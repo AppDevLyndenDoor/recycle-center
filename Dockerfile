@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=base /var/www/html/vendor/tightenco/ziggy/dist/ ./vendor/tightenco/ziggy/dist/
 
 # Frontend files copy
-COPY package.json package-lock.json vite.config.js tailwind.config.js postcss.config.js jsconfig.json ./
+COPY package.json package-lock.json vite.config.ts tailwind.config.js postcss.config.js jsconfig.json ./
 
 # Frontend dependencies install
 RUN npm ci
