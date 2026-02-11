@@ -3,15 +3,13 @@ ARG IMAGE_VARIANT=fpm-nginx
 FROM serversideup/php:8.3-${IMAGE_VARIANT}-v3.5.2 AS base
 USER root
 # Install system and PHP dependencies, clean up in one layer
-RUN echo "deb [trusted=yes] https://public.dhe.ibm.com/software/ibmi/products/odbc/debs 1.1.0 main" > /etc/apt/sources.list.d/ibmi-acs-1.1.0.list \
-    && apt-get update \
-    && apt-get -y --no-install-recommends install ibm-iaccess lftp \
-    && install-php-extensions odbc pdo_odbc exif ftp gd gmp memcached sockets ldap \
+RUN apt-get update \
+    && apt-get -y --no-install-recommends install lftp \
+    && install-php-extensions exif ftp gd gmp memcached sockets ldap \
     && apt-get purge -y --auto-remove autoconf g++ make \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-COPY ./docker/odbc/odbc.ini /etc/
 WORKDIR /var/www/html
 USER www-data
 # Composer JSON file
