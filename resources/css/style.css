@@ -1,0 +1,484 @@
+
+/*input:disabled {
+    @apply bg-gray-300 cursor-not-allowed;
+    @apply dark:bg-slate-700/50 cursor-not-allowed;
+}*/
+
+
+.comments{
+    width:200px;
+    height:90px;
+    background-color: rgb(236, 236, 236);
+    border: solid;
+    border-color:grey;
+    position: relative;
+    top: 25px;
+    font-size: 18px;
+}
+
+.commentArea{
+    font-size: 24px;
+}
+
+hr {
+    border: none;
+    height: 1px;
+    /* Set the hr color */
+    color: #333; /* old IE */
+    background-color: #333; /* Modern Browsers */
+    margin:6px;
+}
+
+.modal-backdrop{
+    width:100%;
+    height:100%;
+}
+
+h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+    margin: auto;
+    width: 50%;
+    margin-bottom:10px;
+}
+
+#SelectUser{
+    height: 50px;
+    font-size: 25px;
+}
+
+.centered {
+    place-self: center;
+    text-align: center;
+}
+
+.selBtn {
+    margin: 5px;
+    width:180px;
+    height:80px;
+    line-height: normal;
+}
+.modal-xl{
+    max-width:850px !important;
+    width:850px !important;
+}
+.userBtn {
+    width: 256px;
+    margin: 15px auto;
+    height:80px;
+    line-height: normal;
+}
+
+p{
+    font-size:20px;
+}
+
+.productBtn, .uomBtn{
+    margin: 5px;
+}
+
+.productBtn {
+    width: 150px;
+    height: 80px;
+    line-height: normal;
+}
+
+.modal-content{
+    filter: drop-shadow(0px 0px 10px);
+}
+
+label {
+    width:50%;
+    margin:auto;
+    font-size: 20px;
+}
+
+.submit {
+    margin: 25px;
+    width: 600px;
+    height: 90px;
+    font-size:50px !important;
+}
+
+.toast-message{
+    font-size:36px;
+    text-align: center;
+    position:relative;
+    top:-13px;
+}
+
+.toast{
+    max-width:1000px;
+    width:800px !important;
+    height:100px;
+}
+
+#toast-container>div{
+    max-width:100%;
+    width:100%;
+    height:60px;
+}
+
+select {
+    width: 200px;
+    height: 48px;
+    font-size: 28px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.wtHolder{
+    text-align: center;
+}
+
+
+.modal-body input{
+    width:400px;
+}
+.date{
+    width:220px;
+}
+
+.overflow {
+    height: 100%;
+}
+
+.btn{
+    font-size:28px;
+    color:rgb(255, 255, 255);
+    border-radius: 10px;
+}
+.btn.highContrast{
+    color:rgb(255, 255, 255);
+}
+.btn-primary{
+    background-color:rgb(0, 0, 0)
+}
+.btn-primary.highContrast{
+    background-color:rgb(0, 0, 0)
+}
+.btn-success{
+    background-color:rgb(255, 238, 0);
+    color:black;
+}
+.btn-success:hover, .active{
+    background-color:rgb(255, 238, 0);
+    color:black;
+}
+.btn-success.highContrast{
+    background-color:rgb(255, 238, 0);
+    color:black;
+}
+.btn-success:hover.highContrast, .active.highContrast{
+    background-color:rgb(255, 238, 0);
+    color:black;
+}
+
+.inputDetails {
+    width: 214px;
+}
+
+@media print
+{
+    .no-print, .no-print *
+    {
+        display: none !important;
+    }
+    .handsonTable {
+        margin: 0;
+        border: initial;
+        border-radius: initial;
+        width: initial;
+        min-height: initial;
+        box-shadow: initial;
+        background: initial;
+        page-break-after: always;
+    }
+}
+
+
+body,
+html {
+    margin: 0;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+}
+
+html {
+    padding: 0;
+    font-size: 16px;
+}
+
+
+
+#styledTable {
+    border-collapse: collapse;
+    width: auto;
+}
+caption {
+    caption-side: top;
+    font-size: 28px;
+}
+#styledTable {
+    text-align: center;
+    margin: 2rem 0 1rem 0;
+    font-weight: bold;
+}
+
+#styledTable td,
+#styledTable th {
+    border: 0.0625rem solid rgb(131, 131, 131);
+}
+
+#styledTable tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+#styledTable tr:hover {
+    background-color: #ddd;
+}
+
+
+.btn-primary.disabled {
+    background-color:#828282;
+    border-color:black;
+}
+
+#styledTable th {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    border: 1px solid black;
+}
+
+#styledTable tfoot {
+    text-align: right;
+}
+
+@media print {
+    header,
+    .buttonContainer {
+        display: none;
+    }
+}
+
+@page {
+    margin-top: 80px;
+    margin-bottom: 80px;
+    /*@top {*/
+    /*  content: "Recycle Center Report"*/
+    /*}*/
+    /*@bottom {*/
+    /*  !* footer with counter functions to insert page counters *!*/
+    /*  content: "Page " counter(page) " of " counter(pages)*/
+    /*}*/
+}
+
+#styledTable {
+    width:100%;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#deleteProduct {
+    position:absolute;
+    top: 33px;
+}
+
+.menuSpacer {
+    margin-top: 20px;
+}
+
+.selBin {
+    font-size: 30px;
+    width: 128px;
+    height: 64px;
+    margin: 10px;
+}
+.settingsBin {
+    font-size: 18px;
+    width: 96px;
+    height: 40px;;
+    margin: 5px;
+}
+
+span{
+    font-size: 16px;
+}
+
+td{
+    font-size: 16px;
+    margin-top:5px;
+    margin-bottom:5px;
+}
+
+#loadingSpinner{
+    margin:auto;
+    width: 120px;
+}
+
+#loadingSpinner div.outer{
+    border-radius: 50%;
+    border-top: 4px solid #8e5c26;
+    border-right: 5px solid #8e5c26;
+    border-left: 3px solid #8e5c26;
+    border-bottom: 1px solid #8e5c26;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    position: absolute;
+}
+
+#loadingSpinner div.inner{
+    border-radius: 50%;
+    border-top: 4px solid #cdae83;
+    border-right: 5px solid #cdae83;
+    border-left: 3px solid #cdae83;
+    border-bottom: 1px solid #cdae83;
+    width: 110px;
+    height: 110px;
+    animation: spin 1s linear infinite;
+    position: relative;
+    top: 5px;
+    left:5px;
+}
+
+#loadingSpinner p {
+    position: relative;
+    top: -62px;
+    font-size: 16px;
+    color: #ede3dd;
+}
+
+@keyframes spin{
+    0%{ transform: rotate(0deg); }
+    100%{ transform: rotate(360deg); }
+}
+
+.upload{
+    font-family:'PT Sans Narrow', sans-serif;
+    background-color:#373a3d;
+
+    background-image:-webkit-linear-gradient(top, #373a3d, #313437);
+    background-image:-moz-linear-gradient(top, #373a3d, #313437);
+    background-image:linear-gradient(top, #373a3d, #313437);
+
+    width:316px;
+    padding:30px;
+    border-radius:3px;
+
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.drop{
+    background-color: #2E3134;
+    padding: 40px 50px;
+    margin-bottom: 30px;
+    border: 20px solid rgba(0, 0, 0, 0);
+    border-radius: 3px;
+    border-image: url('img/border-image.png') 25 repeat;
+    text-align: center;
+    text-transform: uppercase;
+
+    font-size:16px;
+    font-weight:bold;
+    color:#7f858a;
+}
+
+.drop a{
+    background-color:#007a96;
+    padding:12px 26px;
+    color:#fff;
+    font-size:14px;
+    border-radius:2px;
+    cursor:pointer;
+    display:inline-block;
+    margin-top:12px;
+    line-height:1;
+}
+
+.drop a:hover{
+    background-color:#0986a3;
+}
+
+.drop input{
+    display:none;
+}
+
+.upload ul{
+    list-style:none;
+    margin:0 -30px;
+    border-top:1px solid #2b2e31;
+    border-bottom:1px solid #3d4043;
+}
+
+.upload ul li{
+
+    background-color:#333639;
+
+    background-image:-webkit-linear-gradient(top, #333639, #303335);
+    background-image:-moz-linear-gradient(top, #333639, #303335);
+    background-image:linear-gradient(top, #333639, #303335);
+
+    border-top:1px solid #3d4043;
+    border-bottom:1px solid #2b2e31;
+    padding:15px;
+    height: 78px;
+
+    position: relative;
+}
+
+.upload ul li input{
+    display: none;
+}
+
+.upload ul li p{
+    width: auto;
+    overflow: hidden;
+    white-space: nowrap;
+    color: #EEE;
+    font-size: 16px;
+    font-weight: bold;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+.imageDelete{
+    font-size:17px;
+}
+
+.upload ul li i{
+    font-weight: normal;
+    font-style:normal;
+    color:#7f7f7f;
+    display:block;
+}
+
+.upload ul li canvas{
+    top: 15px;
+    left: 32px;
+    position: absolute;
+}
+
+.upload ul li span{
+    width: 15px;
+    height: 12px;
+    background: url('img/icons.png') no-repeat;
+    position: absolute;
+    top: 50px;
+    right: 33px;
+    cursor:pointer;
+}
+
+.upload ul li.working span{
+    height: 16px;
+    background-position: 0 -12px;
+}
+
+.upload ul li.error p{
+    color:red;
+}
+
+
+
+

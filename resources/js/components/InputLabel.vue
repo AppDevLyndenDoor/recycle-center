@@ -1,0 +1,10 @@
+<script setup>
+defineProps(['value']);
+</script>
+
+<template>
+    <label class="font-medium text-sm text-gray-700 dark:text-white">
+        <span v-if="value">{{ value }}</span>
+        <span v-else><slot /></span>
+    </label>
+</template>

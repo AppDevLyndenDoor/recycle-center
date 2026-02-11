@@ -1,0 +1,13 @@
+/*@import './fonts.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+input:disabled {
+    @apply bg-gray-300 cursor-not-allowed;
+    @apply dark:bg-slate-700/50 cursor-not-allowed;
+}*/
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@custom-variant dark (&:where(.dark, .dark *));
