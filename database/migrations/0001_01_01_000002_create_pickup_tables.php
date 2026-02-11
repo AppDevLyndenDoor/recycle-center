@@ -1,0 +1,75 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('pickupbin', function (Blueprint $table) {
+            $table->id()->autoIncrement()->unsigned()->primary();
+            $table->char('binNumber')->nullable();
+            $table->decimal('yards')->nullable();
+            $table->char('company')->nullable();
+            $table->char('location')->nullable();
+            $table->integer('orderID')->nullable();
+        });
+
+        Schema::create('pickupproduct', function (Blueprint $table) {
+            $table->id()->autoIncrement()->unsigned()->primary();
+            $table->char('name')->nullable();
+            $table->char('uom')->nullable();
+            $table->char('company')->nullable();
+            $table->integer('orderID')->nullable();
+        });
+
+        Schema::create('pickupsorting', function (Blueprint $table) {
+            $table->id()->autoIncrement()->unsigned()->primary();
+            $table->char('user')->nullable();
+            $table->decimal('units')->nullable();
+            $table->char('product')->nullable();
+            $table->date('date')->nullable();
+            $table->integer('picked_timestamp')->unsigned()->nullable();
+            $table->char('company')->useCurrent();
+            $table->integer('status')->nullable();
+            $table->integer('idempotency')->unsigned()->nullable();
+        });
+        Schema::create('pickupsortingproduct', function (Blueprint $table) {
+            $table->id()->autoIncrement()->unsigned()->primary();
+            $table->char('name')->nullable();
+            $table->integer('orderID')->nullable();
+        });
+        Schema::create('pickupunit', function (Blueprint $table) {
+            $table->id()->autoIncrement()->unsigned()->primary();
+            $table->char('user')->nullable();
+            $table->decimal('units')->nullable();
+            $table->char('uom')->nullable();
+            $table->char('product')->nullable();
+            $table->decimal('length')->nullable();
+            $table->decimal('width')->nullable();
+            $table->decimal('height')->nullable();
+            $table->char('bin')->nullable();
+            $table->date('date')->nullable();
+            $table->integer('picked_timestamp')->unsigned()->nullable();
+            $table->char('company')->useCurrent();
+            $table->integer('status')->nullable();
+            $table->integer('idempotency')->unsigned()->nullable();
+            $table->string('sortingID')->nullable();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('jobs');
+        Schema::dropIfExists('job_batches');
+        Schema::dropIfExists('failed_jobs');
+    }
+};
