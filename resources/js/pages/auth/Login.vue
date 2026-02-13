@@ -29,9 +29,12 @@ const form = useForm({
     password: '',
     remember: false,
 });
+const csrfToken = document
+    .querySelector('meta[name="csrf-token"]')
+    ?.getAttribute('content') ?? String(instance.value?.attrs?.csrf_token ?? '');
 
 const submit = () => {
-    form.post('login', {
+    form.post('/login', {
         onFinish: () => form.reset('password'),
     });
 };
@@ -57,18 +60,23 @@ async function login() {
     try {
         const accessTokenResponse = await msalInstance.acquireTokenPopup(loginRequest);
         const accessToken = accessTokenResponse.accessToken;
-        await Promise.all([fetch('/api/auth/azure/callback', {
+        const response = await fetch('/api/auth/azure/callback', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': instance.value.attrs.csrf_token
+                ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
             },
             body: JSON.stringify({ code: accessToken }),
-        })]);
-        router.get("dashboard");
+        });
+
+        if (!response.ok) {
+            throw new Error(`Azure callback failed with status ${response.status}`);
+        }
+
+        router.get('/dashboard');
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 }
 function keyChecker({ event }: { event: any }) {
