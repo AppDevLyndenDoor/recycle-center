@@ -6,7 +6,7 @@ The mode configures the styles to display errors, success, or warning messages
 -->
 <template>
   <div v-if="visible" :class="[
-  'absolute',
+  'fixed',
   'md:right-0',
   {
     'bottom-0': !popup,
@@ -77,9 +77,9 @@ const fading = ref(false);
 const delay = ref(5000);
 const fadeout = ref(1000);
 const popup = ref(true);
-const $eventBus = inject('$eventBus');
 
-watch(() => toastySettings.visible ,()=>{
+
+watch(() => toastySettings.visible , () => {
   if (toastySettings.visible == true){
     popup.value = true;
     message.value = JSON.stringify(toastySettings.message);

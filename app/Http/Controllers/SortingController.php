@@ -23,7 +23,7 @@ class SortingController extends Controller
         $timestamp = $data['picked_timestamp'];
         $data['picked_timestamp'] = intval(floor($timestamp / 1000));
 
-        $exists = DB::table('pickupunit')
+        $exists = DB::table('pickupsorting')
             ->where('picked_timestamp', '=', $data['picked_timestamp'])
             ->where('idempotency', '=', $data['idempotency'])
             ->get()->toArray();
@@ -75,9 +75,9 @@ class SortingController extends Controller
 
         if ($data['id'] > 0) {
             DB::table('pickupsortingproduct')->where('id', '=', $data['id'])
-                ->update(['product' => $data['product'], 'name' => $data['name'], 'uom' => $data['uom']]);
+                ->update(['name' => $data['name']]);
         } else {
-            DB::table('pickupsortingproduct')->insert(['product' => $data['product'], 'name' => $data['name'], 'uom' => $data['uom']]);
+            DB::table('pickupsortingproduct')->insert(['name' => $data['name']]);
         }
 
     }

@@ -9,7 +9,6 @@ import {useToastyStore} from '@/store/useToastyStore.js';
 import {useUserStore} from '@/store/useUserStore';
 
 const user = useUserStore();
-const pageData = useReportStore();
 const toastySettings = useToastyStore();
 const range = useReportStore();
 
@@ -76,14 +75,8 @@ function getEntries(silence) {
                 }
             } else {
                 state.unitCache = response.data;
-                state.unitCache.forEach(function (e) {
-                    e.edit = [];
-                })
                 localStorage.setItem('database', JSON.stringify(state.unitCache));
             }
-            // if (obj.generateTable) {
-            //     state.generateTable();
-            // }
         }, (error) => {
             debugger;
             toasty({ mode: 'error', response: error, request: error.request, message: error.message });

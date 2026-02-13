@@ -157,8 +157,25 @@ function tableSettings () {
         colHeaders: columnHeaders,
         minSpareRows: 1,
         contextMenu: {
+            callback: function (key, options, event) {
+              if(key == 'RemoveRow'){
+                  const hot = instance.refs.hotTableComponent.hotInstance;
+                  const selected = hot.getSelected()[0][0];
+                  const rowData = hot.getSourceDataAtRow(selected);
+                 for(let i = 0; i < tableData.value.length-1; i++) {
+                     if(tableData.value[i]['id'] === rowData['id']){
+                         tableData.value.slice(i,i);
+                         break;
+                     }
+                 }
+                  rowData.changes = ['removeRow'];
+                  pendingEdits.value.push(rowData);
+                  hot.alter('remove_row', selected);
+                  emit('pendingEdits', true);
+              }
+            },
             items: {
-                "hotTool_remove_row": {
+                "RemoveRow": {
                     name: 'Remove Row' // Set custom text for predefined option
                 },
             }
@@ -265,6 +282,7 @@ function SaveEdits(){
         },
         complete: function () { },
     }, offlineStore);
+    localStorage.setItem('database', JSON.stringify(tableData.value));
     emit('pendingEdits', false);
     /*axios({
         method: 'POST',

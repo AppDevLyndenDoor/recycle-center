@@ -11,24 +11,13 @@ import {useToastyStore} from '@/store/useToastyStore.js';
 import { useUserStore } from '@/store/useUserStore.js';
 
 
-let hot;
 defineProps(['offline'])
 defineEmits(['offlinePost']);
 const user = useUserStore();
 const toastySettings = useToastyStore();
 const offlineStore = useOfflineStore();
 const state = reactive( {
-    version: 1,
-    userNames: ['Select User'],
-    selectUser: false,
     showBinDialog: false,
-    showPickUser: false,
-    userNamesText: "",
-    //offline: false,
-    loaded: 0,
-    page: 'entry',
-    table: false,
-    template: '',
     editComment: false,
     newComment: '',
     // Entry data structure as it is reflected in the database
@@ -47,18 +36,8 @@ const state = reactive( {
         destination: 'Chip - C',
         comment: '',
     },
-    sortingModel: {
-        user: 'Select User',
-        units: '',
-        product: '',
-        date: 0,
-        picked_timestamp: 0,
-        company: '',
-    },
-    alter: [],
-    remove: [],
+
     binModels: [],
-    binQuantity: 20,
     // User object contains user specific settings
     user: {
         name: 'test',
@@ -68,16 +47,10 @@ const state = reactive( {
             operator: true
         },
     },
-    reportSettings: {
-        dateRange1: '',
-        dateRange2: '',
-        rangeSet: false,
-    },
 
     productSpecModels: [],
 
     unitCache: [],
-    unitSortingCache: [],
     companies: [
         'Lynden Door',
         'Victory Millwork',
@@ -90,84 +63,6 @@ const state = reactive( {
         'Process - P',
     ],
     destination: 'Chip - C',
-    tableSettings: {
-        columnHeaders: [
-            'user',
-            'units',
-            'uom',
-            'product',
-            'length',
-            'width',
-            'height',
-            'bin',
-            'date',
-            'picked_timestamp',
-            'company',
-            'destination',
-            'comment',
-        ],
-        schema: {
-            id: 0,
-            user: '',
-            units: '',
-            uom: '',
-            product: '',
-            length: '',
-            width: '',
-            height: '',
-            bin: '',
-            date: '',
-            picked_timestamp: '',
-            company: '',
-            destination: '',
-            comment: '',
-            edit: []
-        },
-    },
-    tableSortingSettings: {
-        columnHeaders: [
-            'user',
-            'units',
-            'product',
-            'date',
-            'picked_timestamp',
-            'company',
-        ],
-        schema: {
-            id: 0,
-            user: '',
-            units: '',
-            product: '',
-            date: '',
-            picked_timestamp: '',
-            company: '',
-            edit: []
-        },
-        columnHeadersPretty: [
-            'User',
-            'Units',
-            'Product',
-            'Date',
-            'Time ',
-            'Company',
-        ]
-    },
-    createProduct: {
-        name: '',
-        company: '',
-        uom: 'each',
-    },
-    //selectedCompanies: [true,false,false, false], // Lynden Door, VM, LDT, All
-    createSortingProduct: {
-        name: '',
-    },
-    createBin: {
-        binNumber: '',
-        yards: 0,
-        location: '',
-        company: '',
-    },
-    editID: 0,
     uoms: [
         'each',
         'yards',
@@ -175,18 +70,12 @@ const state = reactive( {
     ],
     specModding: '',
     mode: 'each',
-    highContrast: true,
-    OfflinePosts: [],
-    loggedIn: false,
-    decodedToken: {},
-    pendingSave: false,
     imageList: [],
     serverImageList: {},
     uploadResults: 0,
     uploadQuantity: 0,
     imageDeleteList: [],
-    selectionSum: 'Sum:',
-    selectionAverage: 'Average:',
+
 /*    watch: {
         'OfflinePosts'(val) {
             localStorage.setItem('OfflinePosts', JSON.stringify(val))
@@ -194,6 +83,7 @@ const state = reactive( {
 
     }*/
 });
+
 function CurrentDate() {
     const today = new Date();
     const dd = String(today.getDate()).padStart(2, '0');
@@ -202,10 +92,6 @@ function CurrentDate() {
     return mm + '/' + dd + '/' + yyyy;
 }
 
-function logout(){
-    localStorage.removeItem('token');
-    window.location.href = '/';
-}
 function toasty({ mode, request, response, message }) {
     // Setting up toast notification with given parameters and a 5-second delay
     toastySettings.mode = mode;
@@ -332,25 +218,6 @@ function SubmitEntry(){
     state.entryModel.uom = '';
 }
 
-/*function defaultDateRange(){
-    const date2 = new Date(), y = date2.getFullYear(), m = date2.getMonth();
-    let date1 =date2
-    if(user.perms.admin) {
-        date1 = new Date(y, m, 1);
-    }
-    state.reportSettings.rangeSet = true;
-    state.reportSettings.dateRange1 = date1.toISOString().substring(0, 10);
-    state.reportSettings.dateRange2 = date2.toISOString().substring(0, 10);
-    this.$nextTick(() => {
-        state.reportSettings.rangeSet = false;
-    })
-    state.sortingSettings.rangeSet = true;
-    state.sortingSettings.dateRange1 = date1.toISOString().substring(0, 10);
-    state.sortingSettings.dateRange2 = date2.toISOString().substring(0, 10);
-    this.$nextTick(() => {
-        state.sortingSettings.rangeSet = false;
-    })
-}*/
 function getPickupProduct(){
     axios({
         method: 'GET',
@@ -367,7 +234,6 @@ function getPickupProduct(){
                 product.disabled = ((companies.indexOf(state.entryModel.company) < 0 ) && product.company !== 'All')
             }
             localStorage.setItem('database_products', JSON.stringify(response.data));
-            ++state.loaded;
         }
     }, (error) => {
         if (error.message != undefined) {
@@ -386,7 +252,6 @@ function getPickupBins(){
         if (response.data.length > 0) {
             state.binModels = response.data;
             localStorage.setItem('database_bins', JSON.stringify(response.data));
-            ++state.loaded;
         }
     }, (error) => {
         if (error.message != undefined) {
@@ -395,35 +260,6 @@ function getPickupBins(){
     });
 }
 
-/*function getUserNames(){
-    axios({
-        method: 'GET',
-        url: '/api/pickupUserNames',
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem('token'),
-        }
-    }) .then((response) => {
-        if (response.data.length >= 0) {
-            debugger;
-            let userNameList = response.data[0].userNames;
-            userNameList= userNameList.split(',');
-            userNameList.unshift('Select User');
-            // state.userNamesText =
-           /!* state.userNames = state.userNamesText.split(',');
-            state.userNames.unshift('Select User');*!/
-            user.userNameList = userNameList;
-            localStorage.setItem('userNames', JSON.stringify(response.data));
-            if (!user.perms.admin) {
-                state.selectUser = true;
-            }
-            ++state.loaded;
-        }
-    }, (error) => {
-        if (error.message != undefined) {
-            toasty({ mode: 'error', response: error, request: error.request, message: error.message });
-        }
-    });
-}*/
 
 watch( () => user.pseudonym, () => {
     if(user.userName !== undefined){
@@ -484,7 +320,7 @@ onMounted(() => {
     </dialog>
     <Dialog v-if="state.editComment" :size="'md'" :dialogVisible="state.editComment" :title="'Comment'" class="fixed inset-0 z-50">
         <div class="flex flex-wrap centered">
-            <textarea id="operatorsTextarea" rows="4" cols="52" v-model="userNamesText"
+            <textarea id="operatorsTextarea" rows="4" cols="52" v-model="state.newComment"
                       class="border-black border-2 ml-1"
                       autocapitalize="off"
                       autocomplete="off"
@@ -524,7 +360,6 @@ onMounted(() => {
         </div>
     </Dialog>
         <div id="entyPage">
-<!--            <main-layout @select-user="state.showPickUser = true">-->
             <div>
                 <div>
                     <div class="justify-content-between no-print">
@@ -721,17 +556,9 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
-
-                        <div class=" justify-content-center no-print" v-show="(state.page == 'login')">
-                            <div class=" centered">
-                                <button id='LoginButton' type="button" class="btn btn-primary print centered lrgBtn">Login</button>
-<!--                                <button id='LoginButton' type="button" class="btn btn-primary print centered lrgBtn" @click='login()'>Login</button>-->
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-<!--            </main-layout>-->
         </div>
 </template>
 <style scoped>

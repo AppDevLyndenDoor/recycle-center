@@ -264,13 +264,13 @@ caption {
 @page {
     margin-top: 80px;
     margin-bottom: 80px;
-    /*@top {*/
-    /*  content: "Recycle Center Report"*/
-    /*}*/
-    /*@bottom {*/
-    /*  !* footer with counter functions to insert page counters *!*/
-    /*  content: "Page " counter(page) " of " counter(pages)*/
-    /*}*/
+    @top {
+      content: "Recycle Center Report"
+    }
+    @bottom {
+      /* footer with counter functions to insert page counters */
+      content: "Page " counter(page) " of " counter(pages)
+    }
 }
 
 #styledTable {
@@ -358,9 +358,9 @@ td{
     font-family:'PT Sans Narrow', sans-serif;
     background-color:#373a3d;
 
-    background-image:-webkit-linear-gradient(top, #373a3d, #313437);
-    background-image:-moz-linear-gradient(top, #373a3d, #313437);
-    background-image:linear-gradient(top, #373a3d, #313437);
+    background-image:-webkit-linear-gradient( to top, #373a3d, #313437);
+    background-image:-moz-linear-gradient(to top, #373a3d, #313437);
+    background-image:linear-gradient(to top, #373a3d, #313437);
 
     width:316px;
     padding:30px;
@@ -415,9 +415,9 @@ td{
 
     background-color:#333639;
 
-    background-image:-webkit-linear-gradient(top, #333639, #303335);
-    background-image:-moz-linear-gradient(top, #333639, #303335);
-    background-image:linear-gradient(top, #333639, #303335);
+    background-image:-webkit-linear-gradient(to top, #333639, #303335);
+    background-image:-moz-linear-gradient(to top, #333639, #303335);
+    background-image:linear-gradient(to top, #333639, #303335);
 
     border-top:1px solid #3d4043;
     border-bottom:1px solid #2b2e31;

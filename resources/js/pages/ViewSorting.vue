@@ -41,7 +41,6 @@ function keymonitor(event){
 }
 function getSortingEntries(silence) {
     // Retrieves entries with timestamps between startTime and endTime inclusive
-    //const obj = { generateSortingTable: generateTable }
     if (state.offline) {
 
         state.unitSortingCache = JSON.parse(localStorage.getItem('databaseSorting'));
@@ -82,10 +81,6 @@ function getSortingEntries(silence) {
                 } else {
                     ;
                     state.unitSortingCache = response.data;
-                    state.unitSortingCache.forEach(function (e) {
-                        e.edit = [];
-                    });
-
                     if (!state.unitSortingCache) {
                         state.unitSortingCache = [];
                         localStorage.setItem('databaseSorting', '[]');
@@ -98,10 +93,6 @@ function getSortingEntries(silence) {
             //state.loaded ;
         })
     }
-}
-function pendingSave(pendingSave){
-    debugger;
-    state.pendingSave = pendingSave;
 }
 function toasty({ mode, request, response, message }) {
     // Setting up toast notification with given parameters and a 5-second delay

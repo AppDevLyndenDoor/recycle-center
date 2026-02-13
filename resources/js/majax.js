@@ -131,8 +131,6 @@ let majax = (function(obj) {
  * Takes in a single axios request, compares to the queue, and conditionally adds it
  **/
 export function post_to_server(post, offlinePosts){
-    debugger;
-
     //Skip if already queued
     let queue = offlinePosts.offlinePosts;
     for(let i in queue){
@@ -171,8 +169,6 @@ export function post_to_server(post, offlinePosts){
  * passed and sets many non default settings
  **/
 function post_one(data,offlinePosts){
-    //const offlinePosts = useOfflineStore(pinia);
-    debugger;
     let callback = data['success'];
     let errorCallback = data['error'];
     data['method'] = data['method'] || 'GET';
@@ -193,11 +189,6 @@ function post_one(data,offlinePosts){
                 //toasty.error('Could not sync to server, try again later');
                 return false;
             }
-            /*offlinePosts.offlinePosts.forEach(function(e,i){
-                if (JSON.stringify(e) == JSON.stringify(obj)){
-                    offlinePosts.offlinePosts.splice(i,1);
-                }
-            })*/
             for(let i = 0; i < offlinePosts.offlinePosts.length; i++){
                 let post = offlinePosts.offlinePosts[i];
                 if (JSON.stringify(post) == JSON.stringify(obj)){
@@ -214,14 +205,8 @@ function post_one(data,offlinePosts){
 }
 
 export function post_all(offlinePosts){
-    debugger;
-    //const posts = localStorage.getItem('OfflinePosts');
-    //let ol = JSON.parse(posts);
     const posts = offlinePosts.offlinePosts
     if(offlinePosts.offlinePosts.length === 0) return;
-/*    for(let i in ol){
-        post_one(ol[i]);
-    }*/
     for(let i in posts){
         post_one(posts[i],offlinePosts);
     }

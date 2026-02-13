@@ -1,6 +1,6 @@
 <script setup>
-import {useUserStore} from '@/store/useUserStore.js';
 import {useReportStore} from '@/store/useReportStore.js';
+import {useUserStore} from '@/store/useUserStore.js';
 
 const user = useUserStore();
 const pageData = useReportStore();
@@ -27,7 +27,7 @@ function keymonitor(event){
     <div class="grid grid-cols-7 justify-content-between">
         <div class="flex-row col-span-3 justify-self-end">
             <div class="flex-row centered">
-                <input v-on:keyup="keymonitor($event)" @blur="emit('getEntries')" type="date" id="DateRange1" maxlength="10" class="centered date" v-model="pageData.date1" min="1970-01-01">
+                <input v-on:keyup="keymonitor($event)" @change="emit('getEntries')" type="date" id="DateRange1" maxlength="10" class="centered date" v-model="pageData.date1" min="1970-01-01">
             </div>
         </div>
         <div class="flex-row col-span-1 centered">
@@ -36,7 +36,7 @@ function keymonitor(event){
             </div>
         </div>
         <div class="flex-row col-span-3 justify-self-start">
-            <input v-on:keyup="keymonitor($event)" @blur="emit('getEntries')" type="date" id="DateRange2" maxlength="10" class="centered date" v-model="pageData.date2" min="1970-01-01">
+            <input v-on:keyup="keymonitor($event)" @change="emit('getEntries')" type="date" id="DateRange2" maxlength="10" class="centered date" v-model="pageData.date2" :min="pageData.date1" :max="pageData.maxDate">
         </div>
     </div>
     <slot></slot>

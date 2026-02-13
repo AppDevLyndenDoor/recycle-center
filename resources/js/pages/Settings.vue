@@ -287,6 +287,7 @@ function newProduct(){
         },
         companyArray: [],
         model: 'Product',
+        active: [false,false,false]
     }
     state.showEditDialog = true;
 }
@@ -314,13 +315,13 @@ function newBin(){
 }
 function clickedCompanyButton(company, model, index) {
     debugger;
-    if (model === 'product') {
+    if (model === 'Product') {
         const companyIndex = state.createItem.companyArray.indexOf(company);
         if (companyIndex < 0) {
-            state.companyArray.push(company);
+            state.createItem.companyArray.push(company);
             state.createItem.active[index] = true;
         } else {
-            state.companyArray.splice(companyIndex, 1);
+            state.createItem.companyArray.splice(companyIndex, 1);
             state.createItem.active[index] = false;
         }
     }

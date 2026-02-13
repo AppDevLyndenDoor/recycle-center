@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unsigned()->primary();
+            $table->id()->primary();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
@@ -35,6 +35,12 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
+
+        Schema::create('pickupusernames', function (Blueprint $table) {
+            $table->id()->primary();
+            $table->string('userNames')->nullable();
+        });
+
     }
 
     /**

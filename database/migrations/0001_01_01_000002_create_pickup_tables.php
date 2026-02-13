@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pickupbin', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unsigned()->primary();
+            $table->id()->primary();
             $table->char('binNumber')->nullable();
             $table->decimal('yards')->nullable();
             $table->char('company')->nullable();
@@ -21,7 +21,7 @@ return new class extends Migration
         });
 
         Schema::create('pickupproduct', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unsigned()->primary();
+            $table->id()->primary();
             $table->char('name')->nullable();
             $table->char('uom')->nullable();
             $table->char('company')->nullable();
@@ -29,23 +29,23 @@ return new class extends Migration
         });
 
         Schema::create('pickupsorting', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unsigned()->primary();
+            $table->id()->primary();
             $table->char('user')->nullable();
             $table->decimal('units')->nullable();
             $table->char('product')->nullable();
             $table->date('date')->nullable();
             $table->integer('picked_timestamp')->unsigned()->nullable();
             $table->char('company')->useCurrent();
-            $table->integer('status')->nullable();
-            $table->integer('idempotency')->unsigned()->nullable();
+            $table->integer('status')->nullable()->default(1);
+            $table->integer('idempotency')->unsigned()->nullable()->default(0);
         });
         Schema::create('pickupsortingproduct', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unsigned()->primary();
+            $table->id()->primary();
             $table->char('name')->nullable();
             $table->integer('orderID')->nullable();
         });
         Schema::create('pickupunit', function (Blueprint $table) {
-            $table->id()->autoIncrement()->unsigned()->primary();
+            $table->id()->primary();
             $table->char('user')->nullable();
             $table->decimal('units')->nullable();
             $table->char('uom')->nullable();
@@ -56,10 +56,11 @@ return new class extends Migration
             $table->char('bin')->nullable();
             $table->date('date')->nullable();
             $table->integer('picked_timestamp')->unsigned()->nullable();
-            $table->char('company')->useCurrent();
-            $table->integer('status')->nullable();
-            $table->integer('idempotency')->unsigned()->nullable();
-            $table->string('sortingID')->nullable();
+            $table->char('company')->nullable();
+            $table->char('destination')->nullable();
+            $table->integer('status')->nullable()->default(1);
+            $table->integer('idempotency')->unsigned()->nullable()->default(0);
+            $table->string('comment')->nullable()->default('');
         });
     }
 

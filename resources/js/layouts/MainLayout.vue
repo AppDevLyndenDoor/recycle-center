@@ -5,6 +5,7 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { onMounted, getCurrentInstance,  reactive,  watch, } from 'vue';
 import Dialog from '@/components/Dialog.vue';
+import ProductButtons from '@/components/ProductButtons.vue';
 import { post_all } from '@/majax.js';
 
 
@@ -13,7 +14,7 @@ import {useReportStore} from '@/store/useReportStore.js';
 import { useTableStore } from '@/store/useTableStore';
 import { useToastyStore } from '@/store/useToastyStore.js';
 import { useUserStore } from '@/store/useUserStore';
-import ProductButtons from '@/components/ProductButtons.vue';
+import toastyBox from '../Components/Functions/toasty.vue';
 
 document.documentElement.classList.toggle('dark', false);
 
@@ -294,11 +295,10 @@ onMounted(() => {
         name = 'Select User';
     }
     getUserNames();
-
+    setMaxDate();
     if (localStorage.getItem('OfflinePosts') !== '[]'){
         submitOfflinePosts(JSON.parse(localStorage.getItem('OfflinePosts')));
     }
-    offlineStore.offline = true;
     //call ping every 5 minutes
     setInterval(function () { setMaxDate(); }, 300000);
     setInterval(function () {ping(); }, 300000);
@@ -476,14 +476,6 @@ onMounted(() => {
                                     Settings
                                 </Link>
                             </button>
-                            <!--                            <button type="button" id="EntryButton" class="btn btn-primary"-->
-                            <!--                                    @click="state.pageEntry()"  v-show="state.user.perms.operator">Entry</button>-->
-                            <!--                            <button type="button" id="ViewEntriesButton" class="btn btn-primary"-->
-                            <!--                                    @click="state.pageViewEntries()"  v-show="state.user.perms.operator">View Entries</button>-->
-                            <!--                            <button type="button" id="EntrySortingButton" class="btn btn-primary" @click="pageSorting()"  v-show="state.user.perms.operator">Sorting</button>-->
-                            <!--                            <button type="button" id="ViewSortingEntriesButton" class="btn btn-primary" @click="pageViewSorting()" v-show="state.user.perms.operator">View Sorting</button>-->
-                            <!--                            <button type="button" id="SettingsButton" class="btn btn-primary"-->
-                            <!--                                    @click="pageSettings()" v-show="user.perms.admin">Settings</button>-->
                         </div>
                         <div
                             class="centered col-span-1 col-start-10"
@@ -557,6 +549,7 @@ onMounted(() => {
             </div>
         </div>
     </div>
+    <toastyBox />
     </body>
 </template>
 
