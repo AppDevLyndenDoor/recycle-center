@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AzureCallbackController extends Controller
@@ -33,18 +35,34 @@ class AzureCallbackController extends Controller
             ]);
         }
 
-        $user = User::query()->whereRaw('LOWER(email) = ?', [$email])->first();
-
-        if (! $user) {
-            throw ValidationException::withMessages([
-                'email' => "No local account exists for this Microsoft user ({$email}).",
-            ]);
-        }
+        $user = User::query()->whereRaw('LOWER(email) = ?', [$email])->first()
+            ?? User::query()->firstOrCreate(
+                ['email' => $email],
+                [
+                    'name' => $this->resolveDisplayName($claims, $email),
+                    'password' => Hash::make((string) ($claims['oid'] ?? $claims['sub'] ?? Str::uuid())),
+                    'email_verified_at' => now(),
+                ],
+            );
 
         Auth::login($user);
         $request->session()->regenerate();
 
         return response()->json(['ok' => true]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $claims
+     */
+    private function resolveDisplayName(array $claims, string $email): string
+    {
+        $name = $claims['name']
+            ?? $claims['given_name']
+            ?? $claims['preferred_username']
+            ?? $claims['upn']
+            ?? $email;
+
+        return is_string($name) && trim($name) !== '' ? trim($name) : $email;
     }
 
     /**

@@ -24,13 +24,25 @@ class AzureCallbackTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
-    public function test_azure_callback_returns_validation_error_when_user_does_not_exist(): void
+    public function test_azure_callback_auto_provisions_user_when_user_does_not_exist(): void
     {
+        $email = 'missing@example.com';
+
         $response = $this->postJson('/api/auth/azure/callback', [
-            'code' => $this->fakeJwt(['preferred_username' => 'missing@example.com']),
+            'code' => $this->fakeJwt([
+                'preferred_username' => $email,
+                'name' => 'Missing Example',
+                'oid' => 'azure-oid-123',
+            ]),
         ]);
 
-        $response->assertStatus(422);
+        $response->assertOk()->assertJson(['ok' => true]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => $email,
+            'name' => 'Missing Example',
+        ]);
+        $this->assertAuthenticated();
     }
 
     private function fakeJwt(array $claims): string
