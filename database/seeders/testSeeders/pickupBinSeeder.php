@@ -21,7 +21,7 @@ class pickupBinSeeder extends Seeder
             ['binNumber' => 'S-1', 'company' => 'Company A','yards' => 1.0,'location' => 'VM', 'orderID' => '2'],
         ];
 
-        DB::table('pickupbin')
+        DB::table('pickupBin')
             ->insert($bins);
 
 
