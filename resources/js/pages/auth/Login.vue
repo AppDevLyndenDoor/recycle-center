@@ -15,8 +15,14 @@ import GuestLayout from '@/layouts/settings/GuestLayout.vue';
 
 const serviceSelection = ref(0);
 const clientId = ref(import.meta.env.VITE_AZURE_AD_CLIENT_ID);
-const authority = ref('https://login.microsoftonline.com/' + import.meta.env.VITE_AZURE_AD_TENANT_ID);
-const redirectUri = ref('https://' + import.meta.env.VITE_FRONTEND_HOST + '/api/auth/azure');
+const authority = ref(
+    import.meta.env.VITE_AZURE_AD_AUTHORITY
+    || ('https://login.microsoftonline.com/' + import.meta.env.VITE_AZURE_AD_TENANT_ID),
+);
+const redirectUri = ref(
+    import.meta.env.VITE_AZURE_AD_REDIRECT_URI
+    || `${window.location.origin}/api/auth/azure`,
+);
 defineOptions({ layout: GuestLayout });
 
 defineProps<{
@@ -59,7 +65,12 @@ async function login() {
 
     try {
         const accessTokenResponse = await msalInstance.acquireTokenPopup(loginRequest);
-        const accessToken = accessTokenResponse.accessToken;
+        const token = accessTokenResponse.idToken || accessTokenResponse.accessToken;
+
+        if (!token) {
+            throw new Error('Azure login did not return a token.');
+        }
+
         const response = await fetch('/api/auth/azure/callback', {
             method: 'POST',
             headers: {
@@ -67,11 +78,17 @@ async function login() {
                 'Accept': 'application/json',
                 ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
             },
-            body: JSON.stringify({ code: accessToken }),
+            body: JSON.stringify({ code: token }),
         });
 
         if (!response.ok) {
-            throw new Error(`Azure callback failed with status ${response.status}`);
+            const payload = await response.json().catch(() => null);
+            const details = payload?.message
+                || payload?.errors?.email?.[0]
+                || payload?.errors?.code?.[0]
+                || 'Unknown callback error';
+
+            throw new Error(`Azure callback failed with status ${response.status}: ${details}`);
         }
 
         router.get('/dashboard');

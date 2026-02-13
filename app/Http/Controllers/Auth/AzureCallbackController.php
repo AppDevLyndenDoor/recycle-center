@@ -18,19 +18,26 @@ class AzureCallbackController extends Controller
         ]);
 
         $claims = $this->extractJwtClaims($validated['code']);
-        $email = $claims['preferred_username'] ?? $claims['upn'] ?? $claims['email'] ?? null;
+        $email = $claims['preferred_username']
+            ?? $claims['upn']
+            ?? $claims['email']
+            ?? $claims['unique_name']
+            ?? null;
+        $email = is_string($email) ? strtolower(trim($email)) : null;
 
         if (! is_string($email) || $email === '') {
+            $claimKeys = implode(', ', array_keys($claims));
+
             throw ValidationException::withMessages([
-                'code' => 'Unable to determine a Microsoft account email from the token.',
+                'code' => 'Unable to determine a Microsoft account email from the token. Claims: '.($claimKeys ?: 'none'),
             ]);
         }
 
-        $user = User::query()->where('email', $email)->first();
+        $user = User::query()->whereRaw('LOWER(email) = ?', [$email])->first();
 
         if (! $user) {
             throw ValidationException::withMessages([
-                'email' => 'No local account exists for this Microsoft user.',
+                'email' => "No local account exists for this Microsoft user ({$email}).",
             ]);
         }
 
