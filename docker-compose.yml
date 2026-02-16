@@ -1,0 +1,51 @@
+services:
+    app:
+        container_name: s2k-connect-app-local
+        working_dir: /var/www/html
+        ports:
+            - "80:8080"
+            - "443:8443"
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: prod
+            tags:
+                - s2k-connect:latest
+            args:
+                IMAGE_VARIANT: fpm-nginx
+                VITE_AZURE_AD_CLIENT_ID: c616c8d1-ad24-4b2e-a095-68aa86ca326c
+                VITE_AZURE_AD_TENANT_ID: 8d5c6cd2-cd9d-4c3e-b34c-74c23f984506
+                VITE_FRONTEND_HOST: s2k-connect.test
+        env_file:
+            - .env
+            - .env.docker
+    scheduler:
+        container_name: s2k-connect-scheduler-local
+        image: s2k-connect:latest
+        depends_on:
+            - app
+        working_dir: /var/www/html
+        command: [ "php", "artisan", "schedule:work" ]
+        healthcheck:
+            # ServersideUP native healthcheck script for Horizon
+            test: [ "CMD", "healthcheck-schedule" ]
+            start_period: 10s
+        env_file:
+            - .env
+            - .env.docker
+        environment:
+            AUTORUN_LARAVEL_STORAGE_LINK: false
+    queues:
+        container_name: s2k-connect-queues-local
+        image: s2k-connect:latest
+        depends_on:
+            - app
+        working_dir: /var/www/html
+        command: [ "php", "artisan", "horizon" ]
+        healthcheck:
+            # ServersideUP native healthcheck script for Horizon
+            test: [ "CMD", "healthcheck-horizon" ]
+            start_period: 10s
+        env_file:
+            - .env
+            - .env.docker
