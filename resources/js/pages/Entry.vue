@@ -145,7 +145,6 @@ function clickedCompanyButtons(model, index) {
 }
 
 function productButton(product){
-    debugger;
     state.entryModel.product = product.name;
     state.entryModel.uom = product.uom;
     state.mode = product.uom;
@@ -158,7 +157,6 @@ function getRandomInt(max){
     return Math.floor(Math.random() * max)+1;
 }
 function enteryValidation(){
-    debugger
     if (state.entryModel.user == 'Recycle Center' || state.entryModel.user == 'Select User' || state.entryModel.user == 'Op Erator') {
         return 'Please Select a User Name'
     }
@@ -201,7 +199,6 @@ function SubmitEntry(){
         },
         complete: function ()  { },
     };
-    debugger
     try {
         post.success('test',200); // Test the exact call
     } catch (e) {
@@ -274,7 +271,6 @@ watch( () => user.pseudonym, () => {
 })
 
 onMounted(() => {
-    debugger
     if(user.userName !== undefined) {
         state.entryModel.date = CurrentDate()
     if (!user.perms.admin && user.perms.operator) {
@@ -297,7 +293,7 @@ onMounted(() => {
         <div class="flex flex-wrap overflow-auto">
             <div class="flex flex-wrap h-[calc(100vh-360px)] w-full overflow-auto">
             <div v-for="bin in state.binModels" :key="bin.binNumber">
-                <ProductButtons @clicked="pickBin(bin)">{{bin.binNumber}}</ProductButtons>
+                <ProductButtons id="binButtons" @clicked="pickBin(bin)">{{bin.binNumber}}</ProductButtons>
             </div>
             </div>
         </div>
@@ -320,7 +316,7 @@ onMounted(() => {
     </dialog>
     <Dialog v-if="state.editComment" :size="'md'" :dialogVisible="state.editComment" :title="'Comment'" class="fixed inset-0 z-50">
         <div class="flex flex-wrap centered">
-            <textarea id="operatorsTextarea" rows="4" cols="52" v-model="state.newComment"
+            <textarea id="commentTextarea" rows="4" cols="52" v-model="state.newComment"
                       class="border-black border-2 ml-1"
                       autocapitalize="off"
                       autocomplete="off"
@@ -329,7 +325,7 @@ onMounted(() => {
             </textarea>
         </div>
         <div>
-            <button class="btn btn-primary" :class="[
+            <button id="closeButton" class="btn btn-primary" :class="[
                         'absolute',
                         'bottom-2',
                         'right-0',
@@ -339,12 +335,12 @@ onMounted(() => {
                         'm-4',
                         'my-[2px]',
                         'py-[3px]',
-                    ]" @click="state.editComment = false; state.entryModel.comment = state.newComment; state.newComment =''">
+                    ]" @click="state.editComment = false; state.entryModel.comment = state.newComment;">
                 <p class="text-md centered w-full relative whitespace-nowrap">confirm</p>
             </button>
         </div>
         <div>
-            <button class="btn btn-primary" :class="[
+            <button id="saveComment" class="btn btn-primary" :class="[
                         'absolute',
                         'bottom-2',
                         'left-0',
@@ -354,7 +350,7 @@ onMounted(() => {
                         'm-4',
                         'my-[2px]',
                         'py-[3px]',
-                    ]" @click="state.editComment = false; state.newComment =''">
+                    ]" @click="state.editComment = false; state.newComment = state.entryModel.comment">
                 <p class="text-md centered w-full relative whitespace-nowrap">close</p>
             </button>
         </div>
@@ -373,7 +369,7 @@ onMounted(() => {
                             <div class="centered" >
                                 <div class="flex">
                                     <div v-for="(company, index) in state.companies" :key="index">
-                                        <ProductButtons @clicked="clickedCompanyButtons('entryModel', index)" :active="state.entryModel.company === company">{{company}}
+                                        <ProductButtons id="companyButtons" @clicked="clickedCompanyButtons('entryModel', index)" :active="state.entryModel.company === company">{{company}}
                                         </ProductButtons>
                                     </div>
                                 </div>
@@ -388,7 +384,7 @@ onMounted(() => {
                             </div>
                             <div  class="flex flex-wrap w-screen centered place-content-center">
                                 <div v-for="(product, index) in state.productSpecModels" :key="index">
-                                    <ProductButtons :product="product" :index="index" :disabled="product.disabled" :active="product.name === state.entryModel.product"
+                                    <ProductButtons id="productButtons" :product="product" :index="index" :disabled="product.disabled" :active="product.name === state.entryModel.product"
                                                     @clicked="productButton(product, index)">{{product.name}}</ProductButtons>
                                 </div>
                             </div>
@@ -482,7 +478,7 @@ onMounted(() => {
                             <div class="justify-content-center appendDestinationButtons">
                                 <div class="flex centered">
                                     <div v-for="(destination, index) in state.destinations" :key="index">
-                                        <ProductButtons :index="index" :class="[{'btn-primary': destination !== state.destination, 'btn-success': destination === state.destination,}]"
+                                        <ProductButtons id="destinationButtons" :index="index" :class="[{'btn-primary': destination !== state.destination, 'btn-success': destination === state.destination,}]"
                                         @clicked="destinationClicked(destination)">{{destination}}</ProductButtons>
                                     </div>
                                 </div>
@@ -552,7 +548,7 @@ onMounted(() => {
                                 </div>
 
                                 <div class="col-span-4 ">
-                                    <button class="comments btn btn-primary " @click="state.editComment = true">Comment:</button>
+                                    <button id="commentButton" class="comments btn btn-primary " @click="state.editComment = true">Comment:</button>
                                 </div>
                             </div>
                         </div>

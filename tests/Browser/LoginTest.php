@@ -3,39 +3,33 @@
 namespace Tests\Browser;
 
 use Laravel\Dusk\Browser;
-use Tests\DuskTestCase;
 use Tests\Browser\Pages\MainLayout;
-
+use Tests\DuskTestCase;
+use function PHPSTORM_META\type;
 
 class LoginTest extends DuskTestCase
 {
-
     /**
      * Test user can login/logout.
      *
      * @return void
      */
-    public function testUserCanLogin()
+    public function test_user_can_login()
     {
         $this->browse(function (Browser $browser) {
             $browser
-            ->visit(new MainLayout)
-            // ->pause(50000)
-            ->waitFor('#dark',1)
-            ->click('#dark')
-            ->click('#sharedAccount')
-            // Pass Credentials to function in MainLayout.php
-            ->submitForm([
-                'email' => 'scott.anderson@lyndendoor.com',
-                'password' => '1234',
-            ])
+                ->visit('/login')
+                ->waitFor('#sharedAccount', 1)
+                ->click('#sharedAccount')
+                ->type('#email', 'scott.anderson@lyndendoor.com')
+            ->type('#password', '1234')
+                ->click('#Login')
             // ->pause(5000)
-            ->waitFor('#welcome',1)
-            ->assertPathIs('/dashboard')
-            ->click('#tl_logout')
-            ->waitFor('#tl_login', 1)
-            ->assertPathIs('/')
-            ;
+                ->waitFor('#mainLayout', 2)
+                ->assertPathIs('/dashboard')
+                ->click('#logout')
+                ->waitFor('#sharedAccount', 2)
+                ->assertPathIs('/');
         });
     }
 
@@ -46,4 +40,4 @@ class LoginTest extends DuskTestCase
     // ->type('words')
     // ->waitUntilMissing('#selector')
     // ->waitFor('#selector')
-};
+}

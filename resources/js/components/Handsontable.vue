@@ -111,6 +111,7 @@ const tableEntriesSettings = {
 const pendingEdits = ref([])
 watch(() => props.tData, (newVal) => {
     debugger
+    if(newVal == null) newVal = tableSortingSettings.schema;
     tableData.value = newVal;
     settings.value = tableSettings();
     const ht = instance.refs.hotTableComponent.hotInstance
@@ -128,7 +129,6 @@ watch(() => props.save, () => {
 function tableSettings () {
     let columnHeaders = [];
     let columnNames = [];
-    let schema = [];
     let avgText = 'Units Average: '
     if(props.selector == 'viewEntry') {
         columnHeaders =  tableEntriesSettings.columnHeaders;

@@ -31,9 +31,9 @@ class pickupSortingProductSeeder extends Seeder
                 'date' => '2026-02-09', 'picked_timestamp' => 1770672421 ,'company' => 'Company B',
                 'status' => 1, 'idempotency' => '678912345', ],
         ];
-        DB::table('pickupsortingproduct')
+        DB::table('pickup_sorting_product')
             ->insert($products);
-        DB::table('pickupSorting')
+        DB::table('pickup_Sorting')
             ->insert($pickupSorting);
 
     }

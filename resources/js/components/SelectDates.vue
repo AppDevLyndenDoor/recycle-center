@@ -27,7 +27,7 @@ function keymonitor(event){
     <div class="grid grid-cols-7 justify-content-between">
         <div class="flex-row col-span-3 justify-self-end">
             <div class="flex-row centered">
-                <input v-on:keyup="keymonitor($event)" @change="emit('getEntries')" type="date" id="DateRange1" maxlength="10" class="centered date" v-model="pageData.date1" min="1970-01-01">
+                <input v-on:keyup="keymonitor($event)" @change="emit('getEntries')" type="date" id="DateRange1" maxlength="10" class="centered date" v-model="pageData.date1" min="1970-01-01" :max="pageData.maxDate">
             </div>
         </div>
         <div class="flex-row col-span-1 centered">

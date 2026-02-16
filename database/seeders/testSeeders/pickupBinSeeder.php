@@ -17,11 +17,11 @@ class pickupBinSeeder extends Seeder
     {
         // User::factory(10)->create();
         $bins = [
-            [ 'binNumber' => 'B1', 'company' => 'Company A','yards' => 2.0,'location' => 'prep', 'orderID' => '1'],
+            ['binNumber' => 'B1', 'company' => 'Company A','yards' => 2.0,'location' => 'prep', 'orderID' => '1'],
             ['binNumber' => 'S-1', 'company' => 'Company A','yards' => 1.0,'location' => 'VM', 'orderID' => '2'],
         ];
 
-        DB::table('pickupbin')
+        DB::table('pickup_bin')
             ->insert($bins);
 
 

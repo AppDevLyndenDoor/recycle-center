@@ -152,7 +152,7 @@ function anonUser() {
                     <div class="">
                         <InputLabel for="email" value="Email"/>
 
-                        <TextInput id="email" type="email"
+                        <TextInput id="email" type="text"
                                    class="pl-2 mt-1 block w-full place-self-start dark:text-slate-100 dark:bg-slate-700 bg-slate-200"
                                    v-model="form.email" required autofocus autocomplete="username" />
 

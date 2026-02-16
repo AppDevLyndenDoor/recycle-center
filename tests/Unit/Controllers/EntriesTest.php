@@ -53,7 +53,7 @@ class EntriesTest extends TestCase
         $request = Request::createFromBase(Request::create('', 'get', $input));
         $controller = new EntryController;
         $controller->saveProduct($request);
-        $this->assertDatabaseHas('pickupproduct', ['name' => $input['name'], 'uom' => $input['uom'], 'company' => $input['company']]);
+        $this->assertDatabaseHas('pickup_product', ['name' => $input['name'], 'uom' => $input['uom'], 'company' => $input['company']]);
     }
 
     /**
@@ -69,7 +69,7 @@ class EntriesTest extends TestCase
         $result = $controller->submitPickupUnit($request);
         $this->assertTrue($result);
         $timestamp = intval(floor($input['picked_timestamp'] / 1000));
-        $this->assertDatabaseHas('pickupunit', ['user' => $input['user'],
+        $this->assertDatabaseHas('pickup_unit', ['user' => $input['user'],
             'picked_timestamp' => $timestamp, 'idempotency' => $input['idempotency']]);
     }
 
@@ -89,7 +89,7 @@ class EntriesTest extends TestCase
         $request = Request::createFromBase(Request::create('', 'get', $input));
         $controller = new EntryController;
         $controller->saveUserNames($request);
-        $this->assertDatabaseHas('pickupusernames', ['userNames' => $input[0]]);
+        $this->assertDatabaseHas('pickup_user_names', ['userNames' => $input[0]]);
     }
 
     /**
@@ -118,7 +118,7 @@ class EntriesTest extends TestCase
         $controller->saveEntriesEdits($request);
         foreach ($input as $entry) {
             $changes = $entry['changes'][0];
-            $this->assertDatabaseHas('pickupunit', ['id' => $entry['id'],
+            $this->assertDatabaseHas('pickup_unit', ['id' => $entry['id'],
                 $changes[1] => $changes[3]]);
         }
 
@@ -142,7 +142,8 @@ class EntriesTest extends TestCase
         $request = Request::createFromBase(Request::create('', 'get', $input));
         $controller = new EntryController;
         $controller->saveBin($request);
-        $this->assertDatabaseHas('pickupbin', $input['bin']);
+        $bin = $controller->getPickupBin();
+        $this->assertDatabaseHas('pickup_bin', $input['bin']);
     }
 
     public static function save_product_data_provider()
@@ -211,8 +212,8 @@ class EntriesTest extends TestCase
     public static function save_pickup_bin_data_provider()
     {
         $input = [
+            [['input' => ['id' => 1, 'bin' => ['binNumber' => 'B1', 'yards' => 1.5, 'company' => 'company A', 'location' => 'VM']]]],
             [['input' => ['id' => 0, 'bin' => ['binNumber' => 'B17', 'yards' => 2.5, 'company' => 'company A', 'location' => 'prep']]]],
-            [['input' => ['id' => 1, 'bin' => ['binNumber' => 'B1', 'yards' => 1.5, 'company' => 'company A', 'location' => 'VM']]]]
         ];
 
         return $input;

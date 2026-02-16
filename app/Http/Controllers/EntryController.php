@@ -20,7 +20,7 @@ class EntryController extends Controller
 
     public function getPickupProduct()
     {
-        $result = DB::table('pickupproduct')->get()->toArray();
+        $result = DB::table('pickup_product')->get()->toArray();
 
         return $result;
     }
@@ -30,12 +30,12 @@ class EntryController extends Controller
         $data = $request->input();
 
         if ($data['id'] > 0) {
-            DB::table('pickupproduct')
+            DB::table('pickup_product')
                 ->where('id', '=', $data['id'])
                 ->update(['name' => $data['name'],
                     'uom' => $data['uom'], 'company' => $data['company']]);
         } else {
-            DB::table('pickupproduct')
+            DB::table('pickup_product')
                 ->insert(['name' => $data['name'],
                     'uom' => $data['uom'], 'company' => $data['company']]);
         }
@@ -48,7 +48,7 @@ class EntryController extends Controller
         $data['date'] = Carbon::createFromDate($data['date'])->format('Y-m-d');
         $timestamp = $data['picked_timestamp'];
         $data['picked_timestamp'] = intval(floor($timestamp / 1000));
-        $exists = DB::table('pickupunit')
+        $exists = DB::table('pickup_unit')
             ->where('picked_timestamp', '=', $data['picked_timestamp'])
             ->where('idempotency', '=', $data['idempotency'])
             ->get()->toArray();
@@ -59,14 +59,14 @@ class EntryController extends Controller
         $data['bin'] == null ? $data['bin'] = '' : $data['bin'];
         $data['comment'] == null ? $data['comment'] = '' : $data['comment'];
 
-        DB::table('pickupunit')->insert($data);
+        DB::table('pickup_unit')->insert($data);
 
         return true;
     }
 
     public function getPickupUserNames()
     {
-        $result = DB::table('pickupUserNames')->select('userNames')->get()->toArray();
+        $result = DB::table('pickup_user_names')->select('userNames')->get()->toArray();
 
         return $result;
 
@@ -75,9 +75,9 @@ class EntryController extends Controller
     public function saveUserNames(Request $request)
     {
         $data = $request->input();
-        $selectID = DB::table('pickupUserNames')->select('id')->get()->toArray();
+        $selectID = DB::table('pickup_user_names')->select('id')->get()->toArray();
         $id = $selectID[0]->id;
-        DB::table('pickupUserNames')->where('id', '=', $id)
+        DB::table('pickup_user_names')->where('id', '=', $id)
             ->update(['userNames' => $data[0]]);
     }
 
@@ -91,14 +91,14 @@ class EntryController extends Controller
         $start = Carbon::createFromDate($start)->shiftTimezone('America/Los_Angeles')->timestamp;
         $end = Carbon::createFromDate($end)->shiftTimezone('America/Los_Angeles')->add(1, 'day')->timestamp;
         if ($user == 'admin') {
-            $result = DB::table('pickupunit')
+            $result = DB::table('pickup_unit')
                 ->where('status', '=', 1)
                 ->where('picked_timestamp', '<=', $end)
                 ->where('picked_timestamp', '>=', $start)
                 ->orderBy('picked_timestamp', 'asc')
                 ->get()->toArray();
         } else {
-            $result = DB::table('pickupunit')
+            $result = DB::table('pickup_unit')
                 ->where('status', '=', 1)
                 ->where('user', '=', $user)
                 ->where('picked_timestamp', '<=', $end)
@@ -115,11 +115,11 @@ class EntryController extends Controller
         $data = $request->input();
         foreach ($data as $key => $value) {
             if ($value['changes'][0] == 'removeRow') {
-                DB::table('pickupunit')->where('id', '=', $value['id'])
+                DB::table('pickup_unit')->where('id', '=', $value['id'])
                     ->update(['status' => 0]);
             } else {
                 $changes = $value['changes'][0];
-                DB::table('pickupunit')->where('id', '=', $value['id'])
+                DB::table('pickup_unit')->where('id', '=', $value['id'])
                     ->update([$changes[1] => $changes[3]]);
             }
         }
@@ -127,7 +127,7 @@ class EntryController extends Controller
 
     public function getPickupBin()
     {
-        $result = DB::table('pickupbin')->get()->toArray();
+        $result = DB::table('pickup_bin')->get()->toArray();
 
         return $result;
     }
@@ -137,11 +137,11 @@ class EntryController extends Controller
         $data = $request->input();
         $changes = $data['bin'];
         if ($data['id'] > 0) {
-            DB::table('pickupbin')->where('id', '=', $data['id'])
+            DB::table('pickup_bin')->where('id', '=', $data['id'])
                 ->update(['binNumber' => $changes['binNumber'], 'yards' => $changes['yards'],
                     'company' => $changes['company'], 'location' => $changes['location']]);
         } else {
-            DB::table('pickupbin')->insert($data['bin']);
+            DB::table('pickup_bin')->insert($data['bin']);
         }
     }
 }
