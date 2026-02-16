@@ -14,7 +14,7 @@ import {useReportStore} from '@/store/useReportStore.js';
 import { useTableStore } from '@/store/useTableStore';
 import { useToastyStore } from '@/store/useToastyStore.js';
 import { useUserStore } from '@/store/useUserStore';
-import toastyBox from '../Components/Functions/toasty.vue';
+import toastyBox from '../components/functions/toasty.vue';
 
 document.documentElement.classList.toggle('dark', false);
 

@@ -1,15 +1,19 @@
 <?php
 
 use App\Http\Controllers\EntryController;
+use App\Http\Controllers\Auth\AzureCallbackController;
 use App\Http\Controllers\SortingController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    $user = auth()->user();
-
-    return ! $user ? Inertia::render('auth/Login', []) : Inertia::render('Entry', []);
+    return ! Auth::check()
+        ? Inertia::render('auth/Login', [])
+        : Inertia::render('Entry', []);
 });
+
+Route::post('/api/auth/azure/callback', AzureCallbackController::class)->middleware('guest');
 
 Route::get('dashboard', function () {
     return Inertia::render('Entry', []);

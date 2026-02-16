@@ -1,0 +1,64 @@
+services:
+  app:
+    container_name: s2k-connect-app-dev
+    working_dir: /var/www/html
+    ports:
+      - "80:8080"
+      - "443:8443"
+    user: "1000:1000"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+      tags:
+        - s2k-connect-app:dev
+      args:
+        VITE_AZURE_AD_CLIENT_ID: c616c8d1-ad24-4b2e-a095-68aa86ca326c
+        VITE_AZURE_AD_TENANT_ID: 8d5c6cd2-cd9d-4c3e-b34c-74c23f984506
+        VITE_FRONTEND_HOST: s2k-connect.test
+    volumes:
+      - .:/var/www/html
+    environment:
+      AUTORUN_ENABLED: false
+      PHP_OPCACHE_ENABLE: false
+    env_file:
+      - .env
+      - .env.docker
+  scheduler:
+    container_name: s2k-connect-scheduler-dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+      tags:
+        - s2k-connect-cli:dev
+    user: "1000:1000"
+    image: s2k-connect-cli:dev
+    working_dir: /var/www/html
+    command: [ "php", "artisan", "schedule:work" ]
+    volumes:
+      - .:/var/www/html
+    env_file:
+      - .env
+      - .env.docker
+    environment:
+      AUTORUN_ENABLED: false
+      AUTORUN_LARAVEL_STORAGE_LINK: false
+      PHP_OPCACHE_ENABLE: false
+  queues:
+    container_name: s2k-connect-queues-dev
+    image: s2k-connect-cli:dev
+    user: "1000:1000"
+    depends_on:
+      - scheduler
+    working_dir: /var/www/html
+    command: [ "php", "artisan", "horizon" ]
+    volumes:
+      - .:/var/www/html
+    env_file:
+      - .env
+      - .env.docker
+    environment:
+      AUTORUN_ENABLED: false
+      AUTORUN_LARAVEL_STORAGE_LINK: false
+      PHP_OPCACHE_ENABLE: false
