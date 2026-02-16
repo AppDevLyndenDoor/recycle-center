@@ -31,6 +31,6 @@ class userSeeder extends Seeder
         ]);
 
         $userNames =['id' => 4, 'userNames' => 'Mike,Brent,Johnny,Carlos,Christian,Winston' ];
-        DB::table('pickupUserNames')->insert($userNames);
+        DB::table('pickupusernames')->insert($userNames);
     }
 }

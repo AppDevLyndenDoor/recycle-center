@@ -10,7 +10,7 @@ class SortingController extends Controller
 {
     public function getPickupSortingProduct()
     {
-        $result = DB::table('pickupSortingProduct')->get()->toArray();
+        $result = DB::table('pickupsortingproduct')->get()->toArray();
 
         return $result;
     }
@@ -23,7 +23,7 @@ class SortingController extends Controller
         $timestamp = $data['picked_timestamp'];
         $data['picked_timestamp'] = intval(floor($timestamp / 1000));
 
-        $exists = DB::table('pickupSorting')
+        $exists = DB::table('pickupsorting')
             ->where('picked_timestamp', '=', $data['picked_timestamp'])
             ->where('idempotency', '=', $data['idempotency'])
             ->get()->toArray();
@@ -31,7 +31,7 @@ class SortingController extends Controller
             return true;
         }
 
-        DB::table('pickupSorting')->insert($data);
+        DB::table('pickupsorting')->insert($data);
 
     }
 
@@ -47,14 +47,14 @@ class SortingController extends Controller
         $end = Carbon::createFromDate($end)->shiftTimezone('America/Los_Angeles')->add(1, 'day')->timestamp;
 
         if ($user == 'admin') {
-            $result = DB::table('pickupSorting')
+            $result = DB::table('pickupsorting')
                 ->where('status', '=', 1)
                 ->where('picked_timestamp', '<=', $end)
                 ->where('picked_timestamp', '>=', $start)
                 ->orderBy('picked_timestamp', 'asc')
                 ->get()->toArray();
         } else {
-            $result = DB::table('pickupSorting')
+            $result = DB::table('pickupsorting')
                 ->where('status', '=', 1)
                 ->where('user', '=', $user)
                 ->where('picked_timestamp', '<=', $end)
@@ -74,10 +74,10 @@ class SortingController extends Controller
         $data = $request->input();
 
         if ($data['id'] > 0) {
-            DB::table('pickupSortingProduct')->where('id', '=', $data['id'])
+            DB::table('pickupsortingproduct')->where('id', '=', $data['id'])
                 ->update(['name' => $data['name']]);
         } else {
-            DB::table('pickupSortingProduct')->insert(['name' => $data['name']]);
+            DB::table('pickupsortingproduct')->insert(['name' => $data['name']]);
         }
 
     }
@@ -87,7 +87,7 @@ class SortingController extends Controller
         $data = $request->input();
         foreach ($data as $key => $value) {
             $changes = $value['changes'][0];
-            DB::table('pickupSorting')->where('id', '=', $value['id'])
+            DB::table('pickupsorting')->where('id', '=', $value['id'])
                 ->update([$changes[1] => $changes[3]]);
         }
     }

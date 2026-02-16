@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pickupBin', function (Blueprint $table) {
+        Schema::create('pickupbin', function (Blueprint $table) {
             $table->id()->primary();
             $table->char('binNumber')->nullable();
             $table->decimal('yards')->nullable();
@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('orderID')->nullable();
         });
 
-        Schema::create('pickupProduct', function (Blueprint $table) {
+        Schema::create('pickupproduct', function (Blueprint $table) {
             $table->id()->primary();
             $table->char('name')->nullable();
             $table->char('uom')->nullable();
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->integer('orderID')->nullable();
         });
 
-        Schema::create('pickupSorting', function (Blueprint $table) {
+        Schema::create('pickupsorting', function (Blueprint $table) {
             $table->id()->primary();
             $table->char('user')->nullable();
             $table->decimal('units')->nullable();
@@ -39,12 +39,12 @@ return new class extends Migration
             $table->integer('status')->nullable()->default(1);
             $table->integer('idempotency')->unsigned()->nullable()->default(0);
         });
-        Schema::create('pickupSortingProduct', function (Blueprint $table) {
+        Schema::create('pickupsortingproduct', function (Blueprint $table) {
             $table->id()->primary();
             $table->char('name')->nullable();
             $table->integer('orderID')->nullable();
         });
-        Schema::create('pickupUnit', function (Blueprint $table) {
+        Schema::create('pickupunit', function (Blueprint $table) {
             $table->id()->primary();
             $table->char('user')->nullable();
             $table->decimal('units')->nullable();

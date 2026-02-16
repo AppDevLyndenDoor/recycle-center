@@ -36,7 +36,7 @@ return new class extends Migration
             $table->integer('last_activity')->index();
         });
 
-        Schema::create('pickupUserNames', function (Blueprint $table) {
+        Schema::create('pickupusernames', function (Blueprint $table) {
             $table->id()->primary();
             $table->string('userNames')->nullable();
         });

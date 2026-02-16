@@ -47,7 +47,7 @@ class SortingTest extends TestCase
         $request = Request::createFromBase(Request::create('', 'get', $input));
         $controller = new SortingController;
         $controller->saveSortingProduct($request);
-        $this->assertDatabaseHas('pickupSortingProduct', ['name' => $input['name']]);
+        $this->assertDatabaseHas('pickupsortingproduct', ['name' => $input['name']]);
     }
 
     /**
@@ -62,7 +62,7 @@ class SortingTest extends TestCase
         $controller = new SortingController;
         $result = $controller->submitPickupSortingProduct($request);
         $timestamp = intval(floor($input['picked_timestamp'] / 1000));
-        $this->assertDatabaseHas('pickupSorting', ['user' => $input['user'],
+        $this->assertDatabaseHas('pickupsorting', ['user' => $input['user'],
             'picked_timestamp' => $timestamp, 'idempotency' => $input['idempotency']]);
     }
 
@@ -92,7 +92,7 @@ class SortingTest extends TestCase
         $controller->saveSortingEdits($request);
         foreach ($input as $entry) {
             $changes = $entry['changes'][0];
-            $this->assertDatabaseHas('pickupSorting', ['id' => $entry['id'],
+            $this->assertDatabaseHas('pickupsorting', ['id' => $entry['id'],
                 $changes[1] => $changes[3]]);
         }
 

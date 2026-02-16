@@ -34,9 +34,9 @@ class pickupProductSeeder extends Seeder
                 'picked_timestamp' => 1770672421 ,'company' => 'Company B', 'destination' => 'chip-C',
                 'status' => 1, 'idempotency' => '678912345', 'comment' => 'test comment 3'],
         ];
-        DB::table('pickupProduct')
+        DB::table('pickupproduct')
             ->insert($products);
-        DB::table('pickupUnit')
+        DB::table('pickupunit')
             ->insert($pickupUinits);
 
     }
