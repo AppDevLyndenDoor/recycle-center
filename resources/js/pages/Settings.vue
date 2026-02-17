@@ -53,7 +53,7 @@ const state = reactive({
         binNumber: '',
         yards: 0,
         location: '',
-        company: '',
+        company: 'Lynden Door',
     },
     createItem: {},
     companies: [
@@ -62,11 +62,12 @@ const state = reactive({
         'LD Trucking',
     ],
     deleteProductDialog: false,
+    newItem: false,
 })
 const user = useUserStore();
 
 function productButton(product){
-    debugger;
+
     state.createItem = {
         edit: {
             name: product.name,
@@ -84,9 +85,10 @@ function productButton(product){
         state.createItem.active[index] = true;
     }
     state.showEditDialog = true;
+    state.newItem = false;
 }
 function sortingProductButton(product){
-    debugger;
+
     state.createItem = {
         edit: {
             name: product.name,
@@ -95,11 +97,11 @@ function sortingProductButton(product){
         id: product.id,
     };
     state.showEditDialog = true;
-
+    state.newItem = false;
 }
 
 function binButton(bin){
-    debugger
+
     state.createItem = {
         edit: {
             binNumber: bin.binNumber,
@@ -111,9 +113,13 @@ function binButton(bin){
         id: bin.id,
     };
     state.showEditDialog = true;
+    state.newItem = false;
 }
 function saveEdit(product) {
-    debugger;
+    if(product.companyArray.length === 0){
+        toasty({ mode: 'warning', message: 'Must select one or more Companies' });
+        return;
+    }
     if (product.edit.name != '') {
         state.createProduct.company = product.companyArray.toString().trim();
         state.createProduct.name = product.edit.name.trim();
@@ -135,6 +141,8 @@ function saveEdit(product) {
                 toasty({ mode: 'error', response: error, request: error.request, message: error.message });
             }
         });
+    } else{
+        toasty({ mode: 'warning', message: 'Name Field Cannot Be Empty' });
     }
 }
 function saveSorting(product) {
@@ -159,6 +167,9 @@ function saveSorting(product) {
 
 function saveBin(bin) {
     if(bin.edit.binNumber == ''){
+        return;
+    }
+    if(bin.company == ''){
         return;
     }
     state.createBin.company = bin.company.trim();
@@ -290,6 +301,7 @@ function newProduct(){
         active: [false,false,false]
     }
     state.showEditDialog = true;
+    state.newItem = true;
 }
 function newSortingProduct(){
     state.createItem = {
@@ -300,6 +312,7 @@ function newSortingProduct(){
         model: 'Sorting Product',
     }
     state.showEditDialog = true;
+    state.newItem = true;
 }
 function newBin(){
     state.createItem = {
@@ -308,13 +321,14 @@ function newBin(){
             yards: 0,
             location: '',
         },
-        company: [],
+        company: 'Lynden Door',
         model: 'Bin',
     }
     state.showEditDialog = true;
+    state.newItem = true;
 }
 function clickedCompanyButton(company, model, index) {
-    debugger;
+
     if (model === 'Product') {
         const companyIndex = state.createItem.companyArray.indexOf(company);
         if (companyIndex < 0) {
@@ -330,7 +344,7 @@ function clickedCompanyButton(company, model, index) {
     }
 }
 function save(item){
-    debugger;
+
     if (item.model === 'Product') {
         saveEdit(item);
     } else if (item.model === 'Sorting Product') {
@@ -357,7 +371,7 @@ function deleteProduct(product){
         id = state.productSortingSpecModels[product.id]['id'];
         name = state.productSortingSpecModels[product.id]['name'];
     }
-    debugger;
+
     axios({
         method: 'POST',
         url: url,
@@ -373,7 +387,7 @@ function deleteProduct(product){
 
 }
 watch( () => user.userNameList, (newVal) => {
-    //debugger
+    //
     state.userNamesText = newVal;
     state.userNamesText.splice('Select User,', 1);
     state.userNamesText = state.userNamesText.join(',');
@@ -390,17 +404,17 @@ onMounted(() => {
 </script>
 
 <template>
-    <Dialog v-if="state.showEditDialog" :size="'md'" :dialogVisible="state.showEditDialog"
+    <Dialog id="editItem" v-if="state.showEditDialog" :size="'md'" :dialogVisible="state.showEditDialog"
             :title="state.createItem.model" class="fixed inset-0 z-50">
         <div v-if="state.createItem.model === 'Bin'" class="flex flex-wrap centered">
             <div v-for="(company, index) in state.companies" :key="index">
-                <ProductButtons @clicked="clickedCompanyButton(company,state.createItem.model)" :active="state.createItem.company === company">{{company}}
+                <ProductButtons :id="'editItemCompany-' + index" @clicked="clickedCompanyButton(company,state.createItem.model)" :active="state.createItem.company === company">{{company}}
                 </ProductButtons>
             </div>
         </div>
         <div v-if="state.createItem.model === 'Product'" class="flex flex-wrap centered">
             <div v-for="(company, index) in state.companies" :key="index">
-                <ProductButtons @clicked="clickedCompanyButton(company,state.createItem.model,index)" :active="state.createItem.active[index]">{{company}}
+                <ProductButtons :id="'editItemCompanies-'+index"  @clicked="clickedCompanyButton(company,state.createItem.model,index)" :active="state.createItem.active[index]">{{company}}
                 </ProductButtons>
             </div>
         </div>
@@ -408,11 +422,11 @@ onMounted(() => {
             <div v-for="(value, index) in Object.keys(state.createItem.edit)" :key="index">
                 <div class="grid grid-cols-2 gap-4 mt-4">
                     <label class="text-md px-4">{{value}}:</label>
-                    <input v-model="state.createItem.edit[value]" class="inputDetails  mx-2" :placeholder="value">
+                    <input :id="'editItemInput-' + index" v-model="state.createItem.edit[value]" class="inputDetails  mx-2" :placeholder="value">
                 </div>
             </div>
         <div>
-            <button class="btn btn-primary" :class="[
+            <button id="CancelEdit" class="btn btn-primary" :class="[
                         'absolute',
                         'bottom-2',
                         'left-0',
@@ -425,8 +439,8 @@ onMounted(() => {
                 <p class="text-md centered w-full relative whitespace-nowrap">Cancel</p>
             </button>
         </div>
-        <div class="flex justify-center">
-            <button class="btn btn-primary" :class="[
+        <div v-if="!state.newItem" class="flex justify-center">
+            <button id="deleteItem" class="btn btn-primary" :class="[
                     'absolute',
                     'bottom-2',
                     'h-8',
@@ -439,7 +453,7 @@ onMounted(() => {
             </button>
         </div>
         <div>
-            <button class="btn btn-primary" :class="[
+            <button id="saveEdit" class="btn btn-primary" :class="[
                     'absolute',
                     'bottom-2',
                     'right-0',
@@ -494,7 +508,7 @@ onMounted(() => {
                 <div class="col centered">
                     <button id='CreateProduct' type="button" class="btn btn-primary selBtn center" @click="newProduct()">Create New Product</button>
                     <button id="CreateBin" type="button" class="btn btn-primary selBtn center" @click="newBin()">Create New Bin</button>
-                    <button id="CreateSorting" type="button" class="btn btn-primary selBtn center" @click="newSortingProduct()">Create New Sorting</button>
+                    <button hidden id="CreateSorting" type="button" class="btn btn-primary selBtn center" @click="newSortingProduct()">Create New Sorting</button>
                 </div>
             </div>
 
@@ -508,25 +522,25 @@ onMounted(() => {
 
             <div  class="flex flex-wrap w-screen centered place-content-center">
                 <div v-for="(product, index) in state.productSpecModels" :key="index">
-                    <ProductButtons :product="product" :index="index" :disabled="false" :active="product.name === state.entryModel.product"
+                    <ProductButtons :id="'editProduct-'+index" :product="product" :index="index" :disabled="false" :active="product.name === state.entryModel.product"
                                     @clicked="productButton(product, index)">{{product.name}}</ProductButtons>
                 </div>
             </div>
             <hr>
-            <div class="row">
+            <div hidden class="row">
                 <div class="col">
                     <h2 id="titleProducts">Sorting Products</h2>
                 </div>
             </div>
 
-            <div  class="flex flex-wrap w-screen centered place-content-center">
+            <div hidden  class="flex flex-wrap w-screen centered place-content-center">
                 <div v-for="(product, index) in state.productSortingSpecModels" :key="index">
-                    <ProductButtons :disabled="false" :active="product.name === state.sortingModel.product"
+                    <ProductButtons :id="'editSorting-'+index" :disabled="false" :active="product.name === state.sortingModel.product"
                                     @clicked="sortingProductButton(product)">{{product.name}}</ProductButtons>
                 </div>
             </div>
 
-            <hr>
+            <hr hidden>
 
 
             <div class="row justify-content-center">
@@ -535,8 +549,8 @@ onMounted(() => {
                 </div>
             </div>
             <div  class="flex flex-wrap w-screen centered place-content-center">
-                <div v-for="bin in state.binModels" :key="bin.binNumber">
-                    <ProductButtons @clicked="binButton(bin)">{{bin.binNumber}}</ProductButtons>
+                <div v-for="(bin,index) in state.binModels" :key="bin.binNumber">
+                    <ProductButtons :id="'editBin-'+index" @clicked="binButton(bin)">{{bin.binNumber}}</ProductButtons>
                 </div>
             </div>
             <hr>

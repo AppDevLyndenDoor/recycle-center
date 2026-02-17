@@ -38,7 +38,7 @@ const currentDate = computed(() => {
     return yyyy + '-' + mm + '-' + dd;
 })
 function getEntries(silence) {
-    debugger;
+
     // Retrieves entries with timestamps between startTime and endTime inclusive
     //const startTime = range.date1;
     //const endTime = range.date2;
@@ -67,7 +67,7 @@ function getEntries(silence) {
             },
         }) .then((response) => {
             if (response.data.length == 0) {
-                debugger;
+
                 state.unitCache = JSON.parse(localStorage.getItem('database'));
 
                 if (!silence) {
@@ -78,7 +78,7 @@ function getEntries(silence) {
                 localStorage.setItem('database', JSON.stringify(state.unitCache));
             }
         }, (error) => {
-            debugger;
+
             toasty({ mode: 'error', response: error, request: error.request, message: error.message });
         });
     }

@@ -46,7 +46,7 @@
               ]">
                 <div  :class="[
                   'rounded-xl',
-                  'dark:bg-gray-300',
+                  'dark:bg-gray-500',
                   'bg-gray-300',
                   'flex',
                   'flex-col',
@@ -90,7 +90,7 @@
                     'mt-10':dialogMargin=='t-10',
                   }
                 ]">
-          <p class="dark:text-gray-700 w-full  text-center my-2 text-2xl text-black select-none">{{ title }}</p>
+          <p class="dark:text-gray-300 w-full  text-center my-2 text-2xl text-black select-none">{{ title }}</p>
           <slot />
         </div>
       </div>

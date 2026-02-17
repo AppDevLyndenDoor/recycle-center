@@ -292,8 +292,8 @@ onMounted(() => {
             :title="'Bin'" class="fixed inset-0 z-50">
         <div class="flex flex-wrap overflow-auto">
             <div class="flex flex-wrap h-[calc(100vh-360px)] w-full overflow-auto">
-            <div v-for="bin in state.binModels" :key="bin.binNumber">
-                <ProductButtons id="binButtons" @clicked="pickBin(bin)">{{bin.binNumber}}</ProductButtons>
+            <div v-for="(bin,index) in state.binModels" :key="bin.binNumber">
+                <ProductButtons :id="'binButtons-'+index" @clicked="pickBin(bin)">{{bin.binNumber}}</ProductButtons>
             </div>
             </div>
         </div>
@@ -369,7 +369,7 @@ onMounted(() => {
                             <div class="centered" >
                                 <div class="flex">
                                     <div v-for="(company, index) in state.companies" :key="index">
-                                        <ProductButtons id="companyButtons" @clicked="clickedCompanyButtons('entryModel', index)" :active="state.entryModel.company === company">{{company}}
+                                        <ProductButtons :id="'companyButtons-'+index" @clicked="clickedCompanyButtons('entryModel', index)" :active="state.entryModel.company === company">{{company}}
                                         </ProductButtons>
                                     </div>
                                 </div>
@@ -384,7 +384,7 @@ onMounted(() => {
                             </div>
                             <div  class="flex flex-wrap w-screen centered place-content-center">
                                 <div v-for="(product, index) in state.productSpecModels" :key="index">
-                                    <ProductButtons id="productButtons" :product="product" :index="index" :disabled="product.disabled" :active="product.name === state.entryModel.product"
+                                    <ProductButtons :id="'productButtons-'+index" :product="product" :index="index" :disabled="product.disabled" :active="product.name === state.entryModel.product"
                                                     @clicked="productButton(product, index)">{{product.name}}</ProductButtons>
                                 </div>
                             </div>
@@ -478,7 +478,7 @@ onMounted(() => {
                             <div class="justify-content-center appendDestinationButtons">
                                 <div class="flex centered">
                                     <div v-for="(destination, index) in state.destinations" :key="index">
-                                        <ProductButtons id="destinationButtons" :index="index" :class="[{'btn-primary': destination !== state.destination, 'btn-success': destination === state.destination,}]"
+                                        <ProductButtons :id="'destinationButtons-'+index" :index="index" :class="[{'btn-primary': destination !== state.destination, 'btn-success': destination === state.destination,}]"
                                         @clicked="destinationClicked(destination)">{{destination}}</ProductButtons>
                                     </div>
                                 </div>

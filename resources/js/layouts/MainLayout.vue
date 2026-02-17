@@ -23,7 +23,7 @@ const table = useTableStore();
 const toastySettings = useToastyStore();
 const offlineStore = useOfflineStore();
 const report = useReportStore();
-
+let cordovaMode = false;
 const sessionSettngs = reactive({
     version: 1,
     darkMode: false,
@@ -71,7 +71,7 @@ watch(
 );
 
 function printTable(content) {
-    debugger;
+
 
     const printContent = document.createElement('table');
     const tableHead = document.createElement('thead');
@@ -201,7 +201,7 @@ function getUserNames() {
     }).then(
         (response) => {
             if (response.data.length >= 0) {
-                debugger;
+
                 let userNameList = response.data[0].userNames;
                 userNameList = userNameList.split(',');
                 userNameList.unshift('Select User');
@@ -286,12 +286,31 @@ function toasty({ mode, request, response, message }) {
     toastySettings.visible = true;
 }
 onMounted(() => {
+    if (!navigator.userAgent.toLowerCase().match('android')) {
+        cordovaMode = false;
+    } else {
+        /* istanbul ignore start */
+        const script = document.createElement('script');
+        script.src = 'cordova.js';
+        document.head.appendChild(script);
+        cordovaMode = true;
+        document.dispatchEvent(new Event('deviceready'));
+    }
+    if (cordovaMode) {
+        const physicalScreenWidth = window.screen.width * 1.5;
+        const physicalScreenHeight = window.screen.height * 1.5;
+        const body = document.querySelector('body');
+        if (body) {
+            body.style.width = `${physicalScreenWidth}px`;
+            body.style.height = `${physicalScreenHeight}px`;
+            body.style.zoom = '67%';
+        }
+    }
     const instance = getCurrentInstance();
-    debugger
     let name = instance.attrs.auth.user.name;
     const page = usePage();
     sessionSettngs.page = page.component;
-    if (name == undefined) {
+    if (name == undefined || name === 'recycle') {
         name = 'Select User';
     }
     getUserNames();
@@ -320,7 +339,7 @@ onMounted(() => {
               content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=0.5, maximum-scale=4.0">
     </Head>
     <body class="bg-white text-black dark:bg-gray-800 dark:text-white ">
-    <div id="mainLayout" class="h-full bg-white text-black dark:bg-gray-800 dark:text-white ">
+    <div id="mainLayout" class="h-full min-h-screen bg-white text-black dark:bg-gray-800 dark:text-white ">
         <Dialog
             v-if="sessionSettngs.selectUser"
             :size="'sm'"
@@ -437,9 +456,9 @@ onMounted(() => {
                                 </Link>
                             </button>
 
-                            <button
+                            <button hidden
                                 type="button"
-                                id="EntrySortingButton"
+                                id="SortingButton"
                                 class="btn btn-primary mx-2 px-2"
                                 :class="[
                                     {'btn-primary':sessionSettngs.page !== 'Sorting',
@@ -450,9 +469,9 @@ onMounted(() => {
                                     Sorting
                                 </Link>
                             </button>
-                            <button
+                            <button hidden
                                 type="button"
-                                id="ViewSortingEntriesButton"
+                                id="ViewSortingButton"
                                 class="btn btn-primary mx-2 px-2"
                                 :class="[
                                     { 'btn-primary': sessionSettngs.page !=='ViewSorting',
@@ -526,7 +545,7 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <hr class="no-print" />
+                <hr class="no-print dark:bg-gray-300" />
                 <slot @offLinePost="addOffline()"> </slot>
                 <main>
                     <table id="styledTable" hidden>

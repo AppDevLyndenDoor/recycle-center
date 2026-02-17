@@ -28,6 +28,12 @@ hr {
     background-color: #333; /* Modern Browsers */
     margin:6px;
 }
+@media (prefers-color-scheme: dark) {
+    hr {
+        color: #989898; /* fallback for old IE in dark mode */
+        background-color: #989898; /* dark mode color */
+    }
+}
 
 .modal-backdrop{
     width:100%;
@@ -264,13 +270,13 @@ caption {
 @page {
     margin-top: 80px;
     margin-bottom: 80px;
-    @top {
+/*    @top {
       content: "Recycle Center Report"
     }
     @bottom {
-      /* footer with counter functions to insert page counters */
+      !* footer with counter functions to insert page counters *!
       content: "Page " counter(page) " of " counter(pages)
-    }
+    }*/
 }
 
 #styledTable {

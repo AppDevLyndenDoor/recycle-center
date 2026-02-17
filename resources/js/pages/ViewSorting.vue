@@ -66,7 +66,7 @@ function getSortingEntries(silence) {
             },
         })
             .then((response) => {
-                debugger
+
                 if (response.data.length == 0) {
                     state.unitSortingCache = JSON.parse(localStorage.getItem('databaseSorting'));
                     if (!state.unitSortingCache) {
@@ -113,7 +113,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div id="TemplateViewSortingEntries" v-show="(user.perms.admin)">
+    <div id="TemplateViewSorting" v-show="(user.perms.admin)">
         <div class="no-print">
 
             <select-dates @get-entries="getSortingEntries(false)"></select-dates>
