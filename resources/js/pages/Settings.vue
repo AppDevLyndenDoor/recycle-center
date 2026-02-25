@@ -1,21 +1,31 @@
 <script setup>
+import { useForm } from '@inertiajs/vue3';
 import axios from 'axios';
-import { onMounted, reactive, watch } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import Dialog from '@/components/Dialog.vue';
 import GenericButton from '@/components/GenericButton.vue';
 import ProductButtons from '@/components/ProductButtons.vue';
-import {useToastyStore} from '@/store/useToastyStore.js';
-import {useUserStore} from '@/store/useUserStore.js';
+import { useToastyStore } from '@/store/useToastyStore.js';
+import { useUserStore } from '@/store/useUserStore.js';
 
 const toastySettings = useToastyStore();
+const form = useForm({
+    imageName: null,
+    product: null,
+})
+
+const fileInput = ref(null);
 const state = reactive({
+    delImage: -1,
     userNamesText: '',
     productSpecModels: [],
     productSortingSpecModels: [],
     binModels: [],
+    imageList: [],
+    selectedFiles: [],
     companyArray: [],
     showEditDialog: false,
-    entryModel: {
+    /*    entryModel: {
         user: 'test user',
         units: '',
         uom: '',
@@ -29,20 +39,23 @@ const state = reactive({
         company: 'Lynden Door',   //modified
         destination: 'Chip - C',
         comment: '',
-    },
-    sortingModel: {
+        imageList: [],
+    },*/
+
+/*    sortingModel: {
         user: 'Select User',
         units: '',
         product: '',
         date: 0,
         picked_timestamp: 0,
         company: '',
-    },
+    },*/
     createProduct: {
         name: '',
         company: '',
         uom: 'each',
         id: -1,
+        imageList: [],
     },
     //selectedCompanies: [true,false,false, false], // Lynden Door, VM, LDT, All
     createSortingProduct: {
@@ -62,12 +75,13 @@ const state = reactive({
         'LD Trucking',
     ],
     deleteProductDialog: false,
+    deleteImageDialog: false,
     newItem: false,
 })
 const user = useUserStore();
 
 function productButton(product){
-
+    state.selectedFiles = [];
     state.createItem = {
         edit: {
             name: product.name,
@@ -75,6 +89,7 @@ function productButton(product){
         },
         companyArray: product.company.split(','),
         company: '',
+        imageList: product.imageList,
         model: 'Product',
         id: product.id,
         active: [false,false,false]
@@ -133,7 +148,9 @@ function saveEdit(product) {
                 "Authorization": "Bearer " + localStorage.getItem('token'),
             }
         }).then(() => {
-
+            if(state.selectedFiles.length > 0){
+                uploadImage(product);
+            }
             toasty({ mode: 'success', message: 'Saved Edit' });
 
         }, (error) => {
@@ -223,7 +240,7 @@ function saveUsers() {
     })
 }
 
-function getPickupProduct(){
+ function getPickupProduct(){
     axios({
         method: 'GET',
         url: '/pickupProduct',
@@ -233,9 +250,9 @@ function getPickupProduct(){
     }) .then((response) => {
         if (response.data.length >= 0) {
             state.productSpecModels = response.data;
-
+            getImageList();
             localStorage.setItem('database_products', JSON.stringify(response.data));
-
+            //getImageList();
         }
     }, (error) => {
         if (error.message != undefined) {
@@ -282,6 +299,61 @@ function getPickupBins(){
     });
 }
 
+function getImageList(){
+    axios({
+        method: 'GET',
+        url: '/imageUploads',
+        headers: {
+            "Authorization": "Bearer " + localStorage.getItem('token'),
+        }
+    }).then((response) => {
+        state.imageList = response.data;
+        const tempList = response.data;
+        for(let index = 0; index < state.productSpecModels.length; index++){
+            const product = state.productSpecModels[index];
+            product.imageList = (product.imageList === undefined) ?  [] : product.imageList;
+            let i = 0;
+            while(i < tempList.length ){
+                const image = tempList[i];
+                if(product.name === image.product){
+                    image.src = 'storage/img/h96/uploads/' + image.product + '/' + image.imageName;
+                    product.imageList.push(image);
+                    tempList.splice(i, 1);
+                    if (tempList.length === 0)  return;
+                }
+                else{
+                    i++;
+                }
+            }
+        }
+    }, (error) => {
+        toasty({
+            mode: 'error',
+            response: error,
+            request: error.request,
+            message: error.message,
+        });
+
+    })
+}
+function deleteImage(product, index){
+    const image = product.imageList[index];
+    axios({
+        method: 'post',
+        url: '/deleteImage',
+        headers: {
+            "Authorization": "Bearer " + localStorage.getItem('token'),
+        },
+        data: image
+    }).then((response) => {
+        product.imageList.splice(index, 1);
+        toasty({mode: 'success', message: 'successfully deleted image'});
+    }, (error) => {
+        toasty({mode: 'error', message: 'something went wrong'});
+    })
+    state.deleteImageDialog = false;
+}
+
 function toasty({ mode, request, response, message }) {
     // Setting up toast notification with given parameters and a 5-second delay
     toastySettings.mode = mode;
@@ -297,6 +369,7 @@ function newProduct(){
             uom: '',
         },
         companyArray: [],
+        imageList: [],
         model: 'Product',
         active: [false,false,false]
     }
@@ -353,6 +426,53 @@ function save(item){
         saveBin(item);
     }
 }
+
+function handleDrop(e) {
+    const files = Array.from(e.target.files);
+    state.selectedFiles.push(...files);
+}
+function handleFileSelection(e) {
+    const files = Array.from(e.target.files);
+    state.selectedFiles.push(...files);
+}
+function triggerFileBrowse() {
+    fileInput.value.click();
+}
+
+function uploadImage(product){
+    try {
+        //const images = [];
+        const formData = new FormData();
+        state.selectedFiles.forEach((file) => {
+            if (file instanceof File) {
+                formData.append('images[]', file);
+            } else {
+                console.error("Invalid file detected:", file);
+            }
+        });
+        formData.append('product', product.edit.name);
+        axios({
+            method: 'post',
+            url: '/imageUploads',
+            data: formData,
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem('token'),
+                "Content-Type": "multipart/form-data",
+            }
+        }).then((response) => {
+            state.selectedFiles.forEach((file) => {
+                product.imageList.push({src: 'img/h96/uploads/' + product.name + '/' + file.name});
+            });
+            state.selectedFiles = [];
+            toasty({mode: 'success', message: 'successfully uploaded images'});
+        }, (error) => {
+
+        });
+    } catch (error) {
+        console.error("Error uploading images:", error);
+        toasty({mode: 'error', message: 'failed to upload images'});
+    }
+}
 function deleteProduct(product){
 
     let url,id,name;
@@ -393,18 +513,18 @@ watch( () => user.userNameList, (newVal) => {
     state.userNamesText = state.userNamesText.join(',');
 })
 
-onMounted(() => {
-        state.userNamesText = user.userNameList;
-        state.userNamesText.splice('Select User,', 1);
-        state.userNamesText = state.userNamesText.join(',');
-        getPickupProduct();
-        getSortingProducts();
-        getPickupBins();
+onMounted( () => {
+    state.userNamesText = user.userNameList;
+    state.userNamesText.splice('Select User,', 1);
+    state.userNamesText = state.userNamesText.join(',');
+    getPickupProduct();
+    //getSortingProducts();
+    getPickupBins();
 })
 </script>
 
 <template>
-    <Dialog id="editItem" v-if="state.showEditDialog" :size="'md'" :dialogVisible="state.showEditDialog"
+    <Dialog id="editItem" v-if="state.showEditDialog" :size="'xl'" :dialogVisible="state.showEditDialog"
             :title="state.createItem.model" class="fixed inset-0 z-50">
         <div v-if="state.createItem.model === 'Bin'" class="flex flex-wrap centered">
             <div v-for="(company, index) in state.companies" :key="index">
@@ -417,6 +537,7 @@ onMounted(() => {
                 <ProductButtons :id="'editItemCompanies-'+index"  @clicked="clickedCompanyButton(company,state.createItem.model,index)" :active="state.createItem.active[index]">{{company}}
                 </ProductButtons>
             </div>
+
         </div>
 
             <div v-for="(value, index) in Object.keys(state.createItem.edit)" :key="index">
@@ -426,6 +547,53 @@ onMounted(() => {
                 </div>
             </div>
         <div>
+            <hr>
+            <div class="flex flex-wrap centered">
+                <p class="ml-2">Images:</p>
+                <div class="grid grid-cols-12 menuSpacer">
+                    <div class="col-span-3 ml-2">
+                        <form class="upload" @submit.prevent="" enctype="multipart/form-data">
+                            <div class="drop"
+                                @dragover.prevent
+                                @drop.prevent="handleDrop( $event,state.createItem)">
+                                Drop Here
+                                <a @click="triggerFileBrowse">Browse</a>
+                                <input ref="fileInput"
+                                    type="file"
+                                    name="upl"
+                                    multiple
+                                    hidden
+                                    @change="handleFileSelection( $event,state.createItem)" />
+                            </div>
+                            <ul>
+                                <li v-for="(file, index) in state.selectedFiles" class="text-white" :key="index">
+                                    {{ file.name }} test
+                                </li>
+                            </ul>
+                            <input
+                                class="uploadName"
+                                type="hidden"
+                                name="product_name"
+                                v-model="state.createItem.edit.name"
+                            />
+                        </form>
+                    </div>
+                    <div class="col-span-3 ml-2">
+                        <div class="col-span-3 centered">
+                            <div v-for="(item,index) in state.createItem.imageList" :key="index">
+                                <img :src="item.src" alt=" " class="img-thumbnail"/>
+                                <button type="button" class="btn bg-red-800" @click="state.deleteImageDialog = true; state.delImage = index">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+<!--                <div class="productImageTemplate">-->
+<!--                    <div v-for="(item,index) in state.createItem.model.imageList" :key="index">-->
+<!--                        <img src="{{item}}" alt=""/>-->
+<!--                        <button type="button" class="btn btn-danger imageDelete text-black" @click="deleteImage(state.createItem.model,item)">Delete</button>-->
+<!--                    </div>-->
+<!--                </div>-->
+            </div>
             <button id="CancelEdit" class="btn btn-primary" :class="[
                         'absolute',
                         'bottom-2',
@@ -468,10 +636,10 @@ onMounted(() => {
             </button>
         </div>
     </dialog>
-    <Dialog v-if="state.deleteProductDialog" :size="'sm'" :dialogVisible="state.deleteProductDialog" :title="'Delete Labor Code'"
+    <Dialog v-if="state.deleteProductDialog" :size="'sm'" :dialogVisible="state.deleteProductDialog" :title="'Delete Product'"
             class="fixed inset-0 z-50">
         <p class="text-xl text-zinc-700 mt-1 ml-3 mr-4 dark:text-gray-200 whitespace-nowrap text-center">Are you
-            sure you want to delete this labor code?</p>
+            sure you want to delete this product?</p>
         <div class="">
             <GenericButton :class="[
                     'absolute',
@@ -501,6 +669,39 @@ onMounted(() => {
             </GenericButton>
         </div>
     </Dialog>
+    <Dialog v-if="state.deleteImageDialog" :size="'sm'" :dialogVisible="state.deleteImageDialog" :title="'Delete Product'"
+            class="fixed inset-0 z-50">
+        <p class="text-xl text-zinc-700 mt-1 ml-3 mr-4 dark:text-gray-200 whitespace-nowrap text-center">Are you
+            sure you want to delete this product?</p>
+        <div class="">
+            <GenericButton :class="[
+                    'absolute',
+                    'bottom-2',
+                    'left-0',
+                    'h-8',
+                    'w-32',
+                    'inline-flex',
+                    'm-4',
+                    'my-[2px]',
+                    'py-[3px]',
+                ]" @click="state.deleteImageDialog = false">
+                <p class="text-md text-center w-full relative top-[2px] whitespace-nowrap">Cancel</p>
+            </GenericButton>
+            <GenericButton :class="[
+                    'absolute',
+                    'bottom-2',
+                    'right-0',
+                    'h-8',
+                    'inline-flex',
+                    'w-32',
+                    'm-4',
+                    'my-[2px]',
+                    'py-[3px]',
+                ]" @click="deleteImage(state.createItem,state.delImage)">
+                <p class="text-md text-center w-full relative top-[2px] whitespace-nowrap">Delete</p>
+            </GenericButton>
+        </div>
+    </Dialog>
 
     <div id="TemplateSettings">
         <div>
@@ -522,7 +723,7 @@ onMounted(() => {
 
             <div  class="flex flex-wrap w-screen centered place-content-center">
                 <div v-for="(product, index) in state.productSpecModels" :key="index">
-                    <ProductButtons :id="'editProduct-'+index" :product="product" :index="index" :disabled="false" :active="product.name === state.entryModel.product"
+                    <ProductButtons :id="'editProduct-'+index" :product="product" :index="index" :disabled="false"
                                     @clicked="productButton(product, index)">{{product.name}}</ProductButtons>
                 </div>
             </div>
@@ -535,7 +736,7 @@ onMounted(() => {
 
             <div hidden  class="flex flex-wrap w-screen centered place-content-center">
                 <div v-for="(product, index) in state.productSortingSpecModels" :key="index">
-                    <ProductButtons :id="'editSorting-'+index" :disabled="false" :active="product.name === state.sortingModel.product"
+                    <ProductButtons :id="'editSorting-'+index" :disabled="false"
                                     @clicked="sortingProductButton(product)">{{product.name}}</ProductButtons>
                 </div>
             </div>
