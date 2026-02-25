@@ -460,9 +460,11 @@ function uploadImage(product){
                 "Content-Type": "multipart/form-data",
             }
         }).then((response) => {
-            state.selectedFiles.forEach((file) => {
-                product.imageList.push({src: 'img/h96/uploads/' + product.name + '/' + file.name});
-            });
+            for(let i = 0; i < response.data.length; i++){
+                debugger;
+                const image = response.data[i];
+                product.imageList.push({src: 'storage/img/h96/uploads/' + product.edit.name + '/' + image});
+            }
             state.selectedFiles = [];
             toasty({mode: 'success', message: 'successfully uploaded images'});
         }, (error) => {
@@ -546,11 +548,11 @@ onMounted( () => {
                     <input :id="'editItemInput-' + index" v-model="state.createItem.edit[value]" class="inputDetails  mx-2" :placeholder="value">
                 </div>
             </div>
-        <div>
+        <div class="overflow-auto">
             <hr>
-            <div class="flex flex-wrap centered">
+            <div class="flex flex-wrap centered mb-24">
                 <p class="ml-2">Images:</p>
-                <div class="grid grid-cols-12 menuSpacer">
+                <div class="grid grid-cols-12 menuSpacer ">
                     <div class="col-span-3 ml-2">
                         <form class="upload" @submit.prevent="" enctype="multipart/form-data">
                             <div class="drop"
@@ -578,11 +580,11 @@ onMounted( () => {
                             />
                         </form>
                     </div>
-                    <div class="col-span-3 ml-2">
-                        <div class="col-span-3 centered">
-                            <div v-for="(item,index) in state.createItem.imageList" :key="index">
-                                <img :src="item.src" alt=" " class="img-thumbnail"/>
-                                <button type="button" class="btn bg-red-800" @click="state.deleteImageDialog = true; state.delImage = index">Delete</button>
+                    <div class="col-span-9 grid-cols-subgrid col-start-5">
+                        <div class="grid grid-cols-4 centered">
+                            <div v-for="(item,index) in state.createItem.imageList" :key="index" class="col-span-2">
+                                <img  :src="item.src" alt=" " class="img-thumbnail centered my-2"/>
+                                <button type="button" class="btn bg-red-800 mx-4" @click="state.deleteImageDialog = true; state.delImage = index">Delete</button>
                             </div>
                         </div>
                     </div>

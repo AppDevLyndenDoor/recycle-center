@@ -151,6 +151,7 @@ class EntryController extends Controller
             'images' => 'required|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
+        $response = [];
         if ($request->hasFile('images')) {
 
             foreach ($request->file('images') as $image) {
@@ -159,15 +160,14 @@ class EntryController extends Controller
 
                 $imagePath = $image->store('img/h96/uploads/'.$product, 'public');
                 $name = basename($imagePath);
-                //dd($name);
-                // Save image information to database
                 DB::table('pickup_images')->insert([
                     'product' => $request->input('product'),
                     'imageName' => $name, // Save path in database
                 ]);
-                $responses[] = $imagePath;
+                $response[] = $name;
             }
         }
+        return $response;
     }
     public function getImages(){
         $result = DB::table('pickup_images')->get()->toArray();
