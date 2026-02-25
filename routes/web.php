@@ -42,6 +42,9 @@ Route::get('/pickupUnitRange', [EntryController::class, 'getPickupUnitRange'])->
 Route::Post('/saveProduct', [EntryController::class, 'saveProduct'])->middleware(['auth', 'verified'])->name('saveProduct');
 Route::get('/pickupProduct', [EntryController::class, 'getPickupProduct'])->middleware(['auth', 'verified'])->name('pickupProduct');
 Route::Post('/saveEntriesEdits', [EntryController::class, 'saveEntriesEdits'])->middleware(['auth', 'verified'])->name('saveEntriesEdits');
+Route::Post('/imageUploads', [EntryController::class, 'uploadImages'])->middleware(['auth', 'verified'])->name('uploadImages');
+Route::get('/imageUploads', [EntryController::class, 'getImages'])->middleware(['auth', 'verified'])->name('getImages');
+Route::post('/deleteImage', [EntryController::class, 'deleteImages'])->middleware(['auth', 'verified'])->name('deleteImages');
 
 Route::get('/pickupBin', [EntryController::class, 'getPickupBin'])->middleware(['auth', 'verified'])->name('pickupBin');
 Route::post('/saveBin', [EntryController::class, 'saveBin'])->middleware(['auth', 'verified'])->name('saveBin');

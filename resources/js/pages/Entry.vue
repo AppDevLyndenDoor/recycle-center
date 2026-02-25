@@ -16,8 +16,10 @@ defineEmits(['offlinePost']);
 const user = useUserStore();
 const toastySettings = useToastyStore();
 const offlineStore = useOfflineStore();
+let pressTimer = window.setTimeout(() => {}, 0);
 const state = reactive( {
     showBinDialog: false,
+    showImage: false,
     editComment: false,
     newComment: '',
     // Entry data structure as it is reflected in the database
@@ -49,7 +51,7 @@ const state = reactive( {
     },
 
     productSpecModels: [],
-
+    imageList: [],
     unitCache: [],
     companies: [
         'Lynden Door',
@@ -229,6 +231,7 @@ function getPickupProduct(){
             for(const product of state.productSpecModels) {
                 const companies = product.company.split(',');
                 product.disabled = ((companies.indexOf(state.entryModel.company) < 0 ) && product.company !== 'All')
+                product.imageList = [];
             }
             localStorage.setItem('database_products', JSON.stringify(response.data));
         }
@@ -269,6 +272,59 @@ watch( () => user.pseudonym, () => {
     }
 
 })
+function getImageList(){
+    axios({
+        method: 'GET',
+        url: '/imageUploads',
+        headers: {
+            "Authorization": "Bearer " + localStorage.getItem('token'),
+        }
+    }).then((response) => {
+        state.imageList = response.data;
+        const tempList = response.data;
+        for(let index = 0; index < state.productSpecModels.length; index++){
+            const product = state.productSpecModels[index];
+            product.imageList = (product.imageList === undefined) ?  [] : product.imageList;
+            let i = 0;
+            while(i < tempList.length ){
+                const image = tempList[i];
+                if(product.name === image.product){
+                    image.src = 'storage/img/h96/uploads/' + image.product + '/' + image.imageName;
+                    product.imageList.push(image);
+                    tempList.splice(i, 1);
+                    if (tempList.length === 0)  return;
+                }
+                else{
+                    i++;
+                }
+            }
+        }
+    }, (error) => {
+        toasty({
+            mode: 'error',
+            response: error,
+            request: error.request,
+            message: error.message,
+        });
+
+    })
+}
+function startTimer(index){
+    pressTimer = setTimeout(() => showImage(index), 1000);
+}
+function stopTimer(){
+    clearTimeout(pressTimer);
+}
+function showImage(id, down = false){
+    state.imageList = state.productSpecModels[id].imageList;
+    state.showImage = true;
+    // if(down){
+    //     pressTimer = window.setTimeout(() => {});
+    // }
+    // else{
+    //     pressTimer.clearTimeout();
+    // }
+}
 
 onMounted(() => {
     if(user.userName !== undefined) {
@@ -282,6 +338,7 @@ onMounted(() => {
     }
     getPickupProduct();
     getPickupBins();
+    getImageList();
 });
 
 </script>
@@ -292,8 +349,8 @@ onMounted(() => {
             :title="'Bin'" class="fixed inset-0 z-50">
         <div class="flex flex-wrap overflow-auto">
             <div class="flex flex-wrap h-[calc(100vh-360px)] w-full overflow-auto">
-            <div v-for="bin in state.binModels" :key="bin.binNumber">
-                <ProductButtons id="binButtons" @clicked="pickBin(bin)">{{bin.binNumber}}</ProductButtons>
+            <div v-for="(bin,index) in state.binModels" :key="bin.binNumber">
+                <ProductButtons :id="'binButtons-'+index" @clicked="pickBin(bin)">{{bin.binNumber}}</ProductButtons>
             </div>
             </div>
         </div>
@@ -317,7 +374,7 @@ onMounted(() => {
     <Dialog v-if="state.editComment" :size="'md'" :dialogVisible="state.editComment" :title="'Comment'" class="fixed inset-0 z-50">
         <div class="flex flex-wrap centered">
             <textarea id="commentTextarea" rows="4" cols="52" v-model="state.newComment"
-                      class="border-black border-2 ml-1"
+                      class="border-black border-2 ml-1 dark:text-black"
                       autocapitalize="off"
                       autocomplete="off"
                       spellcheck="false"
@@ -355,6 +412,29 @@ onMounted(() => {
             </button>
         </div>
     </Dialog>
+    <Dialog v-if="state.showImage" :size="'md'" :dialogVisible="state.showImage" :title="'Image'" class="fixed inset-0 z-50">
+        <div class="flex flex-wrap centered">
+            <div v-for="(image, index) in state.imageList" :key="index">
+                <img :src="image.src" alt="/"/>
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-primary" :class="[
+                        'absolute',
+                        'bottom-2',
+                        'left-0',
+                        'h-8',
+                        'w-32',
+                        'inline-flex',
+                        'm-4',
+                        'my-[2px]',
+                        'py-[3px]',
+
+                    ]" @click="state.showImage = false">
+                <p class="text-md centered w-full relative whitespace-nowrap">Close</p>
+            </button>
+        </div>
+    </Dialog>
         <div id="entyPage">
             <div>
                 <div>
@@ -369,7 +449,7 @@ onMounted(() => {
                             <div class="centered" >
                                 <div class="flex">
                                     <div v-for="(company, index) in state.companies" :key="index">
-                                        <ProductButtons id="companyButtons" @clicked="clickedCompanyButtons('entryModel', index)" :active="state.entryModel.company === company">{{company}}
+                                        <ProductButtons :id="'companyButtons-'+index" @clicked="clickedCompanyButtons('entryModel', index)" :active="state.entryModel.company === company">{{company}}
                                         </ProductButtons>
                                     </div>
                                 </div>
@@ -384,11 +464,18 @@ onMounted(() => {
                             </div>
                             <div  class="flex flex-wrap w-screen centered place-content-center">
                                 <div v-for="(product, index) in state.productSpecModels" :key="index">
-                                    <ProductButtons id="productButtons" :product="product" :index="index" :disabled="product.disabled" :active="product.name === state.entryModel.product"
-                                                    @clicked="productButton(product, index)">{{product.name}}</ProductButtons>
+                                    <ProductButtons :id="'productButtons-'+index" :product="product"
+                                                    :index="index" :disabled="product.disabled" :active="product.name === state.entryModel.product"
+                                                    @mousedown="startTimer(index)"
+                                                    @mouseup="stopTimer()"
+                                                    @mouseleave="stopTimer()"
+                                                    @touchstart="startTimer(index)"
+                                                    @touchend="stopTimer()"
+                                                    @clicked="productButton(product, index)"
+                                    >{{product.name}}</ProductButtons>
                                 </div>
                             </div>
-
+                            <!--                                                    -->
                             <hr>
 
                             <div>
@@ -478,7 +565,7 @@ onMounted(() => {
                             <div class="justify-content-center appendDestinationButtons">
                                 <div class="flex centered">
                                     <div v-for="(destination, index) in state.destinations" :key="index">
-                                        <ProductButtons id="destinationButtons" :index="index" :class="[{'btn-primary': destination !== state.destination, 'btn-success': destination === state.destination,}]"
+                                        <ProductButtons :id="'destinationButtons-'+index" :index="index" :class="[{'btn-primary': destination !== state.destination, 'btn-success': destination === state.destination,}]"
                                         @clicked="destinationClicked(destination)">{{destination}}</ProductButtons>
                                     </div>
                                 </div>

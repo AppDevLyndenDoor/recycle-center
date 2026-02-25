@@ -47,7 +47,7 @@ function getSortingProducts(){
         }
     }) .then((response) => {
         if (response.data.length >= 0) {
-            debugger
+
             state.productSortingSpecModels = response.data;
             //state.sortingModel.product = response.data[0].name;
             localStorage.setItem('database_sortingProducts', JSON.stringify(response.data));
@@ -67,7 +67,7 @@ function getRandomInt(max){
     return Math.floor(Math.random() * max)+1;
 }
 function sortingValidation(){
-    debugger
+
     if (user.userName == 'Recycle Center' || user.userName == 'Select User' || user.userName == 'Op Erator') {
         return 'Please Select a User Name'
     }
@@ -98,7 +98,7 @@ function SubmitSortingEntry() {
             data: obj,
             success: function(data) {
                 if (!data.result) {
-                    debugger;
+
                     toasty({ mode: 'success', message: 'Entry Submitted' });
                 }
             },
@@ -138,7 +138,7 @@ function toasty({ mode, request, response, message }) {
 </script>
 
 <template>
-    <div id="TemplateSortingEntry">
+    <div hidden id="TemplateSortingEntry">
 
         <div class="row">
             <div class="col">
@@ -148,7 +148,7 @@ function toasty({ mode, request, response, message }) {
 
         <div  class="flex flex-wrap w-screen centered place-content-center">
             <div class="flex-box centered" v-for="(company, index) in state.companies" :key="index">
-                <ProductButtons @clicked="clickedCompanyButtons(index)" :active="state.sortingModel.company === company">{{company}}</ProductButtons>
+                <ProductButtons :id="'companyButtons-'+index" @clicked="clickedCompanyButtons(index)" :active="state.sortingModel.company === company">{{company}}</ProductButtons>
             </div>
         </div>
         <hr>
@@ -161,7 +161,7 @@ function toasty({ mode, request, response, message }) {
 
         <div  class="flex flex-wrap w-screen centered place-content-center">
             <div v-for="(product, index) in state.productSortingSpecModels" :key="index">
-                <ProductButtons :disabled="false" :active="product.name === state.sortingModel.product"
+                <ProductButtons :id="'productButtons-'+index" :disabled="false" :active="product.name === state.sortingModel.product"
                                 @clicked="productButton(product, index)">{{product.name}}</ProductButtons>
             </div>
         </div>
@@ -176,8 +176,6 @@ function toasty({ mode, request, response, message }) {
 
         <div class="flex justify-content-center centered">
             <div class="col centered justify-content-center">
-<!--                    <input v-on:keyup="keymonitor" onfocus="this.value=''" type="number" id="sortingUnits" v-model="state.sortingModel.units"-->
-<!--                           min="0" class="inputDetails centered">-->
                 <input v-on:keyup="keymonitor"  onfocus="this.value=''" type="number" id="sortingUnits" v-model="state.sortingModel.units" min="0" class="centered">
             </div>
         </div>

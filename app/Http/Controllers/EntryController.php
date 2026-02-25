@@ -144,4 +144,39 @@ class EntryController extends Controller
             DB::table('pickup_bin')->insert($data['bin']);
         }
     }
+
+    public function uploadImages(Request $request){
+        $request->validate([
+            'product' => 'required|string|max:255',
+            'images' => 'required|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+        $response = [];
+        if ($request->hasFile('images')) {
+
+            foreach ($request->file('images') as $image) {
+                // Store each image
+                $product = $request->input('product');
+
+                $imagePath = $image->store('img/h96/uploads/'.$product, 'public');
+                $name = basename($imagePath);
+                DB::table('pickup_images')->insert([
+                    'product' => $request->input('product'),
+                    'imageName' => $name, // Save path in database
+                ]);
+                $response[] = $name;
+            }
+        }
+        return $response;
+    }
+    public function getImages(){
+        $result = DB::table('pickup_images')->get()->toArray();
+        return $result;
+    }
+    public function deleteImages(Request $request){
+        //dd($request);
+        $data = $request->input();
+        //dd($data);
+        DB::table('pickup_images')->where('id', '=', $data['id'])->delete();
+    }
 }

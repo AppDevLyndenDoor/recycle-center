@@ -110,8 +110,10 @@ const tableEntriesSettings = {
 }
 const pendingEdits = ref([])
 watch(() => props.tData, (newVal) => {
-    debugger
-    if(newVal == null) newVal = tableSortingSettings.schema;
+    if(newVal == null){
+        //newVal = (props.selector == 'viewEntry') ? tableEntriesSettings.schema : tableSortingSettings.schema;
+        newVal = tableEntriesSettings.schema
+    }
     tableData.value = newVal;
     settings.value = tableSettings();
     const ht = instance.refs.hotTableComponent.hotInstance
@@ -245,9 +247,9 @@ function tableSettings () {
             pageData.avg = tempAvg;
         },
         afterChange: function (changes, source) {
-            debugger;
+
             if (source === 'edit') {
-                debugger;
+
                 const ht = instance.refs.hotTableComponent.hotInstance;
                 for (let i = 0; i < changes.length; i++) {
                     const allData = ht.getSourceDataAtRow(changes[i][0]);
@@ -260,7 +262,7 @@ function tableSettings () {
     }
 }
 function SaveEdits(){
-    debugger
+
     const url = (props.selector == 'viewEntry') ? '/saveEntriesEdits' : '/saveSortingEdits';
     post_to_server({
         headers: {
@@ -271,7 +273,7 @@ function SaveEdits(){
         data: pendingEdits.value,
         success: function (data, status) {
             if (!data.result) {
-                debugger;
+
                 pendingEdits.value = [];
                 //emit('pendingEdits', false);
                 toasty({ mode: 'success', message: 'Saved Edits' });
@@ -314,7 +316,7 @@ function filterTableData(){
 }
 
 function printReport() {
-    debugger
+
     const hot = instance.refs.hotTableComponent.hotInstance;
     printTable.tData = hot.getData();
     printTable.print = true;

@@ -87,7 +87,7 @@ let axiosq = (function (queue, options)
     {
         if (document.axiosq.r)
         {
-            debugger;
+
             document.axiosq.r.abort ();
             document.axiosq.r = null;
         }
@@ -109,7 +109,7 @@ let majax = (function(obj) {
     obj.success = (function(data, offlineObj) {
         connectionStatus = 1;
         //If we were previously not connected, post the localstorage
-        debugger
+
         let ret = oldsuccess(data,offlineObj);
         if(oldstatus == 0){
             post_all();
@@ -183,7 +183,7 @@ function post_one(data,offlinePosts){
         data: data['data'],
         timeout : 3000,
         success : function(data,obj) {
-            debugger;
+
             if(data.result == false){
                 localStorage.setItem('OfflinePosts',JSON.stringify(offlinePosts.offlinePosts));
                 //toasty.error('Could not sync to server, try again later');

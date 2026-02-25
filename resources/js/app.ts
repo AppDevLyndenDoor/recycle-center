@@ -143,28 +143,6 @@ library.add(faCircleQuestion);
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const pinia = createPinia();
-let cordovaMode: boolean;
-
-if (!navigator.userAgent.toLowerCase().match('android')) {
-    cordovaMode = false;
-} else {
-    /* istanbul ignore start */
-    const script = document.createElement('script');
-    script.src = 'cordova.js';
-    document.head.appendChild(script);
-    cordovaMode = true;
-    document.dispatchEvent(new Event('deviceready'));
-}
-if (cordovaMode) {
-    const physicalScreenWidth = window.screen.width * 1.5;
-    const physicalScreenHeight = window.screen.height * 1.5;
-    const body = document.querySelector('body');
-    if (body) {
-        body.style.width = `${physicalScreenWidth}px`;
-        body.style.height = `${physicalScreenHeight}px`;
-        body.style.zoom = '67%';
-    }
-}
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
