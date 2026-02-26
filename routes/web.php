@@ -3,6 +3,7 @@
 use App\Http\Controllers\EntryController;
 use App\Http\Controllers\Auth\AzureCallbackController;
 use App\Http\Controllers\SortingController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -30,29 +31,31 @@ Route::get('viewSorting', function () {
 })->middleware(['auth', 'verified'])->name('viewsorting');
 Route::get('settings', function () {
     return Inertia::render('Settings', []);
-})->middleware(['auth', 'verified'])->name('Settings');
+})->middleware(['role:admin'])->name('Settings');
 
 Route::get('/ping', [EntryController::class, 'ping'])->middleware(['auth', 'verified'])->name('ping');
 
 Route::get('/pickupUserNames', [EntryController::class, 'getPickupUserNames'])->middleware(['auth', 'verified'])->name('pickupUserNames');
-Route::Post('/saveUserNames', [EntryController::class, 'saveUserNames'])->middleware(['auth', 'verified'])->name('saveUserNames');
+Route::Post('/saveUserNames', [EntryController::class, 'saveUserNames'])->middleware(['role:admin'])->name('saveUserNames');
 
 Route::post('/pickupUnit', [EntryController::class, 'submitPickupUnit'])->middleware(['auth', 'verified'])->name('submitPickupProduct');
 Route::get('/pickupUnitRange', [EntryController::class, 'getPickupUnitRange'])->middleware(['auth', 'verified'])->name('PickupUnitRange');
-Route::Post('/saveProduct', [EntryController::class, 'saveProduct'])->middleware(['auth', 'verified'])->name('saveProduct');
+Route::Post('/saveProduct', [EntryController::class, 'saveProduct'])->middleware(['role:admin'])->name('saveProduct');
 Route::get('/pickupProduct', [EntryController::class, 'getPickupProduct'])->middleware(['auth', 'verified'])->name('pickupProduct');
-Route::Post('/saveEntriesEdits', [EntryController::class, 'saveEntriesEdits'])->middleware(['auth', 'verified'])->name('saveEntriesEdits');
-Route::Post('/imageUploads', [EntryController::class, 'uploadImages'])->middleware(['auth', 'verified'])->name('uploadImages');
+Route::Post('/saveEntriesEdits', [EntryController::class, 'saveEntriesEdits'])->middleware(['role:admin'])->name('saveEntriesEdits');
+Route::Post('/imageUploads', [EntryController::class, 'uploadImages'])->middleware(['role:admin'])->name('uploadImages');
 Route::get('/imageUploads', [EntryController::class, 'getImages'])->middleware(['auth', 'verified'])->name('getImages');
-Route::post('/deleteImage', [EntryController::class, 'deleteImages'])->middleware(['auth', 'verified'])->name('deleteImages');
+Route::post('/deleteImage', [EntryController::class, 'deleteImages'])->middleware(['role:admin'])->name('deleteImages');
 
 Route::get('/pickupBin', [EntryController::class, 'getPickupBin'])->middleware(['auth', 'verified'])->name('pickupBin');
-Route::post('/saveBin', [EntryController::class, 'saveBin'])->middleware(['auth', 'verified'])->name('saveBin');
+Route::post('/saveBin', [EntryController::class, 'saveBin'])->middleware(['role:admin'])->name('saveBin');
 
 Route::post('/pickupSortingProduct', [SortingController::class, 'submitPickupSortingProduct'])->middleware(['auth', 'verified'])->name('submitSortingProduct');
 Route::get('/pickupSortingProduct', [SortingController::class, 'getPickupSortingProduct'])->middleware(['auth', 'verified'])->name('pickupSortingProduct');
 Route::get('/pickupSortingRange', [SortingController::class, 'getSortingProductRange'])->middleware(['auth', 'verified'])->name('getSortingRange');
 Route::Post('/saveSortingProduct', [SortingController::class, 'saveSortingProduct'])->middleware(['auth', 'verified'])->name('saveSortingProduct');
-Route::Post('/saveSortingEdits', [SortingController::class, 'saveSortingEdits'])->middleware(['auth', 'verified'])->name('saveSortingEdits');
+Route::Post('/saveSortingEdits', [SortingController::class, 'saveSortingEdits'])->middleware(['role:admin'])->name('saveSortingEdits');
+
+Route::get('/checkUserPermissions',[UserController::class, 'checkUserPermissions'])->middleware(['auth', 'verified'])->name('checkUserPermissions');
 
 require __DIR__.'/settings.php';

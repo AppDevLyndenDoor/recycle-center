@@ -429,7 +429,6 @@ onMounted(() => {
                         'm-4',
                         'my-[2px]',
                         'py-[3px]',
-
                     ]" @click="state.showImage = false">
                 <p class="text-md centered w-full relative whitespace-nowrap">Close</p>
             </button>
@@ -576,13 +575,13 @@ onMounted(() => {
                             <div class="grid grid-cols-9 justify-content-between">
                                 <div class="col-span-3 grid grid-cols-subgrid details">
                                     <label class="">Date</label>
-                                    <input  type="text" id="DateEntryPage" class="inputDetails date ml-4" maxlength="60"  v-model="state.entryModel.date"
+                                    <input  type="text" id="DateEntryPage" class="inputDetails date " maxlength="60"  v-model="state.entryModel.date"
                                             min="1970-01-01" disabled>
                                 </div>
 
                                 <div class="col-span-3 grid grid-cols-subgrid details ">
                                     <label>Company</label>
-                                    <input disabled  type="text" id="Company" class="inputDetails ml-4" maxlength="60" v-model="state.entryModel.company"
+                                    <input disabled  type="text" id="Company" class="inputDetails " maxlength="60" v-model="state.entryModel.company"
                                            autocapitalize="off"
                                            autocomplete="off"
                                            spellcheck="false"
@@ -590,7 +589,7 @@ onMounted(() => {
                                 </div>
                                 <div class="col-span-3 grid grid-cols-subgrid details ">
                                     <label>Product</label>
-                                    <input disabled type="text" id="Product" class="inputDetails ml-4" maxlength="60"  v-model="state.entryModel.product"
+                                    <input disabled type="text" id="Product" class="inputDetails " maxlength="60"  v-model="state.entryModel.product"
                                            autocapitalize="off"
                                            autocomplete="off"
                                            spellcheck="false"
@@ -602,12 +601,12 @@ onMounted(() => {
                                 <div class="col-span-3 grid grid-cols-subgrid details">
                                     <label v-show="(state.mode == 'yards' || state.mode == 'bin')">Yards</label>
                                     <label v-show="(state.mode == 'each')">Each</label>
-                                    <input disabled onfocus="this.value=''" type="number" id="Quantity" class="inputDetails ml-4" maxlength="100"
+                                    <input disabled onfocus="this.value=''" type="number" id="Quantity" class="inputDetails " maxlength="100"
                                            v-model="state.entryModel.units">
                                 </div>
                                 <div class="col-span-3 grid grid-cols-subgrid details ">
                                     <label >Destination</label>
-                                    <input  type="text" id="Destination" class="inputDetails ml-4" maxlength="60"
+                                    <input  type="text" id="Destination" class="inputDetails " maxlength="60"
                                             v-model="state.entryModel.destination"
                                             autocapitalize="off"
                                             autocomplete="off"
@@ -616,7 +615,7 @@ onMounted(() => {
                                 </div>
                                 <div class="col-span-3 grid grid-cols-subgrid details ">
                                     <label >Bin#</label>
-                                    <input  type="text" id="Bin" class="inputDetails ml-4" maxlength="10"
+                                    <input  type="text" id="Bin" class="inputDetails " maxlength="10"
                                             v-model="state.entryModel.bin"
                                             autocapitalize="off"
                                             autocomplete="off"
@@ -634,8 +633,8 @@ onMounted(() => {
                                             @click="SubmitEntry()">SUBMIT</button>
                                 </div>
 
-                                <div class="col-span-4 ">
-                                    <button id="commentButton" class="comments btn btn-primary " @click="state.editComment = true">Comment:</button>
+                                <div class="col-span-4">
+                                    <button id="commentButton" class="comments btn btn-primary ml-2 " @click="state.editComment = true">Comment:</button>
                                 </div>
                             </div>
                         </div>

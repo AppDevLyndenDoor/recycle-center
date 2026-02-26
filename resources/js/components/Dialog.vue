@@ -12,7 +12,7 @@
         'select-none': !dialogVisible
       },
     ]">
-      <div class="h-screen grid grid-cols-1 mx-auto">
+      <div class="h-dvh grid grid-cols-1 mx-auto">
         <div :class="[
             'w-[calc(100%)]',
             'h-full',

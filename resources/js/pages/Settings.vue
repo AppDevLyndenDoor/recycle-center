@@ -1,5 +1,4 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 import { onMounted, reactive, ref, watch } from 'vue';
 import Dialog from '@/components/Dialog.vue';
@@ -9,10 +8,7 @@ import { useToastyStore } from '@/store/useToastyStore.js';
 import { useUserStore } from '@/store/useUserStore.js';
 
 const toastySettings = useToastyStore();
-const form = useForm({
-    imageName: null,
-    product: null,
-})
+
 
 const fileInput = ref(null);
 const state = reactive({
@@ -345,7 +341,7 @@ function deleteImage(product, index){
             "Authorization": "Bearer " + localStorage.getItem('token'),
         },
         data: image
-    }).then((response) => {
+    }).then(() => {
         product.imageList.splice(index, 1);
         toasty({mode: 'success', message: 'successfully deleted image'});
     }, (error) => {
@@ -461,7 +457,6 @@ function uploadImage(product){
             }
         }).then((response) => {
             for(let i = 0; i < response.data.length; i++){
-                debugger;
                 const image = response.data[i];
                 product.imageList.push({src: 'storage/img/h96/uploads/' + product.edit.name + '/' + image});
             }

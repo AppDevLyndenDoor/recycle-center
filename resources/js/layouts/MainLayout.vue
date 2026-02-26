@@ -24,7 +24,7 @@ const toastySettings = useToastyStore();
 const offlineStore = useOfflineStore();
 const report = useReportStore();
 let cordovaMode = false;
-const sessionSettngs = reactive({
+const sessionSettings = reactive({
     version: 1,
     darkMode: false,
     selectUser: false,
@@ -52,10 +52,10 @@ watch(() => offlineStore.offlinePosts.length, () => {
 })
 
 function setHighContrast() {
-    sessionSettngs.darkMode = !sessionSettngs.darkMode;
+    sessionSettings.darkMode = !sessionSettings.darkMode;
     document.documentElement.classList.toggle(
         'dark',
-        sessionSettngs.darkMode,
+        sessionSettings.darkMode,
     );
 }
 function logout() {
@@ -184,12 +184,11 @@ function printTable(content) {
     table.print = false;
 }
 function selectUser() {
-    sessionSettngs.selectUser = true;
-    //emit('selectUser');
+    sessionSettings.selectUser = true;
 }
-function pickUser(user) {
-    user.userName = user;
-    sessionSettngs.selectUser = false;
+function pickUser(newUser) {
+    user.pseudonym = newUser;
+    sessionSettings.selectUser = false;
 }
 function getUserNames() {
     axios({
@@ -214,7 +213,7 @@ function getUserNames() {
                     JSON.stringify(response.data),
                 );
                 if (!user.perms.admin) {
-                    state.selectUser = true;
+                    sessionSettings.selectUser = true;
                 }
             }
         },
@@ -241,7 +240,7 @@ function ping () {
         if (response.data == false) {
             offlineStore.offline = true;
         }
-        if (sessionSettngs.offline) {
+        if (sessionSettings.offline) {
             offlineStore.offline = false;
             post_all(offlineStore);
         }
@@ -272,6 +271,31 @@ function submitOfflinePosts(array){
         localStorage.setItem('OfflinePosts', '[]');
     }
 }
+
+ function checkUserPermissions() {
+    axios({
+        method: 'GET',
+        url: '/checkUserPermissions',
+        headers: {
+            Authorization: 'Bearer ' + localStorage.getItem('token'),
+        },
+    }).then((response) => {
+            if(response.data === 'admin'){
+                user.perms.admin = true;
+                user.perms.operator = true;
+                getUserNames();
+            }
+            else if(response.data === 'operator'){
+                user.perms.admin = false;
+                user.perms.operator = true;
+                getUserNames();
+            }
+
+
+        }, (error) => {
+            toasty({ mode: 'error', response: error, request: error.request, message: error.message });
+    });
+}
 function setMaxDate() {
     const now = new Date();
     report.maxDate = now.toISOString().substring(0, 10);
@@ -285,7 +309,7 @@ function toasty({ mode, request, response, message }) {
     toastySettings.message = message;
     toastySettings.visible = true;
 }
-onMounted(() => {
+onMounted( () => {
     if (!navigator.userAgent.toLowerCase().match('android')) {
         cordovaMode = false;
     } else {
@@ -309,23 +333,25 @@ onMounted(() => {
     const instance = getCurrentInstance();
     let name = instance.attrs.auth.user.name;
     const page = usePage();
-    sessionSettngs.page = page.component;
+    sessionSettings.page = page.component;
     if (name == undefined || name === 'recycle') {
         name = 'Select User';
     }
-    getUserNames();
+    user.userName = name;
+    user.pseudonym = name;
+    checkUserPermissions();
+
     setMaxDate();
-    if (localStorage.getItem('OfflinePosts') !== '[]'){
+    if (localStorage.getItem('OfflinePosts') !== '[]') {
         submitOfflinePosts(JSON.parse(localStorage.getItem('OfflinePosts')));
     }
     //call ping every 5 minutes
-    setInterval(function () { setMaxDate(); }, 300000);
-    setInterval(function () {ping(); }, 300000);
-
-    user.userName = name;
-    user.pseudonym = name;
-    user.perms.admin = true;
-    user.perms.operator = true;
+    setInterval(function() {
+        setMaxDate();
+    }, 300000);
+    setInterval(function() {
+        ping();
+    }, 300000);
 });
 
 </script>
@@ -341,11 +367,11 @@ onMounted(() => {
     <body class="bg-white text-black dark:bg-gray-800 dark:text-white ">
     <div id="mainLayout" class="h-full min-h-screen min-w-screen bg-white text-black dark:bg-gray-800 dark:text-white ">
         <Dialog
-            v-if="sessionSettngs.selectUser"
-            :size="'sm'"
-            :dialogVisible="sessionSettngs.selectUser"
+            v-if="sessionSettings.selectUser"
+            :size="'md'"
+            :dialogVisible="sessionSettings.selectUser"
             :title="'Select User'"
-            class="fixed inset-0 z-50" >
+            class="fixed inset-0 z-1000" >
             <div class="flex flex-wrap">
                 <div v-for="user in user.userNameList" :key="user">
                     <ProductButtons
@@ -369,7 +395,7 @@ onMounted(() => {
                         'my-[2px]',
                         'py-[3px]',
                     ]"
-                    @click="sessionSettngs.selectUser = false">
+                    @click="sessionSettings.selectUser = false">
                     <p class="text-md centered relative w-full whitespace-nowrap">
                         Cancel
                     </p>
@@ -377,7 +403,7 @@ onMounted(() => {
             </div>
         </Dialog>
         <p style="font-size: 12px; position: absolute; left: 429px; top: 29px">
-            v 1.{{ sessionSettngs.version }}
+            v 1.{{ sessionSettings.version }}
         </p>
         <div>
             <div >
@@ -405,7 +431,7 @@ onMounted(() => {
                         <button
                             type="button"
                             id="SelectUser"
-                            class="btn btn-primary"
+                            class="btn btn-primary px-2"
                             @click="selectUser()">
                             {{ user.pseudonym }}
                         </button>
@@ -433,9 +459,9 @@ onMounted(() => {
                                 id="EntryButton"
                                 class="btn btn-primary mx-2 px-2"
                                 :class="[
-                                    {'btn-primary':sessionSettngs.page !== 'Entry',
-                                        'btn-success':sessionSettngs.page === 'Entry'}]"
-                                @click="sessionSettngs.page = 'Entry'"
+                                    {'btn-primary':sessionSettings.page !== 'Entry',
+                                        'btn-success':sessionSettings.page === 'Entry'}]"
+                                @click="sessionSettings.page = 'Entry'"
                                 v-show="user.perms.operator">
                                 <Link href="dashboard" method="get">
                                     Entry
@@ -447,9 +473,9 @@ onMounted(() => {
                                 id="ViewEntriesButton"
                                 class="btn btn-primary mx-2 px-2"
                                 :class="[
-                                    { 'btn-primary': sessionSettngs.page !== 'ViewEntries',
-                                        'btn-success':sessionSettngs.page ==='ViewEntries', }]"
-                                @click="sessionSettngs.page = 'ViewEntries'"
+                                    { 'btn-primary': sessionSettings.page !== 'ViewEntries',
+                                        'btn-success':sessionSettings.page ==='ViewEntries', }]"
+                                @click="sessionSettings.page = 'ViewEntries'"
                                 v-show="user.perms.operator" >
                                 <Link href="viewEntries" method="get">
                                     View Entries
@@ -461,9 +487,9 @@ onMounted(() => {
                                 id="SortingButton"
                                 class="btn btn-primary mx-2 px-2"
                                 :class="[
-                                    {'btn-primary':sessionSettngs.page !== 'Sorting',
-                                    'btn-success': sessionSettngs.page === 'Sorting'}]"
-                                @click="sessionSettngs.page = 'Sorting'"
+                                    {'btn-primary':sessionSettings.page !== 'Sorting',
+                                    'btn-success': sessionSettings.page === 'Sorting'}]"
+                                @click="sessionSettings.page = 'Sorting'"
                                 v-show="user.perms.operator" >
                                 <Link href="sorting" method="get">
                                     Sorting
@@ -474,9 +500,9 @@ onMounted(() => {
                                 id="ViewSortingButton"
                                 class="btn btn-primary mx-2 px-2"
                                 :class="[
-                                    { 'btn-primary': sessionSettngs.page !=='ViewSorting',
-                                        'btn-success':sessionSettngs.page ==='ViewSorting'}]"
-                                @click="sessionSettngs.page = 'ViewSorting'"
+                                    { 'btn-primary': sessionSettings.page !=='ViewSorting',
+                                        'btn-success':sessionSettings.page ==='ViewSorting'}]"
+                                @click="sessionSettings.page = 'ViewSorting'"
                                 v-show="user.perms.operator">
                                 <Link href="viewSorting" method="get">
                                     View Sorting
@@ -487,9 +513,9 @@ onMounted(() => {
                                 id="SettingsButton"
                                 class="btn btn-primary mx-2 px-2"
                                 :class="[
-                                    {'btn-primary':sessionSettngs.page !== 'Settings',
-                                        'btn-success':sessionSettngs.page === 'Settings'}]"
-                                @click="sessionSettngs.page = 'Settings'"
+                                    {'btn-primary':sessionSettings.page !== 'Settings',
+                                        'btn-success':sessionSettings.page === 'Settings'}]"
+                                @click="sessionSettings.page = 'Settings'"
                                 v-show="user.perms.admin">
                                 <Link href="settings" method="get">
                                     Settings
@@ -512,7 +538,7 @@ onMounted(() => {
                                     fill="currentColor"
                                     class="bi bi-sun"
                                     viewBox="0 0 16 16"
-                                    v-show="sessionSettngs.darkMode"
+                                    v-show="sessionSettings.darkMode"
                                 >
                                     <path
                                         d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"
@@ -524,7 +550,7 @@ onMounted(() => {
                                     fill="currentColor"
                                     class="bi bi-sun-fill p-2"
                                     viewBox="0 0 16 16"
-                                    v-show="!sessionSettngs.darkMode"
+                                    v-show="!sessionSettings.darkMode"
                                 >
                                     <path
                                         d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"
@@ -536,7 +562,7 @@ onMounted(() => {
                             <button
                                 id="logout"
                                 type="button"
-                                class="btn btn-primary mr-2 px-1"
+                                class="btn btn-primary mx-2 px-1"
                                 @click="logout"
                             >
                                 Logout
@@ -546,7 +572,7 @@ onMounted(() => {
                 </div>
 
                 <hr class="no-print dark:bg-gray-300" />
-                <slot @offLinePost="addOffline()"> </slot>
+                <slot> </slot>
                 <main>
                     <table id="styledTable" hidden>
                         <caption class="centered">
