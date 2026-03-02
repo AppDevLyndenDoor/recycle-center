@@ -29,15 +29,17 @@ class EntryController extends Controller
     {
         $data = $request->input();
 
-        if ($data['id'] > 0) {
+        if (array_key_exists('id', $data) && $data['id'] > 0) {
             DB::table('pickup_product')
                 ->where('id', '=', $data['id'])
                 ->update(['name' => $data['name'],
                     'uom' => $data['uom'], 'company' => $data['company']]);
+            return 'updated';
         } else {
-            DB::table('pickup_product')
-                ->insert(['name' => $data['name'],
+            $newID = DB::table('pickup_product')
+                ->insertGetId(['name' => $data['name'],
                     'uom' => $data['uom'], 'company' => $data['company']]);
+            return $newID;
         }
     }
 
@@ -125,6 +127,12 @@ class EntryController extends Controller
         }
     }
 
+    public function deleteProduct(Request $request)
+    {
+        $id = $request->input('id');
+        DB::table('pickup_product')->where('id', '=', $id)->delete();
+    }
+
     public function getPickupBin()
     {
         $result = DB::table('pickup_bin')->get()->toArray();
@@ -135,17 +143,24 @@ class EntryController extends Controller
     public function saveBin(Request $request)
     {
         $data = $request->input();
-        $changes = $data['bin'];
-        if ($data['id'] > 0) {
+        if (array_key_exists('id', $data) && $data['id'] > 0) {
             DB::table('pickup_bin')->where('id', '=', $data['id'])
-                ->update(['binNumber' => $changes['binNumber'], 'yards' => $changes['yards'],
-                    'company' => $changes['company'], 'location' => $changes['location']]);
+                ->update(['binNumber' => $data['binNumber'], 'yards' => $data['yards'],
+                    'company' => $data['company'], 'location' => $data['location']]);
+            return 'updated';
         } else {
-            DB::table('pickup_bin')->insert($data['bin']);
+            $newBin = DB::table('pickup_bin')->insertGetId($data);
+            return $newBin;
         }
     }
+     public function deleteBin(Request $request)
+     {
+         $id = $request->input('id');
+         DB::table('pickup_bin')->where('id', '=', $id)->delete();
+     }
 
-    public function uploadImages(Request $request){
+    public function uploadImages(Request $request)
+    {
         $request->validate([
             'product' => 'required|string|max:255',
             'images' => 'required|array',
@@ -169,14 +184,17 @@ class EntryController extends Controller
         }
         return $response;
     }
-    public function getImages(){
+
+    public function getImages()
+    {
         $result = DB::table('pickup_images')->get()->toArray();
+
         return $result;
     }
-    public function deleteImages(Request $request){
-        //dd($request);
+
+    public function deleteImages(Request $request)
+    {
         $data = $request->input();
-        //dd($data);
         DB::table('pickup_images')->where('id', '=', $data['id'])->delete();
     }
 }

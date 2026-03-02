@@ -8,11 +8,13 @@ import { useOfflineStore } from '@/store/useOfflineStore.js';
 import { useReportStore } from '@/store/useReportStore.js';
 import { useTableStore } from '@/store/useTableStore';
 import { useToastyStore } from '@/store/useToastyStore.js';
+import {useUserStore} from '@/store/useUserStore.js';
 
 const pageData = useReportStore();
 const printTable = useTableStore();
 const toastySettings = useToastyStore();
 const offlineStore = useOfflineStore();
+const user = useUserStore();
 
 const props = defineProps(['tData', 'selector', 'print', 'download', 'save']);
 const emit = defineEmits(['pendingEdits']);
@@ -178,7 +180,7 @@ function tableSettings() {
         minSpareRows: 1,
         contextMenu: {
             callback: function (key, options, event) {
-                if (key == 'RemoveRow') {
+                if (key == 'RemoveRow' && user.perms == 'admin') {
                     const hot = instance.refs.hotTableComponent.hotInstance;
                     const selected = hot.getSelected()[0][0];
                     const rowData = hot.getSourceDataAtRow(selected);

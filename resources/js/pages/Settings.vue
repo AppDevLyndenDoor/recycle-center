@@ -76,7 +76,7 @@ const state = reactive({
 })
 const user = useUserStore();
 
-function productButton(product){
+function productButton(product,index){
     state.selectedFiles = [];
     state.createItem = {
         edit: {
@@ -92,9 +92,10 @@ function productButton(product){
     };
     for (let i = 0; i < state.createItem.companyArray.length; i++) {
         const company = state.createItem.companyArray[i];
-        const index = state.companies.indexOf(company);
-        state.createItem.active[index] = true;
+        const companyIndex = state.companies.indexOf(company);
+        state.createItem.active[companyIndex] = true;
     }
+    state.editIndex = index;
     state.showEditDialog = true;
     state.newItem = false;
 }
@@ -111,8 +112,7 @@ function sortingProductButton(product){
     state.newItem = false;
 }
 
-function binButton(bin){
-
+function binButton(bin, index){
     state.createItem = {
         edit: {
             binNumber: bin.binNumber,
@@ -123,6 +123,7 @@ function binButton(bin){
         model: 'Bin',
         id: bin.id,
     };
+    state.editIndex = index;
     state.showEditDialog = true;
     state.newItem = false;
 }
@@ -143,10 +144,15 @@ function saveEdit(product) {
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem('token'),
             }
-        }).then(() => {
+        }).then((response) => {
             if(state.selectedFiles.length > 0){
                 uploadImage(product);
             }
+            if(response.data === 'updated'){
+                return;
+            }
+            state.createProduct.id = response.data;
+            state.productSpecModels.push(state.createProduct);
             toasty({ mode: 'success', message: 'Saved Edit' });
 
         }, (error) => {
@@ -169,7 +175,12 @@ function saveSorting(product) {
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem('token'),
             }
-        }).then(() => {
+        }).then((resopnse) => {
+            if(resopnse === 'updated'){
+                return
+            }
+            state.createSortingProduct.id = resopnse.data;
+
         }, (error) => {
             if (error.message != undefined) {
                 toasty({ mode: 'error', response: error, request: error.request, message: error.message });
@@ -185,6 +196,7 @@ function saveBin(bin) {
     if(bin.company == ''){
         return;
     }
+    state.createBin.binNumber = bin.edit.binNumber.trim();
     state.createBin.company = bin.company.trim();
     state.createBin.yards =  bin.edit.yards;
     state.createBin.location = bin.edit.location.trim();
@@ -192,11 +204,16 @@ function saveBin(bin) {
     axios({
         method: 'POST',
         url: '/saveBin',
-        data: bin,
+        data: state.createBin,
         headers: {
             "Authorization": "Bearer " + localStorage.getItem('token'),
         }
-    }).then(() => {
+    }).then((response) => {
+        if(response.data === 'updated'){
+            return;
+        }
+        state.createBin.id = response.data;
+        state.binModels.push(state.createBin);
         toasty({ mode: 'success', message: 'successfully saved Bin' });
     }, (error) => {
             if (error.message != undefined) {
@@ -470,35 +487,38 @@ function uploadImage(product){
         toasty({mode: 'error', message: 'failed to upload images'});
     }
 }
-function deleteProduct(product){
-
-    let url,id,name;
+function deleteProduct(product,index){
+    let url;
     if(product.model === 'Product'){
        url = '/deleteProduct';
-       id = state.productSpecModels[product.id]['id'];
-       name = state.productSpecModels[product.id]['name'];
     }
     else if(product.model === 'Bin') {
         url = '/deleteBin';
-        id = state.binModels[product.id]['id'];
-        name = state.binModels[product.id]['binNumber'];
     }
     else{
         url = '/deleteSortingProduct';
-        id = state.productSortingSpecModels[product.id]['id'];
-        name = state.productSortingSpecModels[product.id]['name'];
     }
+    const id = product.id;
 
     axios({
         method: 'POST',
         url: url,
-        data: {id: id,
-            name: name},
+        data: {id: id},
         headers: {
             "Authorization": "Bearer " + localStorage.getItem('token'),
         }
+    }).then(() => {
+        let temName = '';
+        if(product.model === 'Product'){
+            state.productSpecModels.splice(index, 1);
+            temName = product.edit.name;
+        }
+        else if(product.model === 'Bin') {
+            state.binModels.splice(index, 1);
+            temName = product.edit.binNumber;
+        }
+        toasty({mode: 'success', message: 'successfully deleted: ' + temName});
     })
-
     state.showEditDialog = false;
     state.deleteProductDialog = false;
 
@@ -536,14 +556,13 @@ onMounted( () => {
             </div>
 
         </div>
-
             <div v-for="(value, index) in Object.keys(state.createItem.edit)" :key="index">
                 <div class="grid grid-cols-2 gap-4 mt-4">
                     <label class="text-md px-4">{{value}}:</label>
-                    <input :id="'editItemInput-' + index" v-model="state.createItem.edit[value]" class="inputDetails  mx-2" :placeholder="value">
+                    <input :id="'editItemInput-' + index" v-model="state.createItem.edit[value]" class="inputDetails  mx-2 px-1" :placeholder="value">
                 </div>
             </div>
-        <div class="overflow-auto">
+        <div class="overflow-auto" v-if="state.createItem.model === 'Product'">
             <hr>
             <div class="flex flex-wrap centered mb-24">
                 <p class="ml-2">Images:</p>
@@ -591,6 +610,7 @@ onMounted( () => {
 <!--                    </div>-->
 <!--                </div>-->
             </div>
+        </div>
             <button id="CancelEdit" class="btn btn-primary" :class="[
                         'absolute',
                         'bottom-2',
@@ -603,7 +623,7 @@ onMounted( () => {
                         'py-[3px]']" @click="state.showEditDialog = false">
                 <p class="text-md centered w-full relative whitespace-nowrap">Cancel</p>
             </button>
-        </div>
+
         <div v-if="!state.newItem" class="flex justify-center">
             <button id="deleteItem" class="btn btn-primary" :class="[
                     'absolute',
@@ -613,6 +633,7 @@ onMounted( () => {
                      'inline-flex',
                      'm-4',
                      'my-[2px]',
+                     'bg-red-800',
                      'py-[3px]']" @click="state.deleteProductDialog = true">
                 <p class="text-md centered w-full relative whitespace-nowrap">Delete</p>
             </button>
@@ -661,7 +682,7 @@ onMounted( () => {
                     'm-4',
                     'my-[2px]',
                     'py-[3px]',
-                ]" @click="deleteProduct()">
+                ]" @click="deleteProduct(state.createItem, state.editIndex)">
                 <p class="text-md text-center w-full relative top-[2px] whitespace-nowrap">Delete</p>
             </GenericButton>
         </div>
@@ -718,7 +739,7 @@ onMounted( () => {
                 </div>
             </div>
 
-            <div  class="flex flex-wrap w-screen centered place-content-center">
+            <div  class="flex flex-wrap mx-4 w-full centered place-content-center">
                 <div v-for="(product, index) in state.productSpecModels" :key="index">
                     <ProductButtons :id="'editProduct-'+index" :product="product" :index="index" :disabled="false"
                                     @clicked="productButton(product, index)">{{product.name}}</ProductButtons>
@@ -731,7 +752,7 @@ onMounted( () => {
                 </div>
             </div>
 
-            <div hidden  class="flex flex-wrap w-screen centered place-content-center">
+            <div hidden  class="flex flex-wrap mx-4 centered place-content-center">
                 <div v-for="(product, index) in state.productSortingSpecModels" :key="index">
                     <ProductButtons :id="'editSorting-'+index" :disabled="false"
                                     @clicked="sortingProductButton(product)">{{product.name}}</ProductButtons>
@@ -746,9 +767,9 @@ onMounted( () => {
                     <h2 id="titleProducts">Bin Numbers</h2>
                 </div>
             </div>
-            <div  class="flex flex-wrap w-screen centered place-content-center">
+            <div  class="flex flex-wrap mx-4 centered place-content-center">
                 <div v-for="(bin,index) in state.binModels" :key="bin.binNumber">
-                    <ProductButtons :id="'editBin-'+index" @clicked="binButton(bin)">{{bin.binNumber}}</ProductButtons>
+                    <ProductButtons :id="'editBin-'+index" class="settingsBin" @clicked="binButton(bin,index)">{{bin.binNumber}}</ProductButtons>
                 </div>
             </div>
             <hr>
@@ -760,7 +781,7 @@ onMounted( () => {
             <div class="row justify-content-center centered">
                 <div class="col-5">
                     <textarea id="operatorsTextarea" rows="4" cols="52" v-model="state.userNamesText"
-                              class="border-black border-2 ml-1"
+                              class="border-black border-2 ml-1 px-1"
                               autocapitalize="off"
                               autocomplete="off"
                               spellcheck="false">

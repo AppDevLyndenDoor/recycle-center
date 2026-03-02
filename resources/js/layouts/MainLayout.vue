@@ -365,7 +365,7 @@ onMounted( () => {
               content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=0.5, maximum-scale=4.0">
     </Head>
     <body class="bg-white text-black dark:bg-gray-800 dark:text-white ">
-    <div id="mainLayout" class="h-full min-h-screen min-w-screen bg-white text-black dark:bg-gray-800 dark:text-white ">
+    <div id="mainLayout" class="h-full min-h-screen  bg-white text-black dark:bg-gray-800 dark:text-white ">
         <Dialog
             v-if="sessionSettings.selectUser"
             :size="'md'"

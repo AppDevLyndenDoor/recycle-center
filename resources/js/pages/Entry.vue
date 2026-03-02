@@ -72,18 +72,11 @@ const state = reactive( {
     ],
     specModding: '',
     mode: 'each',
-    imageList: [],
     serverImageList: {},
     uploadResults: 0,
     uploadQuantity: 0,
     imageDeleteList: [],
 
-/*    watch: {
-        'OfflinePosts'(val) {
-            localStorage.setItem('OfflinePosts', JSON.stringify(val))
-        },
-
-    }*/
 });
 
 function CurrentDate() {
@@ -171,7 +164,7 @@ function enteryValidation(){
 function SubmitEntry(){
     const error = enteryValidation();
     if(error !== ''){
-        toasty({ mode: 'warning', response: error, message: 'Please fill in all required fields'});
+        toasty({ mode: 'warning', response: error, message: error});
         return
     }
     state.entryModel.picked_timestamp = Date.now();
@@ -201,11 +194,6 @@ function SubmitEntry(){
         },
         complete: function ()  { },
     };
-    try {
-        post.success('test',200); // Test the exact call
-    } catch (e) {
-        console.error("Error caught:", e);
-    }
     post_to_server(post,offlineStore);
 
     state.entryModel.width = 0;
@@ -215,6 +203,7 @@ function SubmitEntry(){
     state.entryModel.comment = '';
     state.entryModel.picked_timestamp = 0;
     state.entryModel.uom = '';
+    state.newComment = '';
 }
 
 function getPickupProduct(){
@@ -261,16 +250,12 @@ function getPickupBins(){
 }
 
 
-watch( () => user.pseudonym, () => {
-    if(user.userName !== undefined){
+watch( () => user.pseudonym, (newUser) => {
+    if(newUser !== undefined){
         state.entryModel.date = CurrentDate()
-        if (!user.perms.admin && user.perms.operator) {
-            state.entryModel.user = 'Select User';
-        } else {
-            state.entryModel.user = user.pseudonym;
-        }
-    }
+        state.entryModel.user = newUser;
 
+    }
 })
 function getImageList(){
     axios({
@@ -315,22 +300,17 @@ function startTimer(index){
 function stopTimer(){
     clearTimeout(pressTimer);
 }
-function showImage(id, down = false){
+function showImage(id){
     state.imageList = state.productSpecModels[id].imageList;
     state.showImage = true;
-    // if(down){
-    //     pressTimer = window.setTimeout(() => {});
-    // }
-    // else{
-    //     pressTimer.clearTimeout();
-    // }
+
 }
 
 onMounted(() => {
     if(user.userName !== undefined) {
         state.entryModel.date = CurrentDate()
     if (!user.perms.admin && user.perms.operator) {
-        state.entryModel.user = 'Select User';
+        state.entryModel.user = user.pseudonym;
     } else {
         state.entryModel.user = user.pseudonym;
     }
@@ -374,7 +354,7 @@ onMounted(() => {
     <Dialog v-if="state.editComment" :size="'md'" :dialogVisible="state.editComment" :title="'Comment'" class="fixed inset-0 z-50">
         <div class="flex flex-wrap centered">
             <textarea id="commentTextarea" rows="4" cols="52" v-model="state.newComment"
-                      class="border-black border-2 ml-1 dark:text-black"
+                      class="border-black text-3xl border-2 ml-1 px-2 dark:text-black lg:text-lg"
                       autocapitalize="off"
                       autocomplete="off"
                       spellcheck="false"
@@ -461,7 +441,7 @@ onMounted(() => {
                                     <h2 id="titleProducts">Products</h2>
                                 </div>
                             </div>
-                            <div  class="flex flex-wrap w-screen centered place-content-center">
+                            <div  class="flex flex-wrap w-full centered place-content-center">
                                 <div v-for="(product, index) in state.productSpecModels" :key="index">
                                     <ProductButtons :id="'productButtons-'+index" :product="product"
                                                     :index="index" :disabled="product.disabled" :active="product.name === state.entryModel.product"
@@ -521,14 +501,14 @@ onMounted(() => {
                                 <div id="TemplateUnits" v-show="(state.mode == 'each')">
                                     <div class="flex justify-content-center centered">
                                         <div class="col centered justify-content-center">
-                                            <input v-on:keyup="keymonitor"  onfocus="this.value=''" type="number" id="units" v-model="state.entryModel.units" min="0" class="centered">
+                                            <input v-on:keyup="keymonitor"  onfocus="this.value=''" type="number" id="eachUnits" v-model="state.entryModel.units" min="0" class="centered">
                                         </div>
                                     </div>
                                 </div>
                                 <div id="TemplateUnits" v-show="(state.mode == 'gallons')">
                                     <div class="flex justify-content-center centered">
                                         <div class="col centered justify-content-center">
-                                            <input v-on:keyup="keymonitor"  onfocus="this.value=''" type="number" id="units" v-model="state.entryModel.units" min="0" class="centered">
+                                            <input v-on:keyup="keymonitor"  onfocus="this.value=''" type="number" id="gallonsUnits" v-model="state.entryModel.units" min="0" class="centered">
                                         </div>
                                     </div>
                                 </div>
@@ -572,55 +552,67 @@ onMounted(() => {
 
                             <hr>
 
-                            <div class="grid grid-cols-9 justify-content-between">
+                            <div class="grid grid-cols-9 justify-content-between ml-2 centered">
                                 <div class="col-span-3 grid grid-cols-subgrid details">
+                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
                                     <label class="">Date</label>
-                                    <input  type="text" id="DateEntryPage" class="inputDetails date " maxlength="60"  v-model="state.entryModel.date"
+                                    <input  type="text" id="DateEntryPage" class="inputDetails date pl-2" maxlength="60"  v-model="state.entryModel.date"
                                             min="1970-01-01" disabled>
+                                    </div>
                                 </div>
 
                                 <div class="col-span-3 grid grid-cols-subgrid details ">
+                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
                                     <label>Company</label>
-                                    <input disabled  type="text" id="Company" class="inputDetails " maxlength="60" v-model="state.entryModel.company"
+                                    <input disabled  type="text" id="Company" class="inputDetails pl-2" maxlength="60" v-model="state.entryModel.company"
                                            autocapitalize="off"
                                            autocomplete="off"
                                            spellcheck="false"
                                            autocorrect="off">
+                                    </div>
                                 </div>
                                 <div class="col-span-3 grid grid-cols-subgrid details ">
+                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
                                     <label>Product</label>
-                                    <input disabled type="text" id="Product" class="inputDetails " maxlength="60"  v-model="state.entryModel.product"
+                                    <input disabled type="text" id="Product" class="inputDetails pl-2" maxlength="60"  v-model="state.entryModel.product"
                                            autocapitalize="off"
                                            autocomplete="off"
                                            spellcheck="false"
                                            autocorrect="off">
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-9 justify-content-between">
+                            <div class="grid grid-cols-9 justify-content-between ml-2 centered">
                                 <div class="col-span-3 grid grid-cols-subgrid details">
+                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
                                     <label v-show="(state.mode == 'yards' || state.mode == 'bin')">Yards</label>
                                     <label v-show="(state.mode == 'each')">Each</label>
-                                    <input disabled onfocus="this.value=''" type="number" id="Quantity" class="inputDetails " maxlength="100"
+                                    <input disabled onfocus="this.value=''" type="number" id="Quantity" class="inputDetails pl-2" maxlength="100"
                                            v-model="state.entryModel.units">
+                                    </div>
                                 </div>
                                 <div class="col-span-3 grid grid-cols-subgrid details ">
+                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
                                     <label >Destination</label>
-                                    <input  type="text" id="Destination" class="inputDetails " maxlength="60"
+                                    <input  type="text" id="Destination" class="inputDetails pl-2" maxlength="60"
                                             v-model="state.entryModel.destination"
                                             autocapitalize="off"
                                             autocomplete="off"
                                             spellcheck="false"
                                             autocorrect="off" disabled>
+                                    </div>
                                 </div>
-                                <div class="col-span-3 grid grid-cols-subgrid details ">
-                                    <label >Bin#</label>
-                                    <input  type="text" id="Bin" class="inputDetails " maxlength="10"
+                                <div class="col-span-3 grid grid-cols-subgrid details">
+                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
+                                    <label class="">Bin#</label>
+                                    <input  type="text" id="Bin" class="inputDetails pl-2 " maxlength="10"
                                             v-model="state.entryModel.bin"
                                             autocapitalize="off"
                                             autocomplete="off"
                                             spellcheck="false"
                                             autocorrect="off" disabled>
+                                    </div>
                                 </div>
                             </div>
 
