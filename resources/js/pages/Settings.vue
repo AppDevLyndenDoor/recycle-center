@@ -390,21 +390,26 @@ function getImageList(){
     })
 }
 function deleteImage(product, index){
-    const image = product.imageList[index];
-    axios({
-        method: 'post',
-        url: '/deleteImage',
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem('token'),
-        },
-        data: image
-    }).then(() => {
-        product.imageList.splice(index, 1);
-        toasty({mode: 'success', message: 'successfully deleted image'});
-    }, (error) => {
-        toasty({mode: 'error', message: 'something went wrong'});
-    })
-    state.deleteImageDialog = false;
+    try {
+        const image = product.imageList[index];
+        axios({
+            method: 'post',
+            url: '/deleteImage',
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem('token'),
+            },
+            data: image
+        }).then(() => {
+            product.imageList.splice(index, 1);
+            toasty({ mode: 'success', message: 'successfully deleted image' });
+        }, (error) => {
+            toasty({ mode: 'error', message: 'something went wrong' });
+        })
+        state.deleteImageDialog = false;
+    } catch (error) {
+        console.error("Error deleting image:", error);
+        toasty({ mode: 'error', message: 'something went wrong' });
+    }
 }
 
 function toasty({ mode, request, response, message }) {

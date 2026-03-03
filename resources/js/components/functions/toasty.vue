@@ -56,14 +56,13 @@ The mode configures the styles to display errors, success, or warning messages
         },
       ]"><b>{{ PrettyMode }}:&nbsp;</b>{{ message }}</p>
       <p v-if="mode=='error'" class="text-white absolute right-2 text-sm bottom-0 cursor-pointer hover:text-sky-300" @click="setTimer()">Close</p>
-      <p v-if="mode=='error'" class="text-white absolute right-14 text-sm bottom-0 cursor-pointer hover:text-sky-300" @click="report()">Report</p>
     </div>
   </div>
 
 </template>
 
 <script setup>
-import { ref, watch, inject, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import {useToastyStore} from '@/store/useToastyStore.js';
 
 const toastySettings = useToastyStore();

@@ -486,73 +486,54 @@ onMounted( () => {
                 <div class="flex-row">
                     <div class="justify-content-between grid grid-cols-12">
                         <div class="col-span-8">
-                            <button
-                                type="button"
-                                id="EntryButton"
-                                class="btn btn-primary mx-2 px-2"
-                                :class="[
-                                    {'btn-primary':sessionSettings.page !== 'Entry',
-                                        'btn-success':sessionSettings.page === 'Entry'}]"
-                                @click="sessionSettings.page = 'Entry'"
+
+                            <Link href="dashboard" method="get"
+                                class="btn btn-primary mx-2 px-2 py-1"
+                                :class="[ {'btn-primary':sessionSettings.page !== 'Entry',
+                                'btn-success':sessionSettings.page === 'Entry'}]"
+                                  @click="sessionSettings.page = 'Entry'"
                                 v-show="user.perms.operator">
-                                <Link href="dashboard" method="get">
-                                    Entry
-                                </Link>
-                            </button>
+                                Entry
+                            </Link>
 
-                            <button
-                                type="button"
-                                id="ViewEntriesButton"
-                                class="btn btn-primary mx-2 px-2"
-                                :class="[
-                                    { 'btn-primary': sessionSettings.page !== 'ViewEntries',
-                                        'btn-success':sessionSettings.page ==='ViewEntries', }]"
-                                @click="sessionSettings.page = 'ViewEntries'"
-                                v-show="user.perms.operator" >
-                                <Link href="viewEntries" method="get">
+                            <Link href="viewEntries" method="get"
+                                  class="btn btn-primary mx-2 px-2 py-1"
+                                  :class="[ { 'btn-primary': sessionSettings.page !== 'ViewEntries',
+                                    'btn-success':sessionSettings.page ==='ViewEntries', }]"
+                                  @click="sessionSettings.page = 'ViewEntries'"
+                                  v-show="user.perms.operator">
                                     View Entries
-                                </Link>
-                            </button>
+                            </Link>
 
-                            <button hidden
-                                type="button"
-                                id="SortingButton"
-                                class="btn btn-primary mx-2 px-2"
-                                :class="[
+                            <Link hidden href="viewEntries" method="get"
+                                  class="btn btn-primary mx-2 px-2 py-1"
+                                  :class="[
                                     {'btn-primary':sessionSettings.page !== 'Sorting',
                                     'btn-success': sessionSettings.page === 'Sorting'}]"
-                                @click="sessionSettings.page = 'Sorting'"
-                                v-show="user.perms.operator" >
-                                <Link href="sorting" method="get">
-                                    Sorting
-                                </Link>
-                            </button>
-                            <button hidden
-                                type="button"
-                                id="ViewSortingButton"
-                                class="btn btn-primary mx-2 px-2"
-                                :class="[
+                                  @click="sessionSettings.page = 'Sorting'"
+                                  v-show="user.perms.operator">
+                                Sorting
+                            </Link>
+
+                            <Link hidden href="viewEntries" method="get"
+                                  class="btn btn-primary mx-2 px-2 py-1"
+                                  :class="[
                                     { 'btn-primary': sessionSettings.page !=='ViewSorting',
                                         'btn-success':sessionSettings.page ==='ViewSorting'}]"
-                                @click="sessionSettings.page = 'ViewSorting'"
-                                v-show="user.perms.operator">
-                                <Link href="viewSorting" method="get">
-                                    View Sorting
-                                </Link>
-                            </button>
-                            <button
-                                type="button"
-                                id="SettingsButton"
-                                class="btn btn-primary mx-2 px-2"
-                                :class="[
+                                  @click="sessionSettings.page = 'ViewSorting'"
+                                  v-show="user.perms.operator">
+                                Sorting
+                            </Link>
+
+                            <Link href="settings" method="get"
+                                  class="btn btn-primary mx-2 px-2 py-1"
+                                  :class="[
                                     {'btn-primary':sessionSettings.page !== 'Settings',
                                         'btn-success':sessionSettings.page === 'Settings'}]"
-                                @click="sessionSettings.page = 'Settings'"
-                                v-show="user.perms.admin">
-                                <Link href="settings" method="get">
-                                    Settings
-                                </Link>
-                            </button>
+                                  @click="sessionSettings.page = 'Settings'"
+                                  v-show="user.perms.admin">
+                                Settings
+                            </Link>
                         </div>
                         <div
                             class="centered col-span-1 col-start-10"
