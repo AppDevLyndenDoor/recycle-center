@@ -57,7 +57,6 @@ class SortingTest extends TestCase
     public function test_submit_sorting_product($data)
     {
         $input = $data;
-        // dd($input);
         $request = Request::createFromBase(Request::create('', 'get', $input));
         $controller = new SortingController;
         $result = $controller->submitPickupSortingProduct($request);

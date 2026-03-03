@@ -28,18 +28,24 @@ class EntryController extends Controller
     public function saveProduct(Request $request)
     {
         $data = $request->input();
-
-        if (array_key_exists('id', $data) && $data['id'] > 0) {
-            DB::table('pickup_product')
-                ->where('id', '=', $data['id'])
-                ->update(['name' => $data['name'],
-                    'uom' => $data['uom'], 'company' => $data['company']]);
-            return 'updated';
-        } else {
-            $newID = DB::table('pickup_product')
-                ->insertGetId(['name' => $data['name'],
-                    'uom' => $data['uom'], 'company' => $data['company']]);
-            return $newID;
+        $exists = DB::table('pickup_product')->select('id')->where('name', $data['name'])->get()->toArray();
+        $id = (array_key_exists('id', $data) ? $data['id'] : -1);
+        if (count($exists) > 0 &&  $exists[0]->id != $id) {
+            return response()->json(['error' => 'product already exists'], 400);
+        }
+        else {
+            if (array_key_exists('id', $data) && $data['id'] > 0) {
+                DB::table('pickup_product')
+                    ->where('id', '=', $data['id'])
+                    ->update(['name' => $data['name'],
+                        'uom' => $data['uom'], 'company' => $data['company']]);
+                return 'updated';
+            } else {
+                $newID = DB::table('pickup_product')
+                    ->insertGetId(['name' => $data['name'],
+                        'uom' => $data['uom'], 'company' => $data['company']]);
+                return $newID;
+            }
         }
     }
 
@@ -160,14 +166,21 @@ class EntryController extends Controller
     public function saveBin(Request $request)
     {
         $data = $request->input();
-        if (array_key_exists('id', $data) && $data['id'] > 0) {
-            DB::table('pickup_bin')->where('id', '=', $data['id'])
+        $exists = DB::table('pickup_bin')->select('id')->where('binNumber', $data['binNumber'])->get()->toArray();
+        $id = (array_key_exists('id', $data) ? $data['id'] : -1);
+        if (count($exists) > 0 &&  $exists[0]->id != $id) {
+            return response()->json(['error' => 'Bin already exists'], 400);
+        }
+        else{
+            if (array_key_exists('id', $data) && $data['id'] > 0) {
+                DB::table('pickup_bin')->where('id', '=', $data['id'])
                 ->update(['binNumber' => $data['binNumber'], 'yards' => $data['yards'],
                     'company' => $data['company'], 'location' => $data['location']]);
-            return 'updated';
-        } else {
-            $newBin = DB::table('pickup_bin')->insertGetId($data);
-            return $newBin;
+                return 'updated';
+            } else {
+                $newBin = DB::table('pickup_bin')->insertGetId($data);
+                return $newBin;
+            }
         }
     }
      public function deleteBin(Request $request)

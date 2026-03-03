@@ -153,17 +153,24 @@ function saveEdit(product) {
             if(state.selectedFiles.length > 0){
                 uploadImage(product);
             }
-            if(response.data === 'updated'){
-                return;
+            let message = 'Saved Edit: '
+            if(response.data !== 'updated'){
+                state.createProduct.id = response.data;
+                state.createProduct.imageList = product.imageList;
+                state.productSpecModels.push({...state.createProduct});
+                message = 'Created : '
             }
-            state.createProduct.id = response.data;
-            state.createProduct.imageList = product.imageList;
-            state.productSpecModels.push(state.createProduct);
-            toasty({ mode: 'success', message: 'Saved Edit' });
+            else{
+                state.productSpecModels[state.editIndex] = {...state.createProduct};
+
+            }
+            state.showEditDialog = false;
+            toasty({ mode: 'success', message: message + product.edit.name });
 
         }, (error) => {
             if (error.message != undefined) {
-                toasty({ mode: 'error', response: error, request: error.request, message: error.message });
+                const tempError = error.response.data.error;
+                toasty({ mode: 'error', message: tempError });
             }
         });
 }
@@ -201,7 +208,7 @@ function validateYards(yards) {
         return 'Yards must be a positive number';
     }
     if (yardsNumber >= 1000) {
-        return 'Yards must be an must less than 1000';
+        return 'Yards must be less than 1000';
     }
     if (Math.floor(yardsNumber * 10000) !== yardsNumber * 10000) {
         return 'Yards may only have 4 decimal places'
@@ -241,15 +248,19 @@ function saveBin(bin) {
             "Authorization": "Bearer " + localStorage.getItem('token'),
         }
     }).then((response) => {
-        if(response.data === 'updated'){
-            return;
+        if(response.data !== 'updated'){
+            state.createBin.id = response.data;
+            state.binModels.push({...state.createBin});
         }
-        state.createBin.id = response.data;
-        state.binModels.push(state.createBin);
-        toasty({ mode: 'success', message: 'successfully saved Bin' });
+        else{
+            state.binModels[state.editIndex] = {...state.createBin};
+        }
+        state.showEditDialog = false;
+        toasty({ mode: 'success', message: 'successfully saved Bin: ' + bin.edit.binNumber });
     }, (error) => {
             if (error.message != undefined) {
-                toasty({ mode: 'error', response: error, request: error.request, message: error.message });
+                const tempError = error.response.data.error;
+                toasty({ mode: 'error', message: tempError });
             }
         }
     )
@@ -404,7 +415,6 @@ function deleteImage(product, index){
             product.imageList.splice(index, 1);
             toasty({ mode: 'success', message: 'successfully deleted image' });
         }, (error) => {
-            debugger;
             console.error("Error deleting image:", error.details);
             toasty({ mode: 'error', message: error.message });
         })
