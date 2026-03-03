@@ -157,6 +157,7 @@ function saveEdit(product) {
                 return;
             }
             state.createProduct.id = response.data;
+            state.createProduct.imageList = product.imageList;
             state.productSpecModels.push(state.createProduct);
             toasty({ mode: 'success', message: 'Saved Edit' });
 
@@ -209,7 +210,7 @@ function validateYards(yards) {
 }
 
 function saveBin(bin) {
-    const yards = bin.edit.yards.trim();
+    const yards = bin.edit.yards;
     const error = validateYards(yards);
     if(error != null){
         toasty({ mode: 'warning', message: error });
@@ -399,11 +400,13 @@ function deleteImage(product, index){
                 "Authorization": "Bearer " + localStorage.getItem('token'),
             },
             data: image
-        }).then(() => {
+        }).then((response) => {
             product.imageList.splice(index, 1);
             toasty({ mode: 'success', message: 'successfully deleted image' });
         }, (error) => {
-            toasty({ mode: 'error', message: 'something went wrong' });
+            debugger;
+            console.error("Error deleting image:", error.details);
+            toasty({ mode: 'error', message: error.message });
         })
         state.deleteImageDialog = false;
     } catch (error) {
@@ -519,8 +522,10 @@ function uploadImage(product){
             }
         }).then((response) => {
             for(let i = 0; i < response.data.length; i++){
-                const image = response.data[i];
-                product.imageList.push({src: 'storage/img/h96/uploads/' + product.edit.name + '/' + image});
+                const id = response.data[i][0];
+                const image = response.data[i][1];
+                const productName = product.edit.name;
+                product.imageList.push({id: id, product: productName, imageName: image, src: 'storage/img/h96/uploads/' + productName + '/' + image, });
             }
             state.selectedFiles = [];
             toasty({mode: 'success', message: 'successfully uploaded images'});

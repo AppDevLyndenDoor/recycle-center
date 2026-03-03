@@ -192,11 +192,11 @@ class EntryController extends Controller
 
                 $imagePath = $image->store('img/h96/uploads/'.$product, 'public');
                 $name = basename($imagePath);
-                DB::table('pickup_images')->insert([
+                $id = DB::table('pickup_images')->insertGetId([
                     'product' => $request->input('product'),
                     'imageName' => $name, // Save path in database
                 ]);
-                $response[] = $name;
+                $response[] = [$id,$name];
             }
         }
         return $response;
@@ -211,7 +211,12 @@ class EntryController extends Controller
 
     public function deleteImages(Request $request)
     {
-        $data = $request->input();
-        DB::table('pickup_images')->where('id', '=', $data['id'])->delete();
+        try {
+            $data = $request->input();
+            DB::table('pickup_images')->where('id', '=', $data['id'])->delete();
+            return true;
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Delete operation failed', 'details' => $e->getMessage()], 500);
+        }
     }
 }
