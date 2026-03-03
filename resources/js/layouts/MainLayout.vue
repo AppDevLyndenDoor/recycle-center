@@ -25,12 +25,13 @@ const offlineStore = useOfflineStore();
 const report = useReportStore();
 let cordovaMode = false;
 const sessionSettings = reactive({
-    version: 1,
+    version: 0,
     darkMode: false,
     selectUser: false,
     offlinePosts: [],
     page: 'entries',
     offline: true,
+    logoutConfirm: false,
 });
 const columnHeadersPretty = [
     'User',
@@ -88,9 +89,18 @@ function printTable(content) {
             // Only process rows where the first element is not null
             // Create a new row
             const row = document.createElement('tr');
-            for (const x of element) {
+            for (let i = 0; i < element.length; i++) {
                 const cell = document.createElement('td'); // Create a cell
-                cell.textContent = x; // Set the cell's text content
+                if(i === 8){
+                    const date = new Date(element[i]);
+                    const dd = String(date.getDate()).padStart(2, '0');
+                    const mm = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
+                    const yyyy = date.getFullYear();
+                    cell.textContent =  mm + '-' + dd + '-' + yyyy;
+                }
+                else{
+                    cell.textContent = element[i]; // Set the cell's text content
+                }
                 row.appendChild(cell); // Add the cell to the row
             }
 
@@ -200,13 +210,9 @@ function getUserNames() {
     }).then(
         (response) => {
             if (response.data.length >= 0) {
-
                 let userNameList = response.data[0].userNames;
                 userNameList = userNameList.split(',');
                 userNameList.unshift('Select User');
-                // state.userNamesText =
-                /* state.userNames = state.userNamesText.split(',');
-             state.userNames.unshift('Select User');*/
                 user.userNameList = userNameList;
                 localStorage.setItem(
                     'userNames',
@@ -372,7 +378,7 @@ onMounted( () => {
             :dialogVisible="sessionSettings.selectUser"
             :title="'Select User'"
             class="fixed inset-0 z-1000" >
-            <div class="flex flex-wrap">
+            <div class="flex flex-wrap ml-1 justify-center">
                 <div v-for="user in user.userNameList" :key="user">
                     <ProductButtons
                         type="button"
@@ -396,21 +402,47 @@ onMounted( () => {
                         'py-[3px]',
                     ]"
                     @click="sessionSettings.selectUser = false">
-                    <p class="text-md centered relative w-full whitespace-nowrap">
+                    <span class="text-md centered relative w-full whitespace-nowrap">
                         Cancel
-                    </p>
+                    </span>
                 </button>
             </div>
         </Dialog>
-        <p style="font-size: 12px; position: absolute; left: 429px; top: 29px">
-            v 1.{{ sessionSettings.version }}
-        </p>
+        <Dialog v-if="sessionSettings.logoutConfirm" :size="'xs'" :dialogVisible="sessionSettings.logoutConfirm"
+                :title="'Logout?'" class="fixed inset-0 z-1000" >
+            <button id="CancelLogout" class="btn btn-primary" :class="[
+                        'absolute',
+                        'bottom-2',
+                        'left-0',
+                        'h-8',
+                        'w-32',
+                        'inline-flex',
+                        'm-4',
+                        'my-[2px]',
+                        'py-[3px]']" @click="sessionSettings.logoutConfirm = false">
+                <span class="text-md centered w-full relative whitespace-nowrap">No</span>
+            </button>
+
+                <button id="confirmLogout" class="btn btn-primary" :class="[
+                    'absolute',
+                    'bottom-2',
+                    'right-0',
+                    'h-8',
+                    'inline-flex',
+                    'w-32',
+                    'm-4',
+                    'my-[2px]',
+                    'py-[3px]',
+                    ]" @click="logout">
+                    <span class="text-md centered w-full relative whitespace-nowrap">Yes</span>
+                </button>
+        </Dialog>
         <div>
             <div >
                 <div class="justify-content-between no-print  grid grid-cols-12">
                     <div class="col-span-6 mb-1">
                         <h1 id="title" class="mt-2 ml-2 text-4xl">
-                            Recycle Center Tracker
+                            Recycle Center Tracker <span style="font-size: 12px"> v 2.{{ sessionSettings.version }}</span>
                         </h1>
                     </div>
                     <!--                    <div class="flex-row centered w-full">-->
@@ -426,24 +458,24 @@ onMounted( () => {
                         </button>
                     </div>
                     <div
-                        class="centered col-span-3"
+                        class="centered col-span-1 col-start-11  mt-1 "
                         v-show="!user.perms.admin && user.perms.operator">
                         <button
                             type="button"
                             id="SelectUser"
-                            class="btn btn-primary px-2"
+                            class="userBtn btn-primary px-2 ml-1 h-auto text-white"
                             @click="selectUser()">
                             {{ user.pseudonym }}
                         </button>
                     </div>
-                    <div class="col-span-1 col-start-11 my-2"
+                    <div class="centered col-span-1 col-start-11  mt-1"
                         v-show="user.perms.admin">
                         <p class="userName centered px-1">
                             {{ user.userName }}
                         </p>
                     </div>
                     <div
-                        class="username col-span-1 col-start-11 my-2"
+                        class="centered col-span-1 col-start-11  mt-1"
                         v-show="!user.perms.operator">
                         <p class="userName centered px-1">
                             {{ user.userName }}
@@ -563,7 +595,7 @@ onMounted( () => {
                                 id="logout"
                                 type="button"
                                 class="btn btn-primary mx-2 px-1"
-                                @click="logout"
+                                @click="sessionSettings.logoutConfirm = true"
                             >
                                 Logout
                             </button>

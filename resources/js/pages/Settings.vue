@@ -132,7 +132,12 @@ function saveEdit(product) {
         toasty({ mode: 'warning', message: 'Must select one or more Companies' });
         return;
     }
-    if (product.edit.name != '') {
+    if (product.edit.name == '') {
+        toasty({ mode: 'warning', message: 'Name Field Cannot Be Empty' });
+    }
+    else if (product.edit.uom == '') {
+        toasty({ mode: 'warning', message: 'UOM Field Cannot Be Empty' });
+    }
         state.createProduct.company = product.companyArray.toString().trim();
         state.createProduct.name = product.edit.name.trim();
         state.createProduct.uom = product.edit.uom.trim();
@@ -160,9 +165,6 @@ function saveEdit(product) {
                 toasty({ mode: 'error', response: error, request: error.request, message: error.message });
             }
         });
-    } else{
-        toasty({ mode: 'warning', message: 'Name Field Cannot Be Empty' });
-    }
 }
 function saveSorting(product) {
     if (product.edit.name != '') {
@@ -189,11 +191,40 @@ function saveSorting(product) {
     }
 }
 
+function validateYards(yards) {
+    const yardsNumber = Number(yards);
+    if(!isFinite(yardsNumber) || yards === ''){
+        return 'Yards must be a number';
+    }
+    if (yardsNumber < 0) {
+        return 'Yards must be a positive number';
+    }
+    if (yardsNumber >= 1000) {
+        return 'Yards must be an must less than 1000';
+    }
+    if (Math.floor(yardsNumber * 10000) !== yardsNumber * 10000) {
+        return 'Yards may only have 4 decimal places'
+    }
+    return null;
+}
+
 function saveBin(bin) {
+    const yards = bin.edit.yards.trim();
+    const error = validateYards(yards);
+    if(error != null){
+        toasty({ mode: 'warning', message: error });
+        return
+    }
     if(bin.edit.binNumber == ''){
-        return;
+        toasty({ mode: 'warning', message: "Bin Number Field Cannot Be Empty" });
+        return
     }
     if(bin.company == ''){
+        toasty({ mode: 'warning', message: "A Company Must Be Selected" });
+        return;
+    }
+    if(bin.location == ''){
+        toasty({ mode: 'warning', message: "Location Field Cannot Be Empty" });
         return;
     }
     state.createBin.binNumber = bin.edit.binNumber.trim();
@@ -254,6 +285,7 @@ function saveUsers() {
 }
 
  function getPickupProduct(){
+    try {
     axios({
         method: 'GET',
         url: '/pickupProduct',
@@ -272,6 +304,9 @@ function saveUsers() {
             toasty({ mode: 'error', response: error, request: error.request, message: error.message });
         }
     });
+    } catch (error) {
+        console.log(error);
+    }
 }
 function getSortingProducts(){
     axios({
@@ -292,14 +327,16 @@ function getSortingProducts(){
         }
     });
 }
-function getPickupBins(){
+function getPickupBins() {
+    try {
+
     axios({
         method: 'GET',
         url: '/pickupBin',
         headers: {
             "Authorization": "Bearer " + localStorage.getItem('token'),
         }
-    }) .then((response) => {
+    }).then((response) => {
         if (response.data.length > 0) {
             state.binModels = response.data;
             localStorage.setItem('database_bins', JSON.stringify(response.data));
@@ -310,6 +347,9 @@ function getPickupBins(){
             toasty({ mode: 'error', response: error, request: error.request, message: error.message });
         }
     });
+    }catch(error) {
+        console.log(error);
+    }
 }
 
 function getImageList(){
@@ -524,7 +564,6 @@ function deleteProduct(product,index){
 
 }
 watch( () => user.userNameList, (newVal) => {
-    //
     state.userNamesText = newVal;
     state.userNamesText.splice('Select User,', 1);
     state.userNamesText = state.userNamesText.join(',');
@@ -562,8 +601,9 @@ onMounted( () => {
                     <input :id="'editItemInput-' + index" v-model="state.createItem.edit[value]" class="inputDetails  mx-2 px-1" :placeholder="value">
                 </div>
             </div>
-        <div class="overflow-auto" v-if="state.createItem.model === 'Product'">
-            <hr>
+        <hr>
+        <div class="overflow-auto max-h-[calc(50vh-100px)]" v-if="state.createItem.model === 'Product'">
+
             <div class="flex flex-wrap centered mb-24">
                 <p class="ml-2">Images:</p>
                 <div class="grid grid-cols-12 menuSpacer ">
@@ -594,27 +634,25 @@ onMounted( () => {
                             />
                         </form>
                     </div>
-                    <div class="col-span-9 grid-cols-subgrid col-start-5">
-                        <div class="grid grid-cols-4 centered">
-                            <div v-for="(item,index) in state.createItem.imageList" :key="index" class="col-span-2">
-                                <img  :src="item.src" alt=" " class="img-thumbnail centered my-2"/>
-                                <button type="button" class="btn bg-red-800 mx-4" @click="state.deleteImageDialog = true; state.delImage = index">Delete</button>
+                    <div class="col-span-9 col-start-5">
+                        <div class="columns-2 gap-4"
+                             style="grid-auto-flow: dense;">
+                            <div v-for="(item, index) in state.createItem.imageList" :key="index" class="flex flex-col items-center break-inside-avoid mb-4">
+                                <img :src="item.src" alt=" " class="img-thumbnail my-2" />
+                                <button type="button" class="btn bg-red-800 mx-4 mb-4" @click="state.deleteImageDialog = true; state.delImage = index">
+                                    Delete
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-<!--                <div class="productImageTemplate">-->
-<!--                    <div v-for="(item,index) in state.createItem.model.imageList" :key="index">-->
-<!--                        <img src="{{item}}" alt=""/>-->
-<!--                        <button type="button" class="btn btn-danger imageDelete text-black" @click="deleteImage(state.createItem.model,item)">Delete</button>-->
-<!--                    </div>-->
-<!--                </div>-->
             </div>
         </div>
-            <button id="CancelEdit" class="btn btn-primary" :class="[
+        <div class="flex justify-center">
+            <button id="CancelEdit" class="btn btn-primary justify-center" :class="[
                         'absolute',
                         'bottom-2',
-                        'left-0',
+
                         'h-8',
                         'w-32',
                         'inline-flex',
@@ -623,11 +661,12 @@ onMounted( () => {
                         'py-[3px]']" @click="state.showEditDialog = false">
                 <p class="text-md centered w-full relative whitespace-nowrap">Cancel</p>
             </button>
-
-        <div v-if="!state.newItem" class="flex justify-center">
-            <button id="deleteItem" class="btn btn-primary" :class="[
+        </div>
+        <div v-if="!state.newItem">
+            <button id="deleteItem" class="btn" :class="[
                     'absolute',
                     'bottom-2',
+                    'left-0',
                     'h-8',
                     'w-32',
                      'inline-flex',

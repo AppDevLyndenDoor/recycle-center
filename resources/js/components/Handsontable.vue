@@ -1,14 +1,14 @@
 <script setup>
 import { HotTable } from '@handsontable/vue3';
 import Handsontable from 'handsontable';
-import { getCurrentInstance, ref, onMounted, watch } from 'vue';
+import { getCurrentInstance, onMounted, ref, watch } from 'vue';
 import 'handsontable/dist/handsontable.full.css';
 import { post_to_server } from '@/majax.js';
 import { useOfflineStore } from '@/store/useOfflineStore.js';
 import { useReportStore } from '@/store/useReportStore.js';
 import { useTableStore } from '@/store/useTableStore';
 import { useToastyStore } from '@/store/useToastyStore.js';
-import {useUserStore} from '@/store/useUserStore.js';
+import { useUserStore } from '@/store/useUserStore.js';
 
 const pageData = useReportStore();
 const printTable = useTableStore();
@@ -54,10 +54,10 @@ const tableSortingSettings = {
         { data: 'units' },
         { data: 'product' },
         {
-            data: "date",
+            data: 'date',
             type: 'date',
-            "readOnly": true,
-            dateFormat: 'MM/DD/YYYY'
+            readOnly: true,
+            dateFormat: 'MM/DD/YYYY',
         },
         { data: 'picked_timestamp', editor: false },
         { data: 'company' },
@@ -105,50 +105,59 @@ const tableEntriesSettings = {
         { data: 'width' },
         { data: 'height' },
         { data: 'bin' },
-        { data: 'date', type: 'date', dateFormat: 'MM/DD/YYYY' },
-        { data: 'picked_timestamp', editor: false },
+        { data: 'date', 'renderer': 'customDateRendererGate',editor: 'date', dataType: 'date', dateFormat: 'MM/DD/YYYY' },
+        { data: 'picked_timestamp'  ,editor: false },
         { data: 'company' },
         { data: 'destination' },
         { data: 'comment' },
     ],
-}
-const pendingEdits = ref([])
-watch(() => props.tData, (newVal) => {
-    if(newVal == null){
-        //newVal = (props.selector == 'viewEntry') ? tableEntriesSettings.schema : tableSortingSettings.schema;
-        newVal = tableEntriesSettings.schema
-    }
-    tableData.value = newVal;
-    settings.value = tableSettings();
-    const ht = instance.refs.hotTableComponent.hotInstance
-    ht.updateSettings(settings.value);
-})
-watch(() => props.print, () => {
+};
+const pendingEdits = ref([]);
+watch(
+    () => props.tData,
+    (newVal) => {
+        if (newVal == null) {
+            //newVal = (props.selector == 'viewEntry') ? tableEntriesSettings.schema : tableSortingSettings.schema;
+            newVal = tableEntriesSettings.schema;
+        }
+        tableData.value = newVal;
+        settings.value = tableSettings();
+        const ht = instance.refs.hotTableComponent.hotInstance;
+        ht.updateSettings(settings.value);
+    },
+);
+watch(
+    () => props.print,
+    () => {
         printReport();
     },
 );
-watch(() => props.download, () => {
+watch(
+    () => props.download,
+    () => {
         downloadCSV();
     },
 );
-watch(() => props.save, () => {
+watch(
+    () => props.save,
+    () => {
         SaveEdits();
-        },
+    },
 );
 
 const customDateRendererGate = function (instance, td, row, col, prop, value, cellProperties,) {
-    Handsontable.renderers.TextRenderer(
-        instance,
-        td,
-        row,
-        col,
-        prop,
-        value,
-        cellProperties,
-    );
+    if(value) {
+        if(value.includes('-')){
+            const [year, month, day] = value.split('-');
+            value = month + '/' + day + '/' + year;
+        }
+    }
+    Handsontable.renderers.TextRenderer(instance, td, row, col, prop, value, cellProperties,);
     return td;
 };
+
 Handsontable.renderers.registerRenderer('customDateRendererGate', customDateRendererGate,);
+
 function tableSettings() {
     let columnHeaders = [];
     let columnNames = [];
@@ -179,7 +188,7 @@ function tableSettings() {
         colHeaders: columnHeaders,
         minSpareRows: 1,
         contextMenu: {
-            callback: function (key, options, event) {
+            callback: function (key) {
                 if (key == 'RemoveRow' && user.perms == 'admin') {
                     const hot = instance.refs.hotTableComponent.hotInstance;
                     const selected = hot.getSelected()[0][0];
@@ -202,7 +211,7 @@ function tableSettings() {
                 },
             },
         },
-        afterSelection: function (row, col, row2, col2, selectionLayerLevel) {
+        afterSelection: function (row, col, row2, col2) {
             if (row == -1) return;
             const data = [];
             const hot = instance.refs.hotTableComponent.hotInstance;
@@ -223,22 +232,21 @@ function tableSettings() {
             if (props.selector == 'viewEntry') {
                 avgText = ' Average: ';
                 //push data into array
-                if (col != 4 || col != 5 || col != 6) {
+                if (col != 4 && col != 5 && col != 6) {
                     col = 1;
                 }
-                //turns values into floats
                 switch (col) {
                     case 1:
-                        colName = 'Units';
+                        colName = 'Units Sum: ';
                         break;
                     case 4:
-                        colName = 'Length';
+                        colName = 'Length Sum: ';
                         break;
                     case 5:
-                        colName = 'Width';
+                        colName = 'Width Sum: ';
                         break;
                     case 6:
-                        colName = 'Height';
+                        colName = 'Height Sum: ';
                         break;
                 }
             } else if (col != 1) {
@@ -268,6 +276,9 @@ function tableSettings() {
         },
         afterChange: function (changes, source) {
             if (source === 'edit') {
+                if(changes[2] === changes[3]){
+                    return;
+                }
                 const ht = instance.refs.hotTableComponent.hotInstance;
                 for (let i = 0; i < changes.length; i++) {
                     const allData = ht.getSourceDataAtRow(changes[i][0]);
@@ -292,14 +303,14 @@ function SaveEdits() {
             url: url,
             method: 'POST',
             data: pendingEdits.value,
-            success: function (data, status) {
+            success: function (data) {
                 if (!data.result) {
                     pendingEdits.value = [];
                     //emit('pendingEdits', false);
                     toasty({ mode: 'success', message: 'Saved Edits' });
                 }
             },
-            error: function (data) {
+            error: function () {
                 toasty({ mode: 'warning', message: "Couldn't Save Edits" });
             },
             complete: function () {},

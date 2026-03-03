@@ -14,7 +14,7 @@ const range = useReportStore();
 
 const state = reactive({
     showPickUser: false,
-    selectionSum: 'Sum:',
+    selectionSum: 'Sum: ',
     selectionAverage: 'Average:',
     reportSettings: {
         dateRange1: '',
@@ -25,9 +25,16 @@ const state = reactive({
     clickedSave: false,
     offline: false,
     unitCache: [],
-    userName: (user.userName == '') ?  'Select User' :user.userName,
+    userName: (user.pseudonym == '') ?  'Select User' :user.pseudonym,
     print: false,
     download: false,
+})
+const displayDate = computed(() => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    const yyyy = today.getFullYear();
+    return  mm + '-' + dd + '-' + yyyy;
 })
 
 const currentDate = computed(() => {
@@ -66,7 +73,6 @@ function getEntries(silence) {
             },
         }) .then((response) => {
             if (response.data.length == 0) {
-
                 state.unitCache = JSON.parse(localStorage.getItem('database'));
 
                 if (!silence) {
@@ -98,7 +104,9 @@ onMounted( () => {
         range.date2 =  currentDate.value;
     }
 
-    getEntries(true);
+    if(user.pseudonym != 'Select User'){
+        getEntries(true);
+    }
 });
 
 </script>
@@ -138,7 +146,7 @@ onMounted( () => {
                         </div>
                     </div>
                     <div class="">
-                        <h2 id="titleDate">{{currentDate}}</h2>
+                        <h2 id="titleDate">{{displayDate}}</h2>
                     </div>
                 </div>
             </div>

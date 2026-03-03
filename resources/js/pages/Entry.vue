@@ -39,7 +39,11 @@ const state = reactive( {
         comment: '',
     },
 
-    binModels: [],
+    binModels: {
+        'Lynden Door': [],
+        'Victory Millwork': [],
+        'LD Trucking': [],
+    },
     // User object contains user specific settings
     user: {
         name: 'test',
@@ -186,7 +190,6 @@ function SubmitEntry(){
         method: 'POST',
         data: obj,
         success: function ( )  {
-            console.log(200);
             toasty({ mode: 'success', message: 'Entry Submitted' });
         },
         error: function ()  {
@@ -196,13 +199,13 @@ function SubmitEntry(){
     };
     post_to_server(post,offlineStore);
 
+    state.entryModel.length = 0;
     state.entryModel.width = 0;
     state.entryModel.height = 0;
     state.entryModel.bin = '';
     state.entryModel.units = 0;
     state.entryModel.comment = '';
     state.entryModel.picked_timestamp = 0;
-    state.entryModel.uom = '';
     state.newComment = '';
 }
 
@@ -239,7 +242,10 @@ function getPickupBins(){
         }
     }) .then((response) => {
         if (response.data.length > 0) {
-            state.binModels = response.data;
+            for(const bin of response.data) {
+                state.binModels[bin.company].push(bin);
+            }
+            //state.binModels = response.data;
             localStorage.setItem('database_bins', JSON.stringify(response.data));
         }
     }, (error) => {
@@ -328,8 +334,8 @@ onMounted(() => {
     <Dialog v-if="state.showBinDialog" :size="'xl'" :dialogVisible="state.showBinDialog"
             :title="'Bin'" class="fixed inset-0 z-50">
         <div class="flex flex-wrap overflow-auto">
-            <div class="flex flex-wrap h-[calc(100vh-360px)] w-full overflow-auto">
-            <div v-for="(bin,index) in state.binModels" :key="bin.binNumber">
+            <div class="flex flex-wrap max-h-[calc(100vh-400px)] w-full overflow-auto mx-2">
+            <div v-for="(bin,index) in state.binModels[state.entryModel.company]" :key="bin.binNumber">
                 <ProductButtons :id="'binButtons-'+index" @clicked="pickBin(bin)">{{bin.binNumber}}</ProductButtons>
             </div>
             </div>
@@ -392,10 +398,13 @@ onMounted(() => {
             </button>
         </div>
     </Dialog>
-    <Dialog v-if="state.showImage" :size="'md'" :dialogVisible="state.showImage" :title="'Image'" class="fixed inset-0 z-50">
-        <div class="flex flex-wrap centered">
-            <div v-for="(image, index) in state.imageList" :key="index">
-                <img :src="image.src" alt="/"/>
+    <Dialog v-if="state.showImage" :size="'lg'" :dialogVisible="state.showImage" :title="'Image'" class="fixed inset-0 z-50">
+        <div class="col-span-9 col-start-5 overflow-auto max-h-[calc(100vh-400px)]">
+            <div class="columns-2 gap-4"
+                 style="grid-auto-flow: dense;">
+                <div v-for="(item, index) in state.imageList" :key="index" class="flex flex-col items-center break-inside-avoid mb-4">
+                    <img :src="item.src" alt=" " class="img-thumbnail my-2" />
+                </div>
             </div>
         </div>
         <div>

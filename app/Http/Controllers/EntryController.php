@@ -98,7 +98,14 @@ class EntryController extends Controller
                 ->where('picked_timestamp', '<=', $end)
                 ->where('picked_timestamp', '>=', $start)
                 ->orderBy('picked_timestamp', 'asc')
-                ->get()->toArray();
+                ->get()
+                ->map(function ($item) {
+                    // Convert and format picked_timestamp using Carbon
+                    $item->picked_timestamp = Carbon::createFromTimestamp($item->picked_timestamp)
+                        ->setTimezone('America/Los_Angeles')
+                        ->format('h:i:s A');
+                    return $item;
+                })->toArray();
         } else {
             $result = DB::table('pickup_unit')
                 ->where('status', '=', 1)
@@ -106,9 +113,16 @@ class EntryController extends Controller
                 ->where('picked_timestamp', '<=', $end)
                 ->where('picked_timestamp', '>=', $start)
                 ->orderBy('picked_timestamp', 'asc')
-                ->get()->toArray();
+                ->get()
+                ->map(function ($item) {
+                    // Convert and format picked_timestamp using Carbon
+                    $item->picked_timestamp = Carbon::createFromTimestamp($item->picked_timestamp)
+                        ->setTimezone('America/Los_Angeles')
+                        ->format('h:i:s A');
+                    return $item;
+                })
+                ->toArray();
         }
-
         return $result;
     }
 
@@ -121,6 +135,9 @@ class EntryController extends Controller
                     ->update(['status' => 0]);
             } else {
                 $changes = $value['changes'][0];
+                if($changes[1] == 'date'){
+                    $changes[3] = Carbon::createFromDate($changes[3])->format('Y-m-d');
+                }
                 DB::table('pickup_unit')->where('id', '=', $value['id'])
                     ->update([$changes[1] => $changes[3]]);
             }
