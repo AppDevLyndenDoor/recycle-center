@@ -98,17 +98,42 @@ const tableEntriesSettings = {
     },
     columnNames: [
         { data: 'user', editor: false },
-        { data: 'units' },
-        { data: 'uom' },
+        { data: 'units', type: 'numeric',
+            numericFormat: {
+                pattern: '0.0000',
+            },
+            allowInvalid: false,
+        },
+        { data: 'uom',
+            type: 'dropdown',
+            source: ['each', 'yards'],
+            strict: true,
+
+            allowInvalid: false,
+        },
         { data: 'product' },
-        { data: 'length' },
+        { data: 'length',type: 'numeric',
+            numericFormat: {
+                pattern: '0.00',
+            },
+            allowInvalid: false,},
         { data: 'width' },
-        { data: 'height' },
+        { data: 'height'},
         { data: 'bin' },
         { data: 'date', 'renderer': 'customDateRendererGate',editor: 'date', dataType: 'date', dateFormat: 'MM/DD/YYYY' },
         { data: 'picked_timestamp'  ,editor: false },
-        { data: 'company' },
-        { data: 'destination' },
+        { data: 'company',
+            type: 'dropdown',
+            source: ['Lynden Door', 'Victory Millwork', 'LD Trucking'],
+            strict: true,
+            allowInvalid: false,
+        },
+        { data: 'destination',
+            type: 'dropdown',
+            source: ['Chip - C', 'Landfill - L', 'Sort - S', 'Process - P'],
+            strict: true,
+            allowInvalid: false,
+        },
         { data: 'comment' },
     ],
 };
@@ -277,12 +302,27 @@ function tableSettings() {
         },
         afterChange: function (changes, source) {
             if (source === 'edit') {
-                if(changes[2] === changes[3]){
-                    return;
-                }
                 const ht = instance.refs.hotTableComponent.hotInstance;
                 for (let i = 0; i < changes.length; i++) {
                     const allData = ht.getSourceDataAtRow(changes[i][0]);
+                    const col = changes[i][1]
+                    const row = changes[i][0];
+                    let message = validateChanges(changes[0][2], changes[0][3], col);
+                    if(allData['id'] == undefined) {
+                        message = 'cannot edit new row';
+                        ht.alter('remove_row', row);
+                        toasty({ mode: 'warning', message: message});
+                        return;
+                    }
+                    if(message === -1) {
+                        return;
+                    }
+
+                    else if (message) {
+                        ht.setDataAtRowProp(row, col, changes[0][2]);
+                        toasty({ mode: 'warning', message: message});
+                        return;
+                    }
                     allData.changes = changes;
                     pendingEdits.value.push(allData);
                 }
@@ -290,6 +330,32 @@ function tableSettings() {
             }
         },
     };
+}
+function validateChanges(oldVal, newVal, columnName) {
+    if(oldVal == newVal) {
+        return -1;
+    }
+    if(columnName == 'units' || columnName == 'length' || columnName == 'width' || columnName == 'height') {
+        const valNumber = Number(newVal);
+        if(!isFinite(valNumber) || newVal === ''){
+            return columnName + ' must be a number';
+        }
+        if(newVal >= 1000) {
+            return columnName + ' must be less than 1000';
+        }
+        if(newVal < 0) {
+            return columnName + ' must be a positive number';
+        }
+    }
+    if(columnName != 'bin' && newVal === '') {
+        return columnName + ' cannot be empty';
+    }
+    if(columnName == 'date' && newVal !== '') {
+        const date = new Date(newVal);
+        if(isNaN(date.getTime())) {
+            return columnName + ' must be a valid date';
+        }
+    }
 }
 function SaveEdits() {
     const url =

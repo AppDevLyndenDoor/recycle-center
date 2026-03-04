@@ -64,11 +64,10 @@ class EntryController extends Controller
         }
         $data['bin'] == null ? $data['bin'] = '' : $data['bin'];
         $data['comment'] == null ? $data['comment'] = '' : $data['comment'];
-
         if($data['uom'] == 'each' && $data['units'] <= 0){
             return response()->json(['error' => 'Each must be greater than 0'], 400);
         }
-        else if($data['uom'] == 'Yards' && $data|| $data['length'] <= 0 || $data['width'] <= 0 || $data['height'] <= 0){
+        else if(($data['uom'] == 'Yards' && $data['bin'] == '') && ($data || $data['length'] <= 0 || $data['width'] <= 0 || $data['height'] <= 0)){
             return response()->json(['error' => 'length/width/height must be greater than 0'], 400);
         }
         DB::table('pickup_unit')->insert($data);
@@ -139,6 +138,10 @@ class EntryController extends Controller
     public function saveEntriesEdits(Request $request)
     {
         $data = $request->input();
+
+        if($data[0]['id'] == null){
+            return response()->json(['error' => 'product does not exist'], 400);
+        }
         foreach ($data as $key => $value) {
             if ($value['changes'][0] == 'removeRow') {
                 DB::table('pickup_unit')->where('id', '=', $value['id'])

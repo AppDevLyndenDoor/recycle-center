@@ -763,10 +763,10 @@ onMounted( () => {
             </GenericButton>
         </div>
     </Dialog>
-    <Dialog v-if="state.deleteImageDialog" :size="'sm'" :dialogVisible="state.deleteImageDialog" :title="'Delete Product'"
+    <Dialog v-if="state.deleteImageDialog" :size="'sm'" :dialogVisible="state.deleteImageDialog" :title="'Delete Image'"
             class="fixed inset-0 z-50">
         <p class="text-xl text-zinc-700 mt-1 ml-3 mr-4 dark:text-gray-200 whitespace-nowrap text-center">Are you
-            sure you want to delete this product?</p>
+            sure you want to delete this Image?</p>
         <div class="">
             <GenericButton :class="[
                     'absolute',

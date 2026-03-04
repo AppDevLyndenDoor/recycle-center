@@ -161,13 +161,13 @@ function enteryValidation(){
         return 'Please Select a User Name'
     }
 
-    if (state.entryModel.uom == 'each' && (!state.entryModel.units || state.entryModel.units <= 0 )) {
+    if (state.mode == 'each' && (!state.entryModel.units || state.entryModel.units <= 0 )) {
         return 'Each must be greater than 0'
     }
     const length = state.entryModel.length;
     const width = state.entryModel.width;
     const height = state.entryModel.height;
-    if(state.entryModel.uom == 'yards') {
+    if(state.mode == 'yards' ) {
         if ( (length <= 0)) {
             return 'Length must be greater than 0'
         }
@@ -177,6 +177,9 @@ function enteryValidation(){
         else if (height <= 0){
             return 'Height must be greater than 0'
         }
+    }
+    else if(state.mode == 'bin' && state.entryModel.bin == '') {
+        return 'Please select a Bin'
     }
     return '';
 }
