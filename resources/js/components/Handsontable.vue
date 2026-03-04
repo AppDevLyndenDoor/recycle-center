@@ -189,7 +189,7 @@ function tableSettings() {
         minSpareRows: 1,
         contextMenu: {
             callback: function (key) {
-                if (key == 'RemoveRow' && user.perms == 'admin') {
+                if (key == 'RemoveRow' && user.perms.admin) {
                     const hot = instance.refs.hotTableComponent.hotInstance;
                     const selected = hot.getSelected()[0][0];
                     const rowData = hot.getSourceDataAtRow(selected);
@@ -203,6 +203,7 @@ function tableSettings() {
                     pendingEdits.value.push(rowData);
                     hot.alter('remove_row', selected);
                     emit('pendingEdits', true);
+                    toasty({ mode: 'success', message: 'Save Edits to permanently remove' });
                 }
             },
             items: {
@@ -387,4 +388,204 @@ onMounted(() => {
     ></hot-table>
 </template>
 
-<style scoped></style>
+<style>
+
+:root {
+    --background: rgb(54, 61, 71);
+    --color: rgb(224, 224, 224);
+    --color2: rgb(123, 123, 123);
+    --table-border-color: #444;
+    --table-header-background: rgb(54, 61, 71);
+    --table-header-color: #FFF;
+    --background-color-row-odd: rgb(54, 61, 71);
+    --background-color-row-even: rgb(54, 61, 71);
+    --background-color-row-first: rgb(54, 61, 71);
+    --cell-color: rgb(21, 24, 28);
+    --cell-selected-color: #222;
+    --ctx-background: #e0e0e0;
+    --ctx-background-hover: rgb(186, 198, 215);
+    --border-left: 1px solidrgb(146, 157, 172)  --scroll-track-dark: #111;
+    --scroll-thumb-dark: #575757;
+    --scroll-thumb-hover-dark: #575757;
+    --scroll-track: #7b7fa4;
+    --scroll-thumb: rgb(96 165 250);
+    --scroll-thumb-hover: rgb(156, 201, 255);
+}
+
+.dark .data-sheet {
+    border-top: thin solid var(--table-border-color);
+    border-bottom: thin solid var(--table-border-color);
+}
+
+.dark .data-sheet .handsontable .htDimmed2 {
+    color: var(--color2);
+}
+.data-sheet .handsontable .htDimmed2 {
+    color: var(--color2);
+}
+.dark .data-sheet .handsontable .htDimmed {
+    color: var(--color);
+}
+
+.dark .data-sheet .handsontable {
+    color: var(--color);
+}
+
+.data-sheet .handsontable .htDimmed {
+    color: black;
+}
+
+.dark .data-sheet .handsontable .wtHolder {
+    background-color: var(--table-header-background);
+}
+
+/* All headers */
+.dark .data-sheet .handsontable th {
+    background-color: var(--table-header-background);
+    color: var(--table-header-color);
+    border-left: var(--border-left);
+}
+
+/* Row headers */
+.dark .data-sheet .ht_clone_left th {
+    background-color: var(--table-header-background);
+    color: var(--table-header-color);
+}
+
+/* Column headers */
+.dark .data-sheet .ht_clone_top th {
+    background-color: var(--table-header-background);
+    color: var(--table-header-color);
+}
+
+/* Row headers */
+.dark .data-sheet .ht_clone_top_left_corner th {
+    border-bottom: 1px solid var(--table-border-color);
+}
+
+.dark .data-sheet .ht_clone_left th {
+    border-right: 1px solid var(--table-border-color);
+    border-left: 1px solid var(--table-border-color);
+}
+
+/* Column headers */
+.dark .data-sheet .ht_clone_top th {
+    border-top: 1px solid var(--table-border-color);
+    border-right: 1px solid var(--table-border-color);
+    border-bottom: 1px solid var(--table-border-color);
+}
+
+.dark .data-sheet .ht_clone_top_left_corner th {
+    border-right: 1px solid var(--table-border-color);
+}
+
+.dark .data-sheet .handsontable .changeType {
+    background: inherit;
+    border-color: var(--table-border-color);
+}
+
+/* Borders */
+.dark .data-sheet .handsontable th,
+.dark .data-sheet .handsontable td {
+    border-right: 1px solid var(--table-border-color);
+    border-bottom: 1px solid var(--table-border-color);
+}
+
+.dark .data-sheet .handsontable tr:first-child td,
+.dark .data-sheet .handsontable tr:first-child th {
+    border-top: 1px solid var(--table-border-color);
+}
+
+.dark .data-sheet .ht_master tr>td {
+    border-bottom: 1px solid var(--table-border-color);
+}
+
+/* Right */
+.dark .data-sheet .ht_master tr>td {
+    border-right: 1px solid var(--table-border-color);
+}
+
+.dark .data-sheet .dark .data-sheet .handsontable .htNoFrame+td,
+.dark .data-sheet .handsontable .htNoFrame+th,
+.dark .data-sheet .handsontable.htRowHeaders thead tr th:nth-child(2),
+.dark .data-sheet .handsontable td:first-of-type,
+.dark .data-sheet .handsontable th:first-child,
+.dark .data-sheet .handsontable th:nth-child(2) {
+    border-left: 1px solid var(--table-border-color);
+}
+
+.dark .data-sheet .ht_clone_top_left_corner thead tr th:nth-last-child(2) {
+    border-right: 1px solid var(--table-border-color);
+}
+
+.dark .data-sheet .handsontable th:last-child {
+    border-right: 1px solid var(--table-border-color);
+    border-bottom: 1px solid var(--table-border-color);
+}
+
+/* Selected cell */
+.dark .data-sheet tr>td {
+    background-color: var(--cell-color);
+}
+
+/* Selected cell */
+.dark .data-sheet tr>td.current {
+    background-color: var(--cell-selected-color);
+}
+
+/* Context menu */
+.htContextMenu tr,
+.htDropdownMenu tr,
+.htFiltersConditionsMenu tr {
+    background-color: var(--ctx-background);
+}
+
+
+.htContextMenu table tbody tr td,
+.htDropdownMenu table tbody tr td,
+.htFiltersConditionsMenu table tbody tr td {
+    background-color: var(--ctx-background);
+}
+
+.htContextMenu table tbody tr td.current,
+.htContextMenu table tbody tr td.zeroclipboard-is-hover,
+.htDropdownMenu table tbody tr td.current,
+.htDropdownMenu table tbody tr td.zeroclipboard-is-hover,
+.htFiltersConditionsMenu table tbody tr td.current,
+.htFiltersConditionsMenu table tbody tr td.zeroclipboard-is-hover {
+    background-color: var(--ctx-background-hover);
+}
+
+
+.htContextMenu .handsontable table td.htCustomMenuRenderer,
+.htDropdownMenu .handsontable table td.htCustomMenuRenderer {
+    background-color: var(--ctx-background);
+}
+
+.handsontable .htUISelectCaption,
+.handsontable .htUISelectCaption:hover {
+    background-color: var(--ctx-background);
+}
+
+/* Scroll bar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--scroll-track);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--scroll-thumb-hover);
+}
+
+.hot-display-license-info {
+    opacity: 0 !important;
+}
+</style>

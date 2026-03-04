@@ -569,7 +569,7 @@ onMounted(() => {
                             <div class="justify-content-center appendDestinationButtons">
                                 <div class="flex centered">
                                     <div v-for="(destination, index) in state.destinations" :key="index">
-                                        <ProductButtons :id="'destinationButtons-'+index" :index="index" :class="[{'btn-primary': destination !== state.destination, 'btn-success': destination === state.destination,}]"
+                                        <ProductButtons :id="'destinationButtons-'+index" :index="index" :active="destination === state.entryModel.destination"
                                         @clicked="destinationClicked(destination)">{{destination}}</ProductButtons>
                                     </div>
                                 </div>

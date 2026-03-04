@@ -488,48 +488,40 @@ onMounted( () => {
                         <div class="col-span-8">
 
                             <Link href="dashboard" method="get"
-                                class="btn btn-primary mx-2 px-2 py-1"
-                                :class="[ {'btn-primary':sessionSettings.page !== 'Entry',
-                                'btn-success':sessionSettings.page === 'Entry'}]"
+                                  class="btn mx-2 px-2 py-1"
+                                  :class="[sessionSettings.page !== 'Entry' ? 'btn-primary' : 'btn-success']"
                                   @click="sessionSettings.page = 'Entry'"
                                 v-show="user.perms.operator">
                                 Entry
                             </Link>
 
                             <Link href="viewEntries" method="get"
-                                  class="btn btn-primary mx-2 px-2 py-1"
-                                  :class="[ { 'btn-primary': sessionSettings.page !== 'ViewEntries',
-                                    'btn-success':sessionSettings.page ==='ViewEntries', }]"
+                                  class="btn mx-2 px-2 py-1"
+                                  :class="[sessionSettings.page !== 'ViewEntries' ? 'btn-primary' : 'btn-success']"
                                   @click="sessionSettings.page = 'ViewEntries'"
                                   v-show="user.perms.operator">
                                     View Entries
                             </Link>
 
-                            <Link hidden href="viewEntries" method="get"
-                                  class="btn btn-primary mx-2 px-2 py-1"
-                                  :class="[
-                                    {'btn-primary':sessionSettings.page !== 'Sorting',
-                                    'btn-success': sessionSettings.page === 'Sorting'}]"
+<!--                            <Link  href="viewEntries" method="get"
+                                  class="btn mx-2 px-2 py-1"
+                                  :class="[sessionSettings.page !== 'Sorting' ? 'btn-primary' : 'btn-success']"
                                   @click="sessionSettings.page = 'Sorting'"
                                   v-show="user.perms.operator">
                                 Sorting
                             </Link>
 
-                            <Link hidden href="viewEntries" method="get"
-                                  class="btn btn-primary mx-2 px-2 py-1"
-                                  :class="[
-                                    { 'btn-primary': sessionSettings.page !=='ViewSorting',
-                                        'btn-success':sessionSettings.page ==='ViewSorting'}]"
+                            <Link  href="viewEntries" method="get"
+                                  class="btn mx-2 px-2 py-1"
+                                  :class="[sessionSettings.page !== 'ViewSorting' ? 'btn-primary' : 'btn-success']"
                                   @click="sessionSettings.page = 'ViewSorting'"
                                   v-show="user.perms.operator">
                                 Sorting
-                            </Link>
+                            </Link>-->
 
                             <Link href="settings" method="get"
-                                  class="btn btn-primary mx-2 px-2 py-1"
-                                  :class="[
-                                    {'btn-primary':sessionSettings.page !== 'Settings',
-                                        'btn-success':sessionSettings.page === 'Settings'}]"
+                                  class="btn mx-2 px-2 py-1"
+                                  :class="[sessionSettings.page !== 'Settings' ? 'btn-primary' : 'btn-success']"
                                   @click="sessionSettings.page = 'Settings'"
                                   v-show="user.perms.admin">
                                 Settings

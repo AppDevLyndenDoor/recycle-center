@@ -28,12 +28,7 @@ hr {
     background-color: #333; /* Modern Browsers */
     margin:6px;
 }
-@media (prefers-color-scheme: dark) {
-    hr {
-        color: #989898; /* fallback for old IE in dark mode */
-        background-color: #989898; /* dark mode color */
-    }
-}
+
 
 .modal-backdrop{
     width:100%;
@@ -204,6 +199,17 @@ select {
         page-break-after: always;
     }
 }
+    .dark hr {
+        color: #989898; /* fallback for old IE in dark mode */
+        background-color: #989898; /* dark mode color */
+    }
+    .dark .btn-success{
+        background-color: rgb(33, 59, 92);
+        color: #e0e0e0;
+    }
+    .dark .btn-primary{
+        background-color: rgb(70, 87, 115)
+    }
 
 
 body,

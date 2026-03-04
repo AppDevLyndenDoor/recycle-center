@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios';
-import { computed, onMounted, reactive } from 'vue';
+import { computed, onMounted, reactive, watch } from 'vue';
 import Handsontable from '@/components/Handsontable.vue';
 
 import SelectDates from '@/components/SelectDates.vue';
@@ -74,7 +74,11 @@ function getEntries(silence) {
         }) .then((response) => {
             if (response.data.length == 0) {
                 state.unitCache = JSON.parse(localStorage.getItem('database'));
-
+                if (!user.perms.admin && state.unitCache.length > 0) {
+                    state.unitCache = state.unitCache.filter(function(obj) {
+                        return obj.user == user.pseudonym;
+                    });
+                }
                 if (!silence) {
                     toasty({ mode: 'warning', message: 'No data for the selected date range',})
                 }
@@ -97,6 +101,13 @@ function toasty({ mode, request, response, message }) {
     toastySettings.message = message;
     toastySettings.visible = true;
 }
+watch( () => user.pseudonym, (newVal, oldVal) => {
+    if(newVal !== oldVal){
+        if(newVal !== 'Select User'){
+            getEntries(true);
+        }
+    }
+})
 
 onMounted( () => {
     if(range.date1 == '' || range.date2 == ''){
@@ -153,7 +164,7 @@ onMounted( () => {
         </div>
     <div class="row justify-content-center">
         <div class="col centered w-full">
-            <div id="handsonTable" style="overflow:auto;" class="no-print ">
+            <div id="handsonTable" style="overflow:auto;" class="no-print">
                 <p v-if="user.perms.admin" style="width:60%;margin:auto">To delete a row, right click a row and select "Remove Row."</p>
                 <handsontable :t-data="state.unitCache" :selector="'viewEntry'" :print="state.print" :download="state.download"
                               :save="state.clickedSave" @pendingEdits="(save) => state.pendingSave = save"></handsontable>
