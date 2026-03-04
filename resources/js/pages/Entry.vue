@@ -106,10 +106,10 @@ function keymonitor(event){
     }
 }
 function calcUnits(){
-    state.entryModel.width = parseFloat(state.entryModel.width) || 0;
-    state.entryModel.length = parseFloat(state.entryModel.length) || 0;
-    state.entryModel.height = parseFloat(state.entryModel.height) || 0;
-    state.entryModel.units = Math.round(state.entryModel.width * state.entryModel.length * state.entryModel.height / 1728 / 27 * 10000) / 10000;
+    const width = parseFloat(state.entryModel.width) || 0;
+    const length = parseFloat(state.entryModel.length) || 0;
+    const height = parseFloat(state.entryModel.height) || 0;
+    state.entryModel.units = Math.round(width * length * height / 1728 / 27 * 10000) / 10000;
 }
 
 
@@ -147,10 +147,11 @@ function productButton(product){
     state.entryModel.product = product.name;
     state.entryModel.uom = product.uom;
     state.mode = product.uom;
-    if(product.uom != 'bin'){
-        state.entryModel.bin = '';
-        state.entryModel.units = 0;
-    }
+    state.entryModel.length = 0;
+    state.entryModel.width = 0;
+    state.entryModel.height = 0;
+    state.entryModel.units = 0;
+    state.entryModel.bin = '';
 }
 function getRandomInt(max){
     return Math.floor(Math.random() * max)+1;
@@ -160,8 +161,22 @@ function enteryValidation(){
         return 'Please Select a User Name'
     }
 
-    if (!state.entryModel.units) {
-        return 'Quantity required'
+    if (state.entryModel.uom == 'each' && (!state.entryModel.units || state.entryModel.units <= 0 )) {
+        return 'Each must be greater than 0'
+    }
+    const length = state.entryModel.length;
+    const width = state.entryModel.width;
+    const height = state.entryModel.height;
+    if(state.entryModel.uom == 'yards') {
+        if ( (length <= 0)) {
+            return 'Length must be greater than 0'
+        }
+        else if (width <= 0){
+            return 'Width must be greater than 0'
+        }
+        else if (height <= 0){
+            return 'Height must be greater than 0'
+        }
     }
     return '';
 }
@@ -192,8 +207,9 @@ function SubmitEntry(){
         success: function ( )  {
             toasty({ mode: 'success', message: 'Entry Submitted' });
         },
-        error: function ()  {
-            toasty({ mode: 'warning', message: "couldn't upload"});
+        error: function (error)  {
+            const temp = error.response.data.error;
+            toasty({ mode: 'warning', message: temp});
         },
         complete: function ()  { },
     };

@@ -320,7 +320,7 @@ function saveUsers() {
         console.log(error);
     }
 }
-function getSortingProducts(){
+/*function getSortingProducts(){
     axios({
         method: 'GET',
         url: '/pickupSortingProduct',
@@ -338,7 +338,7 @@ function getSortingProducts(){
             toasty({ mode: 'error', response: error, request: error.request, message: error.message });
         }
     });
-}
+}*/
 function getPickupBins() {
     try {
 
@@ -411,7 +411,7 @@ function deleteImage(product, index){
                 "Authorization": "Bearer " + localStorage.getItem('token'),
             },
             data: image
-        }).then((response) => {
+        }).then(() => {
             product.imageList.splice(index, 1);
             toasty({ mode: 'success', message: 'successfully deleted image' });
         }, (error) => {
@@ -540,7 +540,8 @@ function uploadImage(product){
             state.selectedFiles = [];
             toasty({mode: 'success', message: 'successfully uploaded images'});
         }, (error) => {
-
+            console.error("Error uploading images:", error);
+            toasty({mode: 'error', message: 'failed to upload images'});
         });
     } catch (error) {
         console.error("Error uploading images:", error);
@@ -608,19 +609,35 @@ onMounted( () => {
                 </ProductButtons>
             </div>
         </div>
-        <div v-if="state.createItem.model === 'Product'" class="flex flex-wrap centered">
-            <div v-for="(company, index) in state.companies" :key="index">
+        <div v-if="state.createItem.model === 'Product'" >
+            <div class="flex flex-wrap centered">
+                <div v-for="(company, index) in state.companies" :key="index">
                 <ProductButtons :id="'editItemCompanies-'+index"  @clicked="clickedCompanyButton(company,state.createItem.model,index)" :active="state.createItem.active[index]">{{company}}
                 </ProductButtons>
+                </div>
             </div>
-
+            <div>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <label class="text-md px-4">Name:</label>
+                    <input :id="'editItemName'" v-model="state.createItem.edit.name" class="inputDetails  mx-2 px-1" placeholder="name">
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <label class="text-md px-4">UOM:</label>
+                    <select :id="'editItemUom'" v-model="state.createItem.edit.uom" class="inputDetails mx-2 px-1">
+                        <option value="each">Each</option>
+                        <option value="yards">Yards</option>
+                    </select>
+                </div>
+            </div>
         </div>
+        <div v-if="state.createItem.model !== 'Product'" class="flex flex-wrap centered">
             <div v-for="(value, index) in Object.keys(state.createItem.edit)" :key="index">
                 <div class="grid grid-cols-2 gap-4 mt-4">
                     <label class="text-md px-4">{{value}}:</label>
                     <input :id="'editItemInput-' + index" v-model="state.createItem.edit[value]" class="inputDetails  mx-2 px-1" :placeholder="value">
                 </div>
             </div>
+        </div>
         <hr>
         <div class="overflow-auto max-h-[calc(50vh-100px)]" v-if="state.createItem.model === 'Product'">
 
@@ -856,7 +873,7 @@ onMounted( () => {
 </template>
 
 <style scoped>
-input{
+input, select{
     font-size:28px;
     width: 64px;
     border-width:2px;

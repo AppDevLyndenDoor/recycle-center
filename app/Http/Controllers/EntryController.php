@@ -52,21 +52,25 @@ class EntryController extends Controller
     public function submitPickupUnit(Request $request)
     {
         $data = $request->all();
-
         $data['date'] = Carbon::createFromDate($data['date'])->format('Y-m-d');
         $timestamp = $data['picked_timestamp'];
         $data['picked_timestamp'] = intval(floor($timestamp / 1000));
         $exists = DB::table('pickup_unit')
             ->where('picked_timestamp', '=', $data['picked_timestamp'])
             ->where('idempotency', '=', $data['idempotency'])
-            ->get()->toArray();
-
-        if (count($exists) > 0) {
+            ->exists();
+        if ($exists) {
             return true;
         }
         $data['bin'] == null ? $data['bin'] = '' : $data['bin'];
         $data['comment'] == null ? $data['comment'] = '' : $data['comment'];
 
+        if($data['uom'] == 'each' && $data['units'] <= 0){
+            return response()->json(['error' => 'Each must be greater than 0'], 400);
+        }
+        else if($data['uom'] == 'Yards' && $data|| $data['length'] <= 0 || $data['width'] <= 0 || $data['height'] <= 0){
+            return response()->json(['error' => 'length/width/height must be greater than 0'], 400);
+        }
         DB::table('pickup_unit')->insert($data);
 
         return true;
