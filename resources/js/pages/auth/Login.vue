@@ -149,26 +149,10 @@ function anonUser() {
                             <p class="text-center text-xl mt-[6px]">Shared Account</p>
                         </div>
                     </GenericButton>
-                    <GenericButton id="anonAccount" class="mx-auto pt-1 h-12 w-full mt-2" @clicked="anonUser()">
-                        <div class="inline-flex mr-4 mb-1">
-                            <font-awesome-icon :icon="['fas', 'binoculars']" :class="[
-            'w-6',
-            'h-6',
-            'm-2',
-            'mr-4',
-            'top-0',
-            'text-xl',
-            'dark:text-zinc-200',
-            'text-zinc-200',
-        ]" />
-                            <p class="text-center text-xl mt-[6px]">View Only</p>
-                        </div>
-                    </GenericButton>
                     <div class="p-4 rounded-md dark:bg-slate-800 dark:text-white bg-slate-200 text-sm mt-2">
                         <p class="text-center">Microsoft account is for individual users.</p>
                         <p class="text-center">Shared Account is for users operating on behalf of a location (i.e
                             Building D, Building 11, etc.)</p>
-                        <p class="text-center">"View Only" doesn't allow editing.</p>
                     </div>
                 </div>
             </div>
