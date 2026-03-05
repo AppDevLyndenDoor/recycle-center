@@ -226,6 +226,10 @@ function tableSettings() {
                     const hot = instance.refs.hotTableComponent.hotInstance;
                     const selected = hot.getSelected()[0][0];
                     const rowData = hot.getSourceDataAtRow(selected);
+                    if(rowData['id'] == undefined || rowData['id'] == null) {
+                        toasty({ mode: 'warning', message: 'Cannot remove new row' });
+                        return;
+                    }
                     for (let i = 0; i < tableData.value.length - 1; i++) {
                         if (tableData.value[i]['id'] === rowData['id']) {
                             tableData.value.slice(i, i);

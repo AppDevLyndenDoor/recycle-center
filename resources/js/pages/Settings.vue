@@ -279,6 +279,16 @@ function saveUsers() {
         usersNames = usersNames.replace(/ {2,}/g, ' ');
         usersNames = usersNames.trim();
     }
+    const names = usersNames.split(',');
+    const map = new Map();
+    for(let i = 0; i < names.length; i++){
+        const name = names[i];
+        if(map.has(name)){
+            toasty({ mode: 'warning', message: 'Duplicate User Name: ' + name });
+            return;
+        }
+        map.set(name, true);
+    }
     axios({
         method: 'POST',
         url: '/saveUserNames',
@@ -585,15 +595,21 @@ function deleteProduct(product,index){
 
 }
 watch( () => user.userNameList, (newVal) => {
-    state.userNamesText = newVal;
-    state.userNamesText.splice('Select User,', 1);
-    state.userNamesText = state.userNamesText.join(',');
+    const tempNames = newVal;
+    const index = tempNames.indexOf('Select User');
+    if (index > -1) {
+        tempNames.splice(index, 1);
+    }
+    state.userNamesText = tempNames.join(',');
 })
 
 onMounted( () => {
-    state.userNamesText = user.userNameList;
-    state.userNamesText.splice('Select User,', 1);
-    state.userNamesText = state.userNamesText.join(',');
+    const tempNames = user.userNameList;
+    const index = tempNames.indexOf('Select User');
+    if (index > -1) {
+        tempNames.splice(index, 1);
+    }
+    state.userNamesText = tempNames.join(',');
     getPickupProduct();
     //getSortingProducts();
     getPickupBins();

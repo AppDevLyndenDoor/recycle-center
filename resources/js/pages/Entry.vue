@@ -512,25 +512,25 @@ onMounted(() => {
                                     <div class="grid grid-rows-3 col-span-1 ">
                                         <div class="grid-col-3 place-self-center justify-self-start ml-2">
                                             <input v-on:keyup="keymonitor" @blur="calcUnits()"
-                                                   onfocus="this.value=''" type="number" id="Length" v-model="state.entryModel.length" min="0"
-                                                   class="numberInput centered">
+                                                    type="number" id="Length" v-model="state.entryModel.length" min="0"
+                                                   class="centered">
                                         </div>
                                         <div class="grid-col-3  place-self-center justify-self-start ml-2">
                                             <input v-on:keyup="keymonitor" @blur="calcUnits()"
-                                                   onfocus="this.value=''" type="number" id="Width" v-model="state.entryModel.width" min="0"
-                                                   class="numberInput centered">
+                                                    type="number" id="Width" v-model="state.entryModel.width" min="0"
+                                                   class="centered">
                                         </div>
                                         <div class="grid-col-3  place-self-center justify-self-start ml-2">
                                             <input v-on:keyup="keymonitor" @blur="calcUnits()"
-                                                   onfocus="this.value=''" type="number" id="Height" v-model="state.entryModel.height" min="0"
-                                                   class="numberInput centered">
+                                                    type="number" id="Height" v-model="state.entryModel.height" min="0"
+                                                   class="centered">
                                         </div>
                                     </div>
                                 </div>
                                 <div id="TemplateUnits" v-show="(state.mode == 'each')">
                                     <div class="flex justify-content-center centered">
                                         <div class="col centered justify-content-center">
-                                            <input v-on:keyup="keymonitor"  onfocus="this.value=''" type="number" id="eachUnits" v-model="state.entryModel.units" min="0" class="centered">
+                                            <input v-on:keyup="keymonitor"   type="number" id="eachUnits" v-model="state.entryModel.units" min="0" class="centered">
                                         </div>
                                     </div>
                                 </div>

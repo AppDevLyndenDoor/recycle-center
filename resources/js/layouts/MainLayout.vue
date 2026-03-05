@@ -16,7 +16,7 @@ import { useToastyStore } from '@/store/useToastyStore.js';
 import { useUserStore } from '@/store/useUserStore';
 import toastyBox from '../components/functions/toasty.vue';
 
-document.documentElement.classList.toggle('dark', false);
+
 
 const user = useUserStore();
 const table = useTableStore();
@@ -26,7 +26,7 @@ const report = useReportStore();
 let cordovaMode = false;
 const sessionSettings = reactive({
     version: 0,
-    darkMode: false,
+    darkMode:  (localStorage.getItem('theme') === 'dark'),
     selectUser: false,
     offlinePosts: [],
     page: 'entries',
@@ -55,9 +55,8 @@ watch(() => offlineStore.offlinePosts.length, () => {
 function setHighContrast() {
     sessionSettings.darkMode = !sessionSettings.darkMode;
     document.documentElement.classList.toggle(
-        'dark',
-        sessionSettings.darkMode,
-    );
+        'dark');
+    localStorage.setItem('theme', sessionSettings.darkMode ? 'dark' : 'light');
 }
 function logout() {
     router.post('logout');
@@ -336,6 +335,7 @@ onMounted( () => {
             body.style.zoom = '67%';
         }
     }
+    document.documentElement.classList.toggle('dark', sessionSettings.darkMode );
     const instance = getCurrentInstance();
     let name = instance.attrs.auth.user.name;
     const page = usePage();
