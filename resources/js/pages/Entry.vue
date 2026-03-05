@@ -244,6 +244,7 @@ function getPickupProduct(){
                 product.disabled = ((companies.indexOf(state.entryModel.company) < 0 ) && product.company !== 'All')
                 product.imageList = [];
             }
+            getImageList();
             localStorage.setItem('database_products', JSON.stringify(response.data));
         }
     }, (error) => {
@@ -343,7 +344,7 @@ onMounted(() => {
     }
     getPickupProduct();
     getPickupBins();
-    getImageList();
+
 });
 
 </script>

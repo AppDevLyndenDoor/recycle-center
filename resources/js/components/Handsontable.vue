@@ -117,8 +117,16 @@ const tableEntriesSettings = {
                 pattern: '0.00',
             },
             allowInvalid: false,},
-        { data: 'width' },
-        { data: 'height'},
+        { data: 'width',type: 'numeric',
+            numericFormat: {
+                pattern: '0.00',
+            },
+            allowInvalid: false,},
+        { data: 'height',type: 'numeric',
+            numericFormat: {
+                pattern: '0.00',
+            },
+            allowInvalid: false,},
         { data: 'bin' },
         { data: 'date', 'renderer': 'customDateRendererGate',editor: 'date', dataType: 'date', dateFormat: 'MM/DD/YYYY' },
         { data: 'picked_timestamp'  ,editor: false },
@@ -470,12 +478,13 @@ onMounted(() => {
     --cell-selected-color: #222;
     --ctx-background: #e0e0e0;
     --ctx-background-hover: rgb(186, 198, 215);
-    --border-left: 1px solidrgb(146, 157, 172)  --scroll-track-dark: #111;
+    --border-left: 1px solidrgb(146, 157, 172);
+    --scroll-track-dark: #111;
     --scroll-thumb-dark: #575757;
     --scroll-thumb-hover-dark: #575757;
-    --scroll-track: #7b7fa4;
-    --scroll-thumb: rgb(96 165 250);
-    --scroll-thumb-hover: rgb(156, 201, 255);
+    --scroll-track: #111;
+    --scroll-thumb: #575757;
+    --scroll-thumb-hover: #8a8a8a;
 }
 
 .dark .data-sheet {

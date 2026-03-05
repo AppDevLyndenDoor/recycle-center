@@ -141,6 +141,7 @@ function saveEdit(product) {
         state.createProduct.company = product.companyArray.toString().trim();
         state.createProduct.name = product.edit.name.trim();
         state.createProduct.uom = product.edit.uom.trim();
+        state.createProduct.imageList = product.imageList;
         state.createProduct.id = product.id;
         axios({
             method: 'POST',
@@ -152,11 +153,11 @@ function saveEdit(product) {
         }).then((response) => {
             if(state.selectedFiles.length > 0){
                 uploadImage(product);
+                state.createProduct.imageList = product.imageList;
             }
             let message = 'Saved Edit: '
             if(response.data !== 'updated'){
                 state.createProduct.id = response.data;
-                state.createProduct.imageList = product.imageList;
                 state.productSpecModels.push({...state.createProduct});
                 message = 'Created : '
             }
@@ -560,25 +561,24 @@ function deleteProduct(product,index){
         url = '/deleteSortingProduct';
     }
     const id = product.id;
-
     axios({
         method: 'POST',
         url: url,
-        data: {id: id},
+        data: {id: id, product: product.edit.name},
         headers: {
             "Authorization": "Bearer " + localStorage.getItem('token'),
         }
     }).then(() => {
-        let temName = '';
+        let tempName = '';
         if(product.model === 'Product'){
             state.productSpecModels.splice(index, 1);
-            temName = product.edit.name;
+            tempName = product.edit.name;
         }
         else if(product.model === 'Bin') {
             state.binModels.splice(index, 1);
-            temName = product.edit.binNumber;
+            tempName = product.edit.binNumber;
         }
-        toasty({mode: 'success', message: 'successfully deleted: ' + temName});
+        toasty({mode: 'success', message: 'successfully deleted: ' + tempName});
     })
     state.showEditDialog = false;
     state.deleteProductDialog = false;
@@ -624,8 +624,8 @@ onMounted( () => {
                 <div class="grid grid-cols-2 gap-4 mt-4">
                     <label class="text-md px-4">UOM:</label>
                     <select :id="'editItemUom'" v-model="state.createItem.edit.uom" class="inputDetails mx-2 px-1">
-                        <option value="each">Each</option>
-                        <option value="yards">Yards</option>
+                        <option value="each" class="dark:text-black">Each</option>
+                        <option value="yards" class="dark:text-black">Yards</option>
                     </select>
                 </div>
             </div>

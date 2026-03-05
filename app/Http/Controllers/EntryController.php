@@ -62,8 +62,8 @@ class EntryController extends Controller
         if ($exists) {
             return true;
         }
-        $data['bin'] == null ? $data['bin'] = '' : $data['bin'];
-        $data['comment'] == null ? $data['comment'] = '' : $data['comment'];
+        ($data['bin'] == null) ? $data['bin'] = '' : $data['bin'];
+        ($data['comment'] == null) ? $data['comment'] = '' : $data['comment'];
         if($data['uom'] == 'each' && $data['units'] <= 0){
             return response()->json(['error' => 'Each must be greater than 0'], 400);
         }
@@ -155,12 +155,25 @@ class EntryController extends Controller
                     ->update([$changes[1] => $changes[3]]);
             }
         }
+        return true;
     }
 
     public function deleteProduct(Request $request)
     {
         $id = $request->input('id');
+        $product = $request->input('product');
+        $path = public_path('storage/img/h96/uploads/'.$product);
+        $files = glob($path.'/*');
         DB::table('pickup_product')->where('id', '=', $id)->delete();
+        DB::table('pickup_images')->where('product', '=', $product)->delete();
+        foreach($files as $file){
+            if(is_file($file)) {
+                unlink($file);
+            }
+        }
+        if (file_exists($path) && is_dir($path) && count(scandir($path)) == 2) {
+            rmdir($path);
+        }
     }
 
     public function getPickupBin()
@@ -205,16 +218,14 @@ class EntryController extends Controller
         ]);
         $response = [];
         if ($request->hasFile('images')) {
-
+            $product = $request->input('product');
             foreach ($request->file('images') as $image) {
                 // Store each image
-                $product = $request->input('product');
-
                 $imagePath = $image->store('img/h96/uploads/'.$product, 'public');
                 $name = basename($imagePath);
                 $id = DB::table('pickup_images')->insertGetId([
                     'product' => $request->input('product'),
-                    'imageName' => $name, // Save path in database
+                    'imageName' => $name,
                 ]);
                 $response[] = [$id,$name];
             }
