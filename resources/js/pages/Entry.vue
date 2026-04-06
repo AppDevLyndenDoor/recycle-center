@@ -418,7 +418,7 @@ onMounted(() => {
             </button>
         </div>
     </Dialog>
-    <Dialog v-if="state.showImage" :size="'lg'" :dialogVisible="state.showImage" :title="'Image'" class="fixed inset-0 z-50">
+    <Dialog v-if="state.showImage" :size="'lg'" :dialogVisible="state.showImage" :title="'Images'" class="fixed inset-0 z-50">
         <div class="col-span-9 col-start-5 overflow-auto max-h-[calc(100vh-400px)]">
             <div class="columns-2 gap-4"
                  style="grid-auto-flow: dense;">

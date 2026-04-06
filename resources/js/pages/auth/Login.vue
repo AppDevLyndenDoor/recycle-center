@@ -1,10 +1,9 @@
 <script setup lang="ts">
-
 import { PublicClientApplication } from '@azure/msal-browser';
 const instance = ref(getCurrentInstance());
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import {  Head,useForm, router } from '@inertiajs/vue3';
-import { ref, getCurrentInstance } from 'vue';
+import { Head, useForm, router } from '@inertiajs/vue3';
+import { ref, getCurrentInstance, onMounted } from 'vue';
 import Checkbox from '@/components/Checkbox.vue';
 import GenericButton from '@/components/GenericButton.vue';
 import InputError from '@/components/InputError.vue';
@@ -106,130 +105,204 @@ function anonUser() {
     form.password = 'test';
     submit();
 }
+async function logout() {
+    debugger;
+    const msalConfig = {
+        auth: {
+            clientId: clientId.value,
+            authority: authority.value,
+            redirectUri: 'https://recycle-center-test.lyndendoor.com/',
+            postLogoutRedirectUri: 'https://recycle-center-test.lyndendoor.com/logout',
+        },
+
+    };
+    const myMsal = new PublicClientApplication(msalConfig);
+    const currentAccount = myMsal.getActiveAccount();
+    if(currentAccount == null) {
+        return;
+    }
+    const logoutRequest = {
+        account: currentAccount,
+    };
+    await myMsal.logoutPopup(logoutRequest);
+}
+onMounted(() => {
+    if (clientId.value) {
+        logout();
+    }
+});
 </script>
 
 <template>
+    <Head title="Log in" />
 
-        <Head title="Log in" />
+    <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
+        {{ status }}
+    </div>
 
-        <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
-            {{ status }}
-        </div>
-
-        <div @submit.prevent="submit" class="text-black h-72">
-            <div v-if="serviceSelection == 0">
-                <div>
-                    <GenericButton id="microsoftButton" class="mx-auto pt-1 h-12 w-full mb-2" @clicked="login()">
-                        <div class="inline-flex mr-4 mb-1">
-                            <font-awesome-icon :icon="['fa-brands', 'microsoft']" :class="[
-            'w-6',
-            'h-6',
-            'm-2',
-            'mr-4',
-            'top-0',
-            'text-xl',
-            'dark:text-zinc-200',
-            'text-zinc-200',
-        ]" />
-                            <p class="text-center text-xl mt-[6px]">Microsoft Account</p>
-                        </div>
-                    </GenericButton>
-                    <GenericButton id="sharedAccount" class="mx-auto pt-1 h-12 w-full" @clicked="serviceSelection = 1">
-                        <div class="inline-flex mr-4 mb-1">
-                            <font-awesome-icon :icon="['fas', 'users']" :class="[
-            'w-6',
-            'h-6',
-            'm-2',
-            'mr-4',
-            'top-0',
-            'text-xl',
-            'dark:text-zinc-200',
-            'text-zinc-200',
-        ]" />
-                            <p class="text-center text-xl mt-[6px]">Shared Account</p>
-                        </div>
-                    </GenericButton>
-                    <div class="p-4 rounded-md dark:bg-slate-800 dark:text-white bg-slate-200 text-sm mt-2">
-                        <p class="text-center">Microsoft account is for individual users.</p>
-                        <p class="text-center">Shared Account is for users operating on behalf of a location (i.e
-                            Building D, Building 11, etc.)</p>
+    <div @submit.prevent="submit" class="h-72 text-black">
+        <div v-if="serviceSelection == 0">
+            <div>
+                <GenericButton
+                    id="microsoftButton"
+                    class="mx-auto mb-2 h-12 w-full pt-1"
+                    @clicked="login()"
+                >
+                    <div class="mr-4 mb-1 inline-flex">
+                        <font-awesome-icon
+                            :icon="['fa-brands', 'microsoft']"
+                            :class="[
+                                'w-6',
+                                'h-6',
+                                'm-2',
+                                'mr-4',
+                                'top-0',
+                                'text-xl',
+                                'dark:text-zinc-200',
+                                'text-zinc-200',
+                            ]"
+                        />
+                        <p class="mt-[6px] text-center text-xl">
+                            Microsoft Account
+                        </p>
                     </div>
+                </GenericButton>
+                <GenericButton
+                    id="sharedAccount"
+                    class="mx-auto h-12 w-full pt-1"
+                    @clicked="serviceSelection = 1"
+                >
+                    <div class="mr-4 mb-1 inline-flex">
+                        <font-awesome-icon
+                            :icon="['fas', 'users']"
+                            :class="[
+                                'w-6',
+                                'h-6',
+                                'm-2',
+                                'mr-4',
+                                'top-0',
+                                'text-xl',
+                                'dark:text-zinc-200',
+                                'text-zinc-200',
+                            ]"
+                        />
+                        <p class="mt-[6px] text-center text-xl">
+                            Shared Account
+                        </p>
+                    </div>
+                </GenericButton>
+                <div
+                    class="mt-2 rounded-md bg-slate-200 p-4 text-sm dark:bg-slate-800 dark:text-white"
+                >
+                    <p class="text-center">
+                        Microsoft account is for individual users.
+                    </p>
+                    <p class="text-center">
+                        Shared Account is for users operating on behalf of a
+                        location (i.e Building D, Building 11, etc.)
+                    </p>
                 </div>
             </div>
-            <div v-if="serviceSelection == 1">
-                <form>
-                    <div class="">
-                        <InputLabel for="email" value="Email"/>
-
-                        <TextInput id="email" type="text"
-                                   class="pl-2 mt-1 block w-full place-self-start dark:text-slate-100 dark:bg-slate-700 bg-slate-200"
-                                   v-model="form.email" required autofocus autocomplete="username" />
-
-                        <InputError class="mt-2" :message="form.errors.email" />
-                    </div>
-
-                    <div class="mt-4">
-                        <InputLabel for="password" value="Password" />
-
-                        <TextInput @input="keyChecker({event : $event})" id="password" type="password"
-                                   class="pl-2 mt-1 block w-full dark:text-slate-100 dark:bg-slate-700 bg-slate-200"
-                                   v-model="form.password" required autocomplete="current-password" />
-
-                        <InputError class="mt-2" :message="form.errors.password" />
-                    </div>
-
-                    <div class="inline-flex justify-between w-full mt-4">
-                        <label class="flex items-center">
-                            <Checkbox name="remember" v-model:checked="form.remember" />
-                            <span class="dark:text-slate-100 ml-2 text-sm text-gray-600">Remember me</span>
-                        </label>
-<!--                        <Link v-if="canResetPassword" :href="'password.request'"-->
-<!--                              class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:text-white">-->
-<!--                            Forgot your password?-->
-<!--                        </Link>-->
-                    </div>
-
-                    <div class="inline-flex w-full mt-4 mx-auto">
-                        <PrimaryButton id="Login" :class="[
-            'relative',
-            'top-8',
-            'left-[300px]',
-            'ml-4',
-            'dark:text-white',
-            'dark:hover:bg-slate-500',
-            'dark:bg-slate-700',
-            'rounded-lg',
-            'bg-blue-500',
-            'text-white',
-            'h-8',
-            'hover:bg-blue-600',
-            'active:bg-blue-600',
-            'focus:outline-none',
-            'focus:ring',
-            'focus:ring-blue-400',
-            { 'opacity-25': form.processing }
-        ]" :disabled="form.processing">
-                            Log in
-                        </PrimaryButton>
-                    </div>
-                </form>
-                <GenericButton :class="[
-            'dark:text-white',
-            'dark:hover:bg-slate-500',
-            'dark:bg-slate-700',
-            'rounded-lg',
-            'bg-blue-500',
-            'text-white',
-            'h-8',
-            'w-20',
-            'hover:bg-blue-600',
-            'active:bg-blue-600',
-            'focus:outline-none',
-            'focus:ring',
-            'focus:ring-blue-400',
-        ]" @clicked="serviceSelection = 0">
-                    <p class="text-center">Go back</p>
-                </GenericButton>
-            </div>
         </div>
+        <div v-if="serviceSelection == 1">
+            <form>
+                <div class="">
+                    <InputLabel for="email" value="Email" />
+
+                    <TextInput
+                        id="email"
+                        type="text"
+                        class="mt-1 block w-full place-self-start bg-slate-200 pl-2 dark:bg-slate-700 dark:text-slate-100"
+                        v-model="form.email"
+                        required
+                        autofocus
+                        autocomplete="username"
+                    />
+
+                    <InputError class="mt-2" :message="form.errors.email" />
+                </div>
+
+                <div class="mt-4">
+                    <InputLabel for="password" value="Password" />
+
+                    <TextInput
+                        @input="keyChecker({ event: $event })"
+                        id="password"
+                        type="password"
+                        class="mt-1 block w-full bg-slate-200 pl-2 dark:bg-slate-700 dark:text-slate-100"
+                        v-model="form.password"
+                        required
+                        autocomplete="current-password"
+                    />
+
+                    <InputError class="mt-2" :message="form.errors.password" />
+                </div>
+
+                <div class="mt-4 inline-flex w-full justify-between">
+                    <label class="flex items-center">
+                        <Checkbox
+                            name="remember"
+                            v-model:checked="form.remember"
+                        />
+                        <span
+                            class="ml-2 text-sm text-gray-600 dark:text-slate-100"
+                            >Remember me</span
+                        >
+                    </label>
+                    <!--                        <Link v-if="canResetPassword" :href="'password.request'"-->
+                    <!--                              class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:text-white">-->
+                    <!--                            Forgot your password?-->
+                    <!--                        </Link>-->
+                </div>
+
+                <div class="mx-auto mt-4 inline-flex w-full">
+                    <PrimaryButton
+                        id="Login"
+                        :class="[
+                            'relative',
+                            'top-8',
+                            'left-[300px]',
+                            'ml-4',
+                            'dark:text-white',
+                            'dark:hover:bg-slate-500',
+                            'dark:bg-slate-700',
+                            'rounded-lg',
+                            'bg-blue-500',
+                            'text-white',
+                            'h-8',
+                            'hover:bg-blue-600',
+                            'active:bg-blue-600',
+                            'focus:outline-none',
+                            'focus:ring',
+                            'focus:ring-blue-400',
+                            { 'opacity-25': form.processing },
+                        ]"
+                        :disabled="form.processing"
+                    >
+                        Log in
+                    </PrimaryButton>
+                </div>
+            </form>
+            <GenericButton
+                :class="[
+                    'dark:text-white',
+                    'dark:hover:bg-slate-500',
+                    'dark:bg-slate-700',
+                    'rounded-lg',
+                    'bg-blue-500',
+                    'text-white',
+                    'h-8',
+                    'w-20',
+                    'hover:bg-blue-600',
+                    'active:bg-blue-600',
+                    'focus:outline-none',
+                    'focus:ring',
+                    'focus:ring-blue-400',
+                ]"
+                @clicked="serviceSelection = 0"
+            >
+                <p class="text-center">Go back</p>
+            </GenericButton>
+        </div>
+    </div>
 </template>

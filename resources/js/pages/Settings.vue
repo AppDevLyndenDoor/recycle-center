@@ -595,7 +595,7 @@ function deleteProduct(product,index){
 
 }
 watch( () => user.userNameList, (newVal) => {
-    const tempNames = newVal;
+    const tempNames = [...newVal];
     const index = tempNames.indexOf('Select User');
     if (index > -1) {
         tempNames.splice(index, 1);
@@ -604,7 +604,7 @@ watch( () => user.userNameList, (newVal) => {
 })
 
 onMounted( () => {
-    const tempNames = user.userNameList;
+    const tempNames = [...user.userNameList];
     const index = tempNames.indexOf('Select User');
     if (index > -1) {
         tempNames.splice(index, 1);
