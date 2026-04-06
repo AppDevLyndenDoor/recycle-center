@@ -15,12 +15,13 @@ import GuestLayout from '@/layouts/settings/GuestLayout.vue';
 const serviceSelection = ref(0);
 const clientId = ref(import.meta.env.VITE_AZURE_AD_CLIENT_ID);
 const authority = ref(
-    import.meta.env.VITE_AZURE_AD_AUTHORITY
-    || ('https://login.microsoftonline.com/' + import.meta.env.VITE_AZURE_AD_TENANT_ID),
+    import.meta.env.VITE_AZURE_AD_AUTHORITY ||
+        'https://login.microsoftonline.com/' +
+            import.meta.env.VITE_AZURE_AD_TENANT_ID,
 );
 const redirectUri = ref(
-    import.meta.env.VITE_AZURE_AD_REDIRECT_URI
-    || `${window.location.origin}/api/auth/azure`,
+    import.meta.env.VITE_AZURE_AD_REDIRECT_URI ||
+        `${window.location.origin}/api/auth/azure`,
 );
 defineOptions({ layout: GuestLayout });
 
@@ -34,9 +35,11 @@ const form = useForm({
     password: '',
     remember: false,
 });
-const csrfToken = document
-    .querySelector('meta[name="csrf-token"]')
-    ?.getAttribute('content') ?? String(instance.value?.attrs?.csrf_token ?? '');
+const csrfToken =
+    document
+        .querySelector('meta[name="csrf-token"]')
+        ?.getAttribute('content') ??
+    String(instance.value?.attrs?.csrf_token ?? '');
 
 const submit = () => {
     form.post('/login', {
@@ -49,7 +52,7 @@ async function login() {
             clientId: clientId.value,
             authority: authority.value,
             redirectUri: redirectUri.value,
-            responseType: 'code'
+            responseType: 'code',
         },
         cache: {
             cacheLocation: 'localStorage',
@@ -63,8 +66,10 @@ async function login() {
     };
 
     try {
-        const accessTokenResponse = await msalInstance.acquireTokenPopup(loginRequest);
-        const token = accessTokenResponse.idToken || accessTokenResponse.accessToken;
+        const accessTokenResponse =
+            await msalInstance.acquireTokenPopup(loginRequest);
+        const token =
+            accessTokenResponse.idToken || accessTokenResponse.accessToken;
 
         if (!token) {
             throw new Error('Azure login did not return a token.');
@@ -74,20 +79,23 @@ async function login() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
+                Accept: 'application/json',
+                ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
             },
             body: JSON.stringify({ code: token }),
         });
 
         if (!response.ok) {
             const payload = await response.json().catch(() => null);
-            const details = payload?.message
-                || payload?.errors?.email?.[0]
-                || payload?.errors?.code?.[0]
-                || 'Unknown callback error';
+            const details =
+                payload?.message ||
+                payload?.errors?.email?.[0] ||
+                payload?.errors?.code?.[0] ||
+                'Unknown callback error';
 
-            throw new Error(`Azure callback failed with status ${response.status}: ${details}`);
+            throw new Error(
+                `Azure callback failed with status ${response.status}: ${details}`,
+            );
         }
 
         router.get('/dashboard');
@@ -105,31 +113,32 @@ function anonUser() {
     form.password = 'test';
     submit();
 }
-async function logout() {
-    debugger;
+/*async function logout() {
     const msalConfig = {
         auth: {
             clientId: clientId.value,
             authority: authority.value,
-            redirectUri: 'https://recycle-center-test.lyndendoor.com/',
-            postLogoutRedirectUri: 'https://recycle-center-test.lyndendoor.com/logout',
+            redirectUri: redirectUri.value,
+            postLogoutRedirectUri: `${window.location.origin}/logout`,
         },
+        cache: {
+            cacheLocation: 'localStorage',
+        },
+    };
 
-    };
-    const myMsal = new PublicClientApplication(msalConfig);
-    const currentAccount = myMsal.getActiveAccount();
-    if(currentAccount == null) {
-        return;
+    const msalInstance = new PublicClientApplication(msalConfig);
+
+    const account =
+        msalInstance.getActiveAccount() || msalInstance.getAllAccounts()[0];
+    if (account) {
+        await msalInstance.logoutRedirect({
+            account,
+            postLogoutRedirectUri: `${window.location.origin}/logout`,
+        });
     }
-    const logoutRequest = {
-        account: currentAccount,
-    };
-    await myMsal.logoutPopup(logoutRequest);
-}
+}*/
 onMounted(() => {
-    if (clientId.value) {
-        logout();
-    }
+    //logout();
 });
 </script>
 
