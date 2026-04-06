@@ -29,7 +29,7 @@ class LoginTest extends DuskTestCase
                 ->assertPathIs('/dashboard')
                 ->click('#logout')
                 ->waitFor('#sharedAccount', 2)
-                ->assertPathIs('/');
+                ->assertPathIs('/login');
         });
     }
 

@@ -22,6 +22,7 @@ const redirectUri = ref(
     import.meta.env.VITE_AZURE_AD_REDIRECT_URI
     || `${window.location.origin}/api/auth/azure`,
 );
+const logoutRedirectUri = ref(`${window.location.origin}/login`);
 defineOptions({ layout: GuestLayout });
 
 defineProps<{
@@ -106,13 +107,12 @@ function anonUser() {
     submit();
 }
 async function logout() {
-    debugger;
     const msalConfig = {
         auth: {
             clientId: clientId.value,
             authority: authority.value,
-            redirectUri: 'https://recycle-center-test.lyndendoor.com/',
-            postLogoutRedirectUri: 'https://recycle-center-test.lyndendoor.com/logout',
+            redirectUri: logoutRedirectUri.value,
+            postLogoutRedirectUri: logoutRedirectUri.value,
         },
 
     };

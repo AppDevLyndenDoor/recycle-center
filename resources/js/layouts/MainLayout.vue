@@ -59,7 +59,7 @@ function setHighContrast() {
     localStorage.setItem('theme', sessionSettings.darkMode ? 'dark' : 'light');
 }
 function logout() {
-    router.post('logout');
+    router.post('/logout');
 }
 watch(
     () => table.print,
