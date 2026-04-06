@@ -84,7 +84,7 @@ async function logout() {
                             clientId: clientId.value,
                             authority: authority.value,
                             redirectUri: redirectUri.value,
-                            postLogoutRedirectUri: `${window.location.origin}/logout`,
+                            postLogoutRedirectUri: `${window.location.origin}`,
                         },
                         cache: {
                             cacheLocation: 'localStorage',
@@ -98,15 +98,15 @@ async function logout() {
                     const account =
                         msalInstance.getActiveAccount() ||
                         msalInstance.getAllAccounts()[0];
-
+                    debugger;
                     if (account) {
                         msalInstance.setActiveAccount(null);
                         await msalInstance.logoutRedirect({
                             account,
-                            postLogoutRedirectUri: `${window.location.origin}/logout`,
+                            postLogoutRedirectUri: `${window.location.origin}`,
                         });
                     } else {
-                        window.location.href = `${window.location.origin}/logout`;
+                        window.location.href = `${window.location.origin}`;
                     }
                 },
             },
