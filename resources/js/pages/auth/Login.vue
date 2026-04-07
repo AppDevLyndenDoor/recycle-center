@@ -137,7 +137,7 @@ async function logout() {
             postLogoutRedirectUri: `${window.location.origin}/logout`,
         });
     }
-}*/
+}
 onMounted(() => {
     //logout();
 });
