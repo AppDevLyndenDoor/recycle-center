@@ -32,6 +32,7 @@ const redirectUri = ref(
     import.meta.env.VITE_AZURE_AD_REDIRECT_URI ||
         `${window.location.origin}/api/auth/azure`,
 );
+const logoutRedirectUri = ref(`${window.location.origin}/login`);
 const sessionSettings = reactive({
     version: 0,
     darkMode: localStorage.getItem('theme') === 'dark',
@@ -66,6 +67,25 @@ watch(
     },
 );
 
+async function getMsalInstance() {
+    const msalInstance = new PublicClientApplication({
+        auth: {
+            clientId: clientId.value,
+            authority: authority.value,
+            redirectUri: redirectUri.value,
+            postLogoutRedirectUri: logoutRedirectUri.value,
+        },
+        cache: {
+            cacheLocation: 'localStorage',
+        },
+    });
+
+    await msalInstance.initialize();
+    await msalInstance.handleRedirectPromise();
+
+    return msalInstance;
+}
+
 function setHighContrast() {
     sessionSettings.darkMode = !sessionSettings.darkMode;
     document.documentElement.classList.toggle('dark');
@@ -79,34 +99,19 @@ async function logout() {
             {
                 preserveScroll: true,
                 onFinish: async () => {
-                    const msalConfig = {
-                        auth: {
-                            clientId: clientId.value,
-                            authority: authority.value,
-                            redirectUri: redirectUri.value,
-                            postLogoutRedirectUri: `${window.location.origin}`,
-                        },
-                        cache: {
-                            cacheLocation: 'localStorage',
-                        },
-                    };
-
-                    const msalInstance = new PublicClientApplication(
-                        msalConfig,
-                    );
+                    const msalInstance = await getMsalInstance();
 
                     const account =
                         msalInstance.getActiveAccount() ||
                         msalInstance.getAllAccounts()[0];
-                    debugger;
                     if (account) {
                         msalInstance.setActiveAccount(null);
                         await msalInstance.logoutRedirect({
                             account,
-                            postLogoutRedirectUri: `${window.location.origin}`,
+                            postLogoutRedirectUri: logoutRedirectUri.value,
                         });
                     } else {
-                        window.location.href = `${window.location.origin}`;
+                        window.location.href = logoutRedirectUri.value;
                     }
                 },
             },

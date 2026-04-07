@@ -24,6 +24,7 @@ const redirectUri = ref(
         `${window.location.origin}/api/auth/azure`,
 );
 const logoutRedirectUri = ref(`${window.location.origin}/login`);
+const microsoftInteractionInProgress = ref(false);
 defineOptions({ layout: GuestLayout });
 
 defineProps<{
@@ -42,31 +43,43 @@ const csrfToken =
         ?.getAttribute('content') ??
     String(instance.value?.attrs?.csrf_token ?? '');
 
+async function getMsalInstance() {
+    const msalInstance = new PublicClientApplication({
+        auth: {
+            clientId: clientId.value,
+            authority: authority.value,
+            redirectUri: redirectUri.value,
+            postLogoutRedirectUri: logoutRedirectUri.value,
+        },
+        cache: {
+            cacheLocation: 'localStorage',
+        },
+    });
+
+    await msalInstance.initialize();
+    await msalInstance.handleRedirectPromise();
+
+    return msalInstance;
+}
+
 const submit = () => {
     form.post('/login', {
         onFinish: () => form.reset('password'),
     });
 };
 async function login() {
-    const msalConfig = {
-        auth: {
-            clientId: clientId.value,
-            authority: authority.value,
-            redirectUri: redirectUri.value,
-            responseType: 'code',
-        },
-        cache: {
-            cacheLocation: 'localStorage',
-        },
-    };
-
-    const msalInstance = new PublicClientApplication(msalConfig);
-
     const loginRequest = {
         scopes: ['openid', 'profile', 'email'],
     };
 
+    if (microsoftInteractionInProgress.value) {
+        return;
+    }
+
+    microsoftInteractionInProgress.value = true;
+
     try {
+        const msalInstance = await getMsalInstance();
         const accessTokenResponse =
             await msalInstance.acquireTokenPopup(loginRequest);
         const token =
@@ -102,6 +115,8 @@ async function login() {
         router.get('/dashboard');
     } catch (error) {
         console.error(error);
+    } finally {
+        microsoftInteractionInProgress.value = false;
     }
 }
 function keyChecker({ event }: { event: any }) {
@@ -115,19 +130,7 @@ function anonUser() {
     submit();
 }
 async function logout() {
-    const msalConfig = {
-        auth: {
-            clientId: clientId.value,
-            authority: authority.value,
-            redirectUri: logoutRedirectUri.value,
-            postLogoutRedirectUri: logoutRedirectUri.value,
-        },
-        cache: {
-            cacheLocation: 'localStorage',
-        },
-    };
-
-    const msalInstance = new PublicClientApplication(msalConfig);
+    const msalInstance = await getMsalInstance();
 
     const account =
         msalInstance.getActiveAccount() || msalInstance.getAllAccounts()[0];
@@ -138,8 +141,8 @@ async function logout() {
         });
     }
 }
-onMounted(() => {
-    //logout();
+onMounted(async () => {
+    await getMsalInstance();
 });
 </script>
 
