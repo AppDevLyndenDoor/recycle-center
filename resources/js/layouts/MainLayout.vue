@@ -4,7 +4,14 @@ import '../../css/style.css';
 import { PublicClientApplication } from '@azure/msal-browser';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
-import { onMounted, getCurrentInstance, reactive, watch, ref } from 'vue';
+import {
+    onMounted,
+    getCurrentInstance,
+    reactive,
+    watch,
+    ref,
+    onBeforeUnmount,
+} from 'vue';
 import Dialog from '@/components/Dialog.vue';
 import ProductButtons from '@/components/ProductButtons.vue';
 import { post_all } from '@/majax.js';
@@ -385,14 +392,26 @@ function toasty({ mode, request, response, message }) {
     toastySettings.visible = true;
 }
 const screenWidth = ref(window.innerWidth);
+const updateScreenWidth = () => {
+    screenWidth.value = window.innerWidth;
+    if (screenWidth.value <= 768) {
+        user.maxDialog = 'sm';
+    } else {
+        user.maxDialog = screenWidth.value >= 1024 ? 'xl' : 'md';
+    }
+};
 onMounted(() => {
     if (navigator.userAgent.toLowerCase().match('android')) {
+        window.addEventListener('resize', updateScreenWidth);
         if (screenWidth.value <= 768) {
             user.maxDialog = 'sm';
         } else {
-            user.maxDialog = screenWidth.value >= 1024 ? 'md' : 'sm';
+            user.maxDialog = screenWidth.value >= 1024 ? 'xl' : 'sm';
         }
     }
+    onBeforeUnmount(() =>
+        window.removeEventListener('resize', updateScreenWidth),
+    );
     /*    if (!navigator.userAgent.toLowerCase().match('android')) {
         cordovaMode = false;
     } else {

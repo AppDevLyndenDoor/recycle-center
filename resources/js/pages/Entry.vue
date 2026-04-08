@@ -16,9 +16,8 @@ const user = useUserStore();
 const toastySettings = useToastyStore();
 const offlineStore = useOfflineStore();
 let pressTimer = window.setTimeout(() => {}, 0);
-const screenWidth = ref(window.innerWidth);
-const textareaRows = computed(() => (screenWidth.value >= 1024 ? 10 : 4));
-const textareaCols = computed(() => (screenWidth.value >= 1024 ? 52 : 40));
+const textareaRows = computed(() => (user.maxDialog === 'xl' ? 10 : 4));
+const textareaCols = computed(() => (user.maxDialog === 'xl' ? 52 : 30));
 const state = reactive( {
     showBinDialog: false,
     showImage: false,
@@ -353,10 +352,10 @@ onMounted(() => {
 
 <template>
 
-    <Dialog v-if="state.showBinDialog" :size="(user.maxDialog === 'md' ?'md':'lg')" :dialogVisible="state.showBinDialog"
+    <Dialog v-if="state.showBinDialog" :size="'md'" :dialogVisible="state.showBinDialog"
             :title="'Bin'" class="fixed inset-0 z-50">
-        <div class="flex flex-wrap overflow-auto">
-            <div class="flex flex-wrap max-h-[calc(100vh-445px)] w-full overflow-auto mx-2 mb-24 lg:mb-2">
+        <div class="flex flex-wrap ">
+            <div class="flex flex-wrap max-h-[calc(75vh)] xl:max-h-[calc(100vh-250px)] 2xl:max-h-[calc(100vh-445px)] w-full overflow-auto mx-2 mb-24">
             <div v-for="(bin,index) in state.binModels[state.entryModel.company]" :key="bin.binNumber">
                 <ProductButtons :id="'binButtons-'+index" @clicked="pickBin(bin)">{{bin.binNumber}}</ProductButtons>
             </div>
@@ -379,10 +378,10 @@ onMounted(() => {
             </button>
         </div>
     </dialog>
-    <Dialog v-if="state.editComment" :size="'md'" :dialogVisible="state.editComment" :title="'Comment'" class="fixed inset-0 z-50 mx-2">
+    <Dialog v-if="state.editComment" :size="'md'" :dialogVisible="state.editComment" :title="'Comment'" class="fixed inset-0 z-50 ">
         <div class="flex flex-wrap centered">
             <textarea id="commentTextarea" :rows="textareaRows" :cols="textareaCols" v-model="state.newComment"
-                      class="border-black text-3xl border-2 ml-1 px-2 dark:text-black lg:text-lg"
+                      class="border-black text-3xl border-2 px-2 dark:text-black lg:text-lg mx-2"
                       autocapitalize="off"
                       autocomplete="off"
                       spellcheck="false"
@@ -420,8 +419,8 @@ onMounted(() => {
             </button>
         </div>
     </Dialog>
-    <Dialog v-if="state.showImage" :size="(user.maxDialog !== 'xl' ? user.maxDialog:'lg')" :dialogVisible="state.showImage" :title="'Images'" class="fixed inset-0 z-50">
-        <div class="col-span-9 col-start-5 overflow-auto max-h-[calc(100vh-400px)] mb-12">
+    <Dialog v-if="state.showImage" :size="(user.maxDialog !== 'xl' ? user.maxDialog:'md')" :dialogVisible="state.showImage" :title="'Images'" class="fixed inset-0 z-50">
+        <div class="col-span-9 col-start-5 overflow-auto max-h-[calc(60vh)] xl:max-h-[calc(100vh-200px)] 2xl:max-h-[calc(100vh-445px)] mb-12">
             <div class="columns-2 gap-4"
                  style="grid-auto-flow: dense;">
                 <div v-for="(item, index) in state.imageList" :key="index" class="flex flex-col items-center break-inside-avoid mb-4 mx-2">

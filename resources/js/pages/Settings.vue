@@ -660,7 +660,7 @@ onMounted( () => {
             <div class="flex flex-wrap centered ">
                 <p class="ml-2">Images:</p>
                 <div class="grid grid-cols-12 menuSpacer ">
-                    <div class="col-span-4 lg:col-span-3 ml-2">
+                    <div class="col-span-4 2xl:col-span-3 ml-2">
                         <form class="upload" @submit.prevent="" enctype="multipart/form-data">
                             <div class="drop centered"
                                 @dragover.prevent
@@ -687,8 +687,8 @@ onMounted( () => {
                             />
                         </form>
                     </div>
-                    <div class="col-span-9 col-start-5 ml-4 lg:ml-1">
-                        <div class="columns-2 gap-4"
+                    <div class=" col-start-6 col-span-8 2xl:col-span-9 2xl:col-start-5 ml-4 2xl:ml-1">
+                        <div class="columns-1 lg:columns-2 gap-4"
                              style="grid-auto-flow: dense;">
                             <div v-for="(item, index) in state.createItem.imageList" :key="index" class="flex flex-col items-center break-inside-avoid mb-4 mr-4">
                                 <img :src="item.src" alt=" " class="img-thumbnail my-2" />
