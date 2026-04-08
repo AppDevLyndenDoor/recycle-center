@@ -74,7 +74,7 @@ function getEntries(silence) {
         }) .then((response) => {
             if (response.data.length == 0) {
                 state.unitCache = JSON.parse(localStorage.getItem('database'));
-                if (!user.perms.admin && state.unitCache.length > 0) {
+                if (!user.perms.admin && state.unitCache) {
                     state.unitCache = state.unitCache.filter(function(obj) {
                         return obj.user == user.pseudonym;
                     });
@@ -141,9 +141,9 @@ onMounted( () => {
                 </div>
                 </select-dates>
 
-                <div class="grid grid-cols-3 justify-content-between">
-                    <div class="">
-                        <h2 id="titleReport">Recycle Center Report</h2>
+                <div class="grid grid-cols-3 lg:justify-content-between text-wrap">
+                    <div class="text-wrap">
+                        <h2 id="titleReport" class="">Recycle Center Report</h2>
                     </div>
 
                     <div class="col">

@@ -2,7 +2,7 @@
 import '../../css/app.css';
 import '../../css/style.css';
 import axios from 'axios';
-import { onMounted, reactive, watch } from 'vue';
+import { computed, inject, onMounted, reactive, ref, watch } from 'vue';
 import Dialog from '@/components/Dialog.vue';
 import ProductButtons from '@/components/ProductButtons.vue';
 import { post_to_server } from '@/majax.js';
@@ -11,12 +11,14 @@ import {useToastyStore} from '@/store/useToastyStore.js';
 import { useUserStore } from '@/store/useUserStore.js';
 
 
-defineProps(['offline'])
 defineEmits(['offlinePost']);
 const user = useUserStore();
 const toastySettings = useToastyStore();
 const offlineStore = useOfflineStore();
 let pressTimer = window.setTimeout(() => {}, 0);
+const screenWidth = ref(window.innerWidth);
+const textareaRows = computed(() => (screenWidth.value >= 1024 ? 10 : 4));
+const textareaCols = computed(() => (screenWidth.value >= 1024 ? 52 : 40));
 const state = reactive( {
     showBinDialog: false,
     showImage: false,
@@ -140,6 +142,7 @@ function clickedCompanyButtons(model, index) {
             const companies = product.company.split(',');
             product.disabled = ((companies.indexOf(state.entryModel.company) < 0 ) && product.company !== 'All')
         }
+        productButton(state.productSpecModels[0]);
     }
 }
 
@@ -335,12 +338,11 @@ function showImage(id){
 onMounted(() => {
     if(user.userName !== undefined) {
         state.entryModel.date = CurrentDate()
-    if (!user.perms.admin && user.perms.operator) {
-        state.entryModel.user = user.pseudonym;
-    } else {
-        state.entryModel.user = user.pseudonym;
-    }
-
+        if (!user.perms.admin && user.perms.operator) {
+            state.entryModel.user = user.pseudonym;
+        } else {
+            state.entryModel.user = user.pseudonym;
+        }
     }
     getPickupProduct();
     getPickupBins();
@@ -351,10 +353,10 @@ onMounted(() => {
 
 <template>
 
-    <Dialog v-if="state.showBinDialog" :size="'xl'" :dialogVisible="state.showBinDialog"
+    <Dialog v-if="state.showBinDialog" :size="(user.maxDialog === 'md' ?'md':'lg')" :dialogVisible="state.showBinDialog"
             :title="'Bin'" class="fixed inset-0 z-50">
         <div class="flex flex-wrap overflow-auto">
-            <div class="flex flex-wrap max-h-[calc(100vh-400px)] w-full overflow-auto mx-2">
+            <div class="flex flex-wrap max-h-[calc(100vh-445px)] w-full overflow-auto mx-2 mb-24 lg:mb-2">
             <div v-for="(bin,index) in state.binModels[state.entryModel.company]" :key="bin.binNumber">
                 <ProductButtons :id="'binButtons-'+index" @clicked="pickBin(bin)">{{bin.binNumber}}</ProductButtons>
             </div>
@@ -377,9 +379,9 @@ onMounted(() => {
             </button>
         </div>
     </dialog>
-    <Dialog v-if="state.editComment" :size="'md'" :dialogVisible="state.editComment" :title="'Comment'" class="fixed inset-0 z-50">
+    <Dialog v-if="state.editComment" :size="'md'" :dialogVisible="state.editComment" :title="'Comment'" class="fixed inset-0 z-50 mx-2">
         <div class="flex flex-wrap centered">
-            <textarea id="commentTextarea" rows="4" cols="52" v-model="state.newComment"
+            <textarea id="commentTextarea" :rows="textareaRows" :cols="textareaCols" v-model="state.newComment"
                       class="border-black text-3xl border-2 ml-1 px-2 dark:text-black lg:text-lg"
                       autocapitalize="off"
                       autocomplete="off"
@@ -418,11 +420,11 @@ onMounted(() => {
             </button>
         </div>
     </Dialog>
-    <Dialog v-if="state.showImage" :size="'lg'" :dialogVisible="state.showImage" :title="'Images'" class="fixed inset-0 z-50">
-        <div class="col-span-9 col-start-5 overflow-auto max-h-[calc(100vh-400px)]">
+    <Dialog v-if="state.showImage" :size="(user.maxDialog === 'md' ?'md':'lg')" :dialogVisible="state.showImage" :title="'Images'" class="fixed inset-0 z-50">
+        <div class="col-span-9 col-start-5 overflow-auto max-h-[calc(100vh-400px)] mb-12">
             <div class="columns-2 gap-4"
                  style="grid-auto-flow: dense;">
-                <div v-for="(item, index) in state.imageList" :key="index" class="flex flex-col items-center break-inside-avoid mb-4">
+                <div v-for="(item, index) in state.imageList" :key="index" class="flex flex-col items-center break-inside-avoid mb-4 mx-2">
                     <img :src="item.src" alt=" " class="img-thumbnail my-2" />
                 </div>
             </div>
@@ -650,7 +652,7 @@ onMounted(() => {
 
                             <div class="grid grid-cols-12 justify-content-between">
                                 <div class="col-span-8 centered">
-                                    <button id="submit" type="button" class="btn btn-primary submit centered lrgBtn"
+                                    <button id="submit" type="button" class="btn btn-primary submit centered"
                                             @click="SubmitEntry()">SUBMIT</button>
                                 </div>
 

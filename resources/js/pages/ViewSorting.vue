@@ -140,7 +140,7 @@ onMounted(() => {
     </div>
     <div class="justify-content-center">
         <div class="centered w-full">
-            <div id="handsonTable" style="overflow:auto;" class="no-print">
+            <div id="handsonTable" style="overflow:auto;" class="no-print w-full">
                 <handsontable :t-data="state.unitSortingCache" :selector="'viewSorting'" :print="state.print" :download="state.download" :save="state.clickedSave"
                 @pendingEdits="(save) => state.pendingSave = save"></handsontable>
             </div>

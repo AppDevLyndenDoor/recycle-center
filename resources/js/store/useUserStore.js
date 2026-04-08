@@ -11,5 +11,6 @@ export const useUserStore
     });
     const loggedIn = ref(false);
     const userNameList = ref([]);
-    return ({ userName, pseudonym, perms, loggedIn, userNameList})
+    const maxDialog = ref('xl');
+    return ({ userName, pseudonym, perms, loggedIn, userNameList, maxDialog})
 })

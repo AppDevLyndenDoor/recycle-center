@@ -40,7 +40,6 @@ h2 {
     font-weight: bold;
     text-align: center;
     margin: auto;
-    width: 50%;
     margin-bottom:10px;
 }
 
@@ -99,9 +98,17 @@ label {
 
 .submit {
     margin: 25px;
-    width: 600px;
+    width: 400px;
     height: 90px;
     font-size:50px !important;
+}
+@media (min-width: 1024px) {
+    .submit {
+        margin: 25px;
+        width: 600px;
+        height: 90px;
+        font-size:50px !important;
+    }
 }
 
 .toast-message{
@@ -309,10 +316,19 @@ caption {
     margin: 10px;
 }
 .settingsBin {
-    font-size: 18px;
-    width: 96px;
-    height: 40px;;
-    margin: 5px;
+    font-size: 30px;
+    width: 128px;
+    height: 64px;
+    margin: 10px;
+}
+@media (min-width: 1024px) {
+
+    .settingsBin {
+        font-size: 18px;
+        width: 96px;
+        height: 40px;;
+        margin: 5px;
+    }
 }
 
 span{
@@ -376,18 +392,17 @@ td{
     background-image:-moz-linear-gradient(to top, #373a3d, #313437);
     background-image:linear-gradient(to top, #373a3d, #313437);
 
-    width:316px;
+    width:250px;
     padding:30px;
     border-radius:3px;
 
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
-
 .drop{
     background-color: #2E3134;
-    padding: 40px 50px;
+    padding: 30px 40px;
     margin-bottom: 30px;
-    border: 20px solid rgba(0, 0, 0, 0);
+    border: 10px solid rgba(0, 0, 0, 0);
     border-radius: 3px;
     border-image: url('img/border-image.png') 25 repeat;
     text-align: center;
@@ -455,6 +470,37 @@ td{
     position: absolute;
     top: 20px;
     left: 20px;
+}
+@media (min-width: 1024px) {
+    .upload{
+        font-family:'PT Sans Narrow', sans-serif;
+        background-color:#373a3d;
+
+        background-image:-webkit-linear-gradient( to top, #373a3d, #313437);
+        background-image:-moz-linear-gradient(to top, #373a3d, #313437);
+        background-image:linear-gradient(to top, #373a3d, #313437);
+
+        width:316px;
+        padding:30px;
+        border-radius:3px;
+
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .drop{
+        background-color: #2E3134;
+        padding: 40px 50px;
+        margin-bottom: 30px;
+        border: 20px solid rgba(0, 0, 0, 0);
+        border-radius: 3px;
+        border-image: url('img/border-image.png') 25 repeat;
+        text-align: center;
+        text-transform: uppercase;
+
+        font-size:16px;
+        font-weight:bold;
+        color:#7f858a;
+    }
+
 }
 
 .imageDelete{

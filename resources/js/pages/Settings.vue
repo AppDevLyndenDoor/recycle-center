@@ -510,7 +510,7 @@ function save(item){
 }
 
 function handleDrop(e) {
-    const files = Array.from(e.target.files);
+    const files = Array.from(e.dataTransfer.files);
     state.selectedFiles.push(...files);
 }
 function handleFileSelection(e) {
@@ -617,7 +617,7 @@ onMounted( () => {
 </script>
 
 <template>
-    <Dialog id="editItem" v-if="state.showEditDialog" :size="'xl'" :dialogVisible="state.showEditDialog"
+    <Dialog id="editItem" v-if="state.showEditDialog" :size="(user.maxDialog === 'md' ?'md':'xl')" :dialogVisible="state.showEditDialog"
             :title="state.createItem.model" class="fixed inset-0 z-50">
         <div v-if="state.createItem.model === 'Bin'" class="flex flex-wrap centered">
             <div v-for="(company, index) in state.companies" :key="index">
@@ -655,18 +655,18 @@ onMounted( () => {
             </div>
         </div>
         <hr>
-        <div class="overflow-auto max-h-[calc(50vh-100px)]" v-if="state.createItem.model === 'Product'">
+        <div class="overflow-auto max-h-[calc(50vh-100px)] mb-20" v-if="state.createItem.model === 'Product'">
 
-            <div class="flex flex-wrap centered mb-24">
+            <div class="flex flex-wrap centered ">
                 <p class="ml-2">Images:</p>
                 <div class="grid grid-cols-12 menuSpacer ">
-                    <div class="col-span-3 ml-2">
+                    <div class="col-span-4 lg:col-span-3 ml-2">
                         <form class="upload" @submit.prevent="" enctype="multipart/form-data">
-                            <div class="drop"
+                            <div class="drop centered"
                                 @dragover.prevent
                                 @drop.prevent="handleDrop( $event,state.createItem)">
                                 Drop Here
-                                <a @click="triggerFileBrowse">Browse</a>
+                                <a @click="triggerFileBrowse" class="centered">Browse</a>
                                 <input ref="fileInput"
                                     type="file"
                                     name="upl"
@@ -687,10 +687,10 @@ onMounted( () => {
                             />
                         </form>
                     </div>
-                    <div class="col-span-9 col-start-5">
+                    <div class="col-span-9 col-start-5 ml-4 lg:ml-1">
                         <div class="columns-2 gap-4"
                              style="grid-auto-flow: dense;">
-                            <div v-for="(item, index) in state.createItem.imageList" :key="index" class="flex flex-col items-center break-inside-avoid mb-4">
+                            <div v-for="(item, index) in state.createItem.imageList" :key="index" class="flex flex-col items-center break-inside-avoid mb-4 mr-4">
                                 <img :src="item.src" alt=" " class="img-thumbnail my-2" />
                                 <button type="button" class="btn bg-red-800 mx-4 mb-4" @click="state.deleteImageDialog = true; state.delImage = index">
                                     Delete
@@ -746,7 +746,7 @@ onMounted( () => {
             </button>
         </div>
     </dialog>
-    <Dialog v-if="state.deleteProductDialog" :size="'sm'" :dialogVisible="state.deleteProductDialog" :title="'Delete Product'"
+    <Dialog v-if="state.deleteProductDialog" :size="'xs'" :dialogVisible="state.deleteProductDialog" :title="'Delete Product'"
             class="fixed inset-0 z-50">
         <p class="text-xl text-zinc-700 mt-1 ml-3 mr-4 dark:text-gray-200 whitespace-nowrap text-center">Are you
             sure you want to delete this product?</p>
@@ -759,10 +759,10 @@ onMounted( () => {
                     'w-32',
                     'inline-flex',
                     'm-4',
-                    'my-[2px]',
-                    'py-[3px]',
+                    'my-0.5',
+                    'py-0.75',
                 ]" @click="state.deleteProductDialog = false">
-                <p class="text-md text-center w-full relative top-[2px] whitespace-nowrap">Cancel</p>
+                <p class="text-md text-center w-full relative centered whitespace-nowrap">Cancel</p>
             </GenericButton>
             <GenericButton :class="[
                     'absolute',
@@ -772,14 +772,14 @@ onMounted( () => {
                     'inline-flex',
                     'w-32',
                     'm-4',
-                    'my-[2px]',
-                    'py-[3px]',
+                    'my-0.5',
+                    'py-0.75',
                 ]" @click="deleteProduct(state.createItem, state.editIndex)">
-                <p class="text-md text-center w-full relative top-[2px] whitespace-nowrap">Delete</p>
+                <p class="text-md text-center w-full relative centered whitespace-nowrap">Delete</p>
             </GenericButton>
         </div>
     </Dialog>
-    <Dialog v-if="state.deleteImageDialog" :size="'sm'" :dialogVisible="state.deleteImageDialog" :title="'Delete Image'"
+    <Dialog v-if="state.deleteImageDialog" :size="'xs'" :dialogVisible="state.deleteImageDialog" :title="'Delete Image'"
             class="fixed inset-0 z-50">
         <p class="text-xl text-zinc-700 mt-1 ml-3 mr-4 dark:text-gray-200 whitespace-nowrap text-center">Are you
             sure you want to delete this Image?</p>
@@ -792,10 +792,11 @@ onMounted( () => {
                     'w-32',
                     'inline-flex',
                     'm-4',
-                    'my-[2px]',
-                    'py-[3px]',
+                    'my-0.5',
+                    'py-0.75',
+
                 ]" @click="state.deleteImageDialog = false">
-                <p class="text-md text-center w-full relative top-[2px] whitespace-nowrap">Cancel</p>
+                <p class="text-md text-center w-full relative centered whitespace-nowrap">Cancel</p>
             </GenericButton>
             <GenericButton :class="[
                     'absolute',
@@ -805,10 +806,11 @@ onMounted( () => {
                     'inline-flex',
                     'w-32',
                     'm-4',
-                    'my-[2px]',
-                    'py-[3px]',
+                    'my-0.5',
+                    'py-0.75',
+                    'centered'
                 ]" @click="deleteImage(state.createItem,state.delImage)">
-                <p class="text-md text-center w-full relative top-[2px] whitespace-nowrap">Delete</p>
+                <p class="text-md text-center w-full relative centered  whitespace-nowrap">Delete</p>
             </GenericButton>
         </div>
     </Dialog>

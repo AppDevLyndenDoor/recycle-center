@@ -385,10 +385,13 @@ function toasty({ mode, request, response, message }) {
     toastySettings.visible = true;
 }
 onMounted(() => {
-    if (!navigator.userAgent.toLowerCase().match('android')) {
+    if (navigator.userAgent.toLowerCase().match('android')) {
+        user.maxDialog = 'md';
+    }
+    /*    if (!navigator.userAgent.toLowerCase().match('android')) {
         cordovaMode = false;
     } else {
-        /* istanbul ignore start */
+        /!* istanbul ignore start *!/
         const script = document.createElement('script');
         script.src = 'cordova.js';
         document.head.appendChild(script);
@@ -404,7 +407,7 @@ onMounted(() => {
             body.style.height = `${physicalScreenHeight}px`;
             body.style.zoom = '67%';
         }
-    }
+    }*/
     document.documentElement.classList.toggle('dark', sessionSettings.darkMode);
     const instance = getCurrentInstance();
     let name = instance.attrs.auth.user.name;
@@ -441,7 +444,9 @@ onMounted(() => {
             content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=0.5, maximum-scale=4.0"
         />
     </Head>
-    <body class="bg-white text-black dark:bg-gray-800 dark:text-white">
+    <body
+        class="h-full min-h-screen bg-white text-black dark:bg-gray-800 dark:text-white"
+    >
         <div
             id="mainLayout"
             class="h-full min-h-screen bg-white text-black dark:bg-gray-800 dark:text-white"
@@ -543,7 +548,7 @@ onMounted(() => {
                     <div
                         class="justify-content-between no-print grid grid-cols-12"
                     >
-                        <div class="col-span-6 mb-1">
+                        <div class="col-span-7 mb-1 lg:col-span-6">
                             <h1 id="title" class="mt-2 ml-2 text-4xl">
                                 Recycle Center Tracker
                                 <span style="font-size: 12px">
@@ -663,7 +668,7 @@ onMounted(() => {
                                 </Link>
                             </div>
                             <div
-                                class="centered col-span-1 col-start-10"
+                                class="centered col-span-2 col-start-9 lg:col-span-1 lg:col-start-10"
                                 v-show="user.perms.operator"
                             >
                                 <button
