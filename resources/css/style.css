@@ -95,12 +95,19 @@ label {
     margin:auto;
     font-size: 20px;
 }
-
 .submit {
     margin: 25px;
-    width: 400px;
+    width: 300px;
     height: 90px;
-    font-size:50px !important;
+    font-size: 50px !important;
+}
+@media (min-width: 725px) {
+    .submit {
+        margin: 25px;
+        width: 400px;
+        height: 90px;
+        font-size: 50px !important;
+    }
 }
 @media (min-width: 1024px) {
     .submit {

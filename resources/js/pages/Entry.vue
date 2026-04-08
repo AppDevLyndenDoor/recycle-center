@@ -2,7 +2,7 @@
 import '../../css/app.css';
 import '../../css/style.css';
 import axios from 'axios';
-import { computed, inject, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import Dialog from '@/components/Dialog.vue';
 import ProductButtons from '@/components/ProductButtons.vue';
 import { post_to_server } from '@/majax.js';
@@ -420,7 +420,7 @@ onMounted(() => {
             </button>
         </div>
     </Dialog>
-    <Dialog v-if="state.showImage" :size="(user.maxDialog === 'md' ?'md':'lg')" :dialogVisible="state.showImage" :title="'Images'" class="fixed inset-0 z-50">
+    <Dialog v-if="state.showImage" :size="(user.maxDialog !== 'xl' ? user.maxDialog:'lg')" :dialogVisible="state.showImage" :title="'Images'" class="fixed inset-0 z-50">
         <div class="col-span-9 col-start-5 overflow-auto max-h-[calc(100vh-400px)] mb-12">
             <div class="columns-2 gap-4"
                  style="grid-auto-flow: dense;">
@@ -573,7 +573,7 @@ onMounted(() => {
                             </div>
 
                             <div class="justify-content-center appendDestinationButtons">
-                                <div class="flex centered">
+                                <div class="flex flex-wrap  centered">
                                     <div v-for="(destination, index) in state.destinations" :key="index">
                                         <ProductButtons :id="'destinationButtons-'+index" :index="index" :active="destination === state.entryModel.destination"
                                         @clicked="destinationClicked(destination)">{{destination}}</ProductButtons>
@@ -583,19 +583,19 @@ onMounted(() => {
 
                             <hr>
 
-                            <div class="grid grid-cols-9 justify-content-between ml-2 centered">
-                                <div class="col-span-3 grid grid-cols-subgrid details">
-                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
-                                    <label class="">Date</label>
-                                    <input  type="text" id="DateEntryPage" class="inputDetails date pl-2" maxlength="60"  v-model="state.entryModel.date"
+                            <div class="grid grid-cols-6 justify-content-between ml-2 md:grid-cols-9">
+                                <div class="col-span-3 grid grid-cols-subgrid details justify-content-between">
+                                    <div class="grid col-span-3 md:col-span-2 grid-cols-1 xl:grid-cols-2 ">
+                                    <label class="centered">Date</label>
+                                    <input  type="text" id="DateEntryPage" class="inputDetails date pl-2 ml-8 xl:ml-0" maxlength="60"  v-model="state.entryModel.date"
                                             min="1970-01-01" disabled>
                                     </div>
                                 </div>
 
                                 <div class="col-span-3 grid grid-cols-subgrid details ">
-                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
-                                    <label>Company</label>
-                                    <input disabled  type="text" id="Company" class="inputDetails pl-2" maxlength="60" v-model="state.entryModel.company"
+                                    <div class="grid col-span-3 md:col-span-2 grid-cols-1 xl:grid-cols-2">
+                                    <label class="centered">Company</label>
+                                    <input disabled  type="text" id="Company" class="inputDetails pl-2 ml-8 xl:ml-0" maxlength="60" v-model="state.entryModel.company"
                                            autocapitalize="off"
                                            autocomplete="off"
                                            spellcheck="false"
@@ -603,30 +603,30 @@ onMounted(() => {
                                     </div>
                                 </div>
                                 <div class="col-span-3 grid grid-cols-subgrid details ">
-                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
-                                    <label>Product</label>
-                                    <input disabled type="text" id="Product" class="inputDetails pl-2" maxlength="60"  v-model="state.entryModel.product"
+                                    <div class="grid col-span-3 md:col-span-2 grid-cols-1 xl:grid-cols-2">
+                                    <label class="centered">Product</label>
+                                    <input disabled type="text" id="Product" class="inputDetails pl-2 ml-8 xl:ml-0" maxlength="60"  v-model="state.entryModel.product"
                                            autocapitalize="off"
                                            autocomplete="off"
                                            spellcheck="false"
                                            autocorrect="off">
                                     </div>
                                 </div>
-                            </div>
+<!--                            </div>
 
-                            <div class="grid grid-cols-9 justify-content-between ml-2 centered">
+                            <div class="grid grid-cols-9 justify-content-between ml-2 centered">-->
                                 <div class="col-span-3 grid grid-cols-subgrid details">
-                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
-                                    <label v-show="(state.mode == 'yards' || state.mode == 'bin')">Yards</label>
-                                    <label v-show="(state.mode == 'each')">Each</label>
-                                    <input disabled onfocus="this.value=''" type="number" id="Quantity" class="inputDetails pl-2" maxlength="100"
+                                    <div class="grid col-span-3 md:col-span-2 grid-cols-1 xl:grid-cols-2">
+                                    <label v-show="(state.mode == 'yards' || state.mode == 'bin')" class="centered">Yards</label>
+                                    <label v-show="(state.mode == 'each')" class="centered">Each</label>
+                                    <input disabled onfocus="this.value=''" type="number" id="Quantity" class="inputDetails pl-2 ml-8 xl:ml-0" maxlength="100"
                                            v-model="state.entryModel.units">
                                     </div>
                                 </div>
                                 <div class="col-span-3 grid grid-cols-subgrid details ">
-                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
-                                    <label >Destination</label>
-                                    <input  type="text" id="Destination" class="inputDetails pl-2" maxlength="60"
+                                    <div class="grid col-span-3 md:col-span-2 grid-cols-1 xl:grid-cols-2">
+                                    <label class="centered">Destination</label>
+                                    <input  type="text" id="Destination" class="inputDetails pl-2 ml-8 xl:ml-0" maxlength="60"
                                             v-model="state.entryModel.destination"
                                             autocapitalize="off"
                                             autocomplete="off"
@@ -635,9 +635,9 @@ onMounted(() => {
                                     </div>
                                 </div>
                                 <div class="col-span-3 grid grid-cols-subgrid details">
-                                    <div class="grid col-span-2 grid-cols-1 xl:grid-cols-2">
-                                    <label class="">Bin#</label>
-                                    <input  type="text" id="Bin" class="inputDetails pl-2 " maxlength="10"
+                                    <div class="grid col-span-3 md:col-span-2 grid-cols-1 xl:grid-cols-2">
+                                    <label class="centered">Bin#</label>
+                                    <input  type="text" id="Bin" class="inputDetails pl-2 ml-8 xl:ml-0" maxlength="10"
                                             v-model="state.entryModel.bin"
                                             autocapitalize="off"
                                             autocomplete="off"
@@ -651,13 +651,13 @@ onMounted(() => {
                             </div>
 
                             <div class="grid grid-cols-12 justify-content-between">
-                                <div class="col-span-8 centered">
+                                <div class="col-span-7 md:col-span-8 centered">
                                     <button id="submit" type="button" class="btn btn-primary submit centered"
                                             @click="SubmitEntry()">SUBMIT</button>
                                 </div>
 
-                                <div class="col-span-4">
-                                    <button id="commentButton" class="comments btn btn-primary ml-2 " @click="state.editComment = true">Comment:</button>
+                                <div class="col-span-4 md:col-span-4">
+                                    <button id="commentButton" class="comments btn btn-primary md:ml-2 " @click="state.editComment = true">Comment:</button>
                                 </div>
                             </div>
                         </div>

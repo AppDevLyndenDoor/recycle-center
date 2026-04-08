@@ -384,9 +384,14 @@ function toasty({ mode, request, response, message }) {
     toastySettings.message = message;
     toastySettings.visible = true;
 }
+const screenWidth = ref(window.innerWidth);
 onMounted(() => {
     if (navigator.userAgent.toLowerCase().match('android')) {
-        user.maxDialog = 'md';
+        if (screenWidth.value <= 768) {
+            user.maxDialog = 'sm';
+        } else {
+            user.maxDialog = screenWidth.value >= 1024 ? 'md' : 'sm';
+        }
     }
     /*    if (!navigator.userAgent.toLowerCase().match('android')) {
         cordovaMode = false;
