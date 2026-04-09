@@ -302,7 +302,7 @@ function getImageList(){
             while(i < tempList.length ){
                 const image = tempList[i];
                 if(product.name === image.product){
-                    image.src = 'storage/img/h96/uploads/' + image.product + '/' + image.imageName;
+                    image.src = '/storage/img/h96/uploads/' + image.product + '/' + image.imageName;
                     product.imageList.push(image);
                     tempList.splice(i, 1);
                     if (tempList.length === 0)  return;
