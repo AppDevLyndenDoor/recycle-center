@@ -42,11 +42,13 @@ Route::post('/pickupUnit', [EntryController::class, 'submitPickupUnit'])->middle
 Route::get('/pickupUnitRange', [EntryController::class, 'getPickupUnitRange'])->middleware(['auth', 'verified'])->name('PickupUnitRange');
 Route::Post('/saveProduct', [EntryController::class, 'saveProduct'])->middleware(['role:admin'])->name('saveProduct');
 Route::get('/pickupProduct', [EntryController::class, 'getPickupProduct'])->middleware(['auth', 'verified'])->name('pickupProduct');
-Route::Post('/saveEntriesEdits', [EntryController::class, 'saveEntriesEdits'])->middleware(['role:admin'])->name('saveEntriesEdits');
+Route::Post('/saveEntriesEdits', [EntryController::class, 'saveEntriesEdits'])->middleware(['auth', 'verified'])->name('saveEntriesEdits');
 Route::Post('/imageUploads', [EntryController::class, 'uploadImages'])->middleware(['role:admin'])->name('uploadImages');
 Route::get('/imageUploads', [EntryController::class, 'getImages'])->middleware(['auth', 'verified'])->name('getImages');
 Route::post('/deleteProduct', [EntryController::class, 'deleteProduct'])->middleware(['role:admin'])->name('deleteProduct');
 Route::post('/deleteImage', [EntryController::class, 'deleteImages'])->middleware(['role:admin'])->name('deleteImages');
+Route::get('/getDefaults', [EntryController::class, 'getDefaults'])->middleware(['auth', 'verified'])->name('getDefaults');
+Route::post('/saveDefaults', [EntryController::class, 'saveDefaults'])->middleware(['auth', 'verified'])->name('saveDefaults');
 
 Route::get('/pickupBin', [EntryController::class, 'getPickupBin'])->middleware(['auth', 'verified'])->name('pickupBin');
 Route::post('/saveBin', [EntryController::class, 'saveBin'])->middleware(['role:admin'])->name('saveBin');

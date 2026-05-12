@@ -23,6 +23,8 @@ const state = reactive( {
     showImage: false,
     editComment: false,
     newComment: '',
+    defaults: {},
+    setDefaults: false,
     // Entry data structure as it is reflected in the database
     entryModel: {
         user: 'test user',
@@ -146,14 +148,27 @@ function clickedCompanyButtons(model, index) {
 }
 
 function productButton(product){
+
+    const company = state.entryModel.company;
     state.entryModel.product = product.name;
     state.entryModel.uom = product.uom;
     state.mode = product.uom;
-    state.entryModel.length = 0;
-    state.entryModel.width = 0;
-    state.entryModel.height = 0;
     state.entryModel.units = 0;
     state.entryModel.bin = '';
+    if(product.defaults){
+        state.entryModel.length = product.defaults[company]?.length || 0;
+        state.entryModel.width = product.defaults[company]?.width || 0;
+        state.entryModel.height = product.defaults[company]?.height || 0;
+        state.entryModel.destination = product.defaults[company]?.destination || '';
+        state.destination = product.defaults[company]?.destination || state.destination;
+    }
+else{
+        state.entryModel.length = 0;
+        state.entryModel.width = 0;
+        state.entryModel.height = 0;
+        state.entryModel.units = 0;
+    }
+
 }
 function getRandomInt(max){
     return Math.floor(Math.random() * max)+1;
@@ -246,6 +261,7 @@ function getPickupProduct(){
                 product.disabled = ((companies.indexOf(state.entryModel.company) < 0 ) && product.company !== 'All')
                 product.imageList = [];
             }
+            getDefaults();
             getImageList();
             localStorage.setItem('database_products', JSON.stringify(response.data));
         }
@@ -276,13 +292,84 @@ function getPickupBins(){
         }
     });
 }
+function getDefaults(){
+    if(user.pseudonym == 'Select User' || user.pseudonym == undefined){
+        return;
+    }
+    const url = '/getDefaults?user=' + user.pseudonym;
+    axios({
+        method: 'GET',
+        url: '/getDefaults?user=' + user.pseudonym,
+        headers: {
+            "Authorization": "Bearer " + localStorage.getItem('token'),
+        }
+    }) .then((response) => {
 
+        if (response.data.length > 0) {
+            const defaults = response.data[0];
+            Object.keys(defaults).forEach(function(key) {
+                const product = state.productSpecModels.find(x => x.name === key);
+                if(product !== undefined) {
+                    product.defaults = defaults[key];
+                }
+            });
+        }
+    },  (error) => {
+        if (error.message != undefined) {
+            toasty({ mode: 'error', message: 'unable to load defaults' });
+        }
+    });
+}
+function saveDefaults(){
+
+    axios({
+        method: 'POST',
+        url: '/saveDefaults',
+        headers: {
+            "Authorization": "Bearer " + localStorage.getItem('token'),
+        },
+        data: {
+            user: user.pseudonym,
+            defaults: state.defaults
+        }
+    }) .then(() => {
+        Object.keys(state.defaults).forEach(function(key) {
+            const product = state.productSpecModels.find(x => x.name === key);
+            if(product !== undefined) {
+                product.defaults = state.defaults[key];
+            }
+        });
+        toasty({ mode: 'success', message: 'Defaults Saved' });
+    }, (error) => {
+        if (error.message != undefined) {
+            toasty({ mode: 'error', message: 'Failed to save defaults' });
+        }
+    });
+}
+
+function addDefault(product){
+    state.defaults[product.product] = state.defaults[product.product]?? {};
+    state.defaults[product.product][state.entryModel.company] = {
+        length: product.length,
+        width: product.width,
+        height: product.height,
+        destination: state.destination,
+    }
+    toasty({ mode: 'success', message: 'Default Added click save ' });
+}
+function clearDefaults(){
+
+    for(const product of state.productSpecModels) {
+        product.defaults = null;
+    }
+}
 
 watch( () => user.pseudonym, (newUser) => {
     if(newUser !== undefined){
         state.entryModel.date = CurrentDate()
         state.entryModel.user = newUser;
-
+        clearDefaults();
+        getDefaults();
     }
 })
 function getImageList(){
@@ -467,8 +554,20 @@ onMounted(() => {
                             <hr>
 
                             <div>
-                                <div>
-                                    <h2 id="titleProducts">Products</h2>
+                                <div class="grid grid-cols-5">
+                                    <h2 id="titleProducts" class="grid col-start-3">Products</h2>
+                                    <div class="flex col-start-4 col-span-2 ml-2 h-full items-center">
+                                        <label for="defaultCheckbox" class="flex items-center gap-2">
+                                            <span class="font-semibold">Set Defaults:</span>
+                                            <input
+                                                type="checkbox"
+                                                id="defaultCheckbox"
+                                                class="h-5 w-5"
+                                                v-model="state.setDefaults"
+                                            >
+                                        </label>
+                                    </div>
+
                                 </div>
                             </div>
                             <div  class="flex flex-wrap w-full centered place-content-center">
@@ -497,32 +596,32 @@ onMounted(() => {
                             </div>
 
                             <div>
-                                <div id="TemplateDimensions" class="grid grid-cols-2" v-show="(state.mode == 'yards')">
-                                    <div class="grid grid-rows-3 col-span-1 ">
-                                        <div class="grid-col-3 place-self-center justify-self-end">
+                                <div id="TemplateDimensions" class="grid grid-rows-2 centered max-w-1/2 min-w-1/3" v-show="(state.mode == 'yards')">
+                                    <div class="grid grid-cols-3 grid-rows-1 ">
+                                        <div class=" place-self-center">
                                             <label class="centered ">Length</label>
                                         </div>
-                                        <div class="grid-col-3 place-self-center justify-self-end">
+                                        <div class=" place-self-center ">
                                             <label class=" centered">Width</label>
                                         </div>
-                                        <div class="grid-col-3 place-self-center justify-self-end">
+                                        <div class=" place-self-center">
                                             <label class="centered ">Height</label>
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-rows-3 col-span-1 ">
-                                        <div class="grid-col-3 place-self-center justify-self-start ml-2">
-                                            <input v-on:keyup="keymonitor" @blur="calcUnits()"
+                                    <div class="grid grid-cols-3 grid-rows-1 ">
+                                        <div class="grid-col-3 place-self-center">
+                                            <input v-on:keyup="keymonitor" @blur="calcUnits()" @focus="state.entryModel.length = ''"
                                                     type="number" id="Length" v-model="state.entryModel.length" min="0"
                                                    class="centered">
                                         </div>
-                                        <div class="grid-col-3  place-self-center justify-self-start ml-2">
-                                            <input v-on:keyup="keymonitor" @blur="calcUnits()"
+                                        <div class="grid-col-3  place-self-center">
+                                            <input v-on:keyup="keymonitor" @blur="calcUnits()" @focus="state.entryModel.width = ''"
                                                     type="number" id="Width" v-model="state.entryModel.width" min="0"
                                                    class="centered">
                                         </div>
-                                        <div class="grid-col-3  place-self-center justify-self-start ml-2">
-                                            <input v-on:keyup="keymonitor" @blur="calcUnits()"
+                                        <div class="grid-col-3  place-self-center">
+                                            <input v-on:keyup="keymonitor" @blur="calcUnits()" @focus="state.entryModel.height = ''"
                                                     type="number" id="Height" v-model="state.entryModel.height" min="0"
                                                    class="centered">
                                         </div>
@@ -531,7 +630,7 @@ onMounted(() => {
                                 <div id="TemplateUnits" v-show="(state.mode == 'each')">
                                     <div class="flex justify-content-center centered">
                                         <div class="col centered justify-content-center">
-                                            <input v-on:keyup="keymonitor"   type="number" id="eachUnits" v-model="state.entryModel.units" min="0" class="centered">
+                                            <input v-on:keyup="keymonitor" @focus="state.entryModel.units = ''" type="number" id="eachUnits" v-model="state.entryModel.units" min="0" class="centered">
                                         </div>
                                     </div>
                                 </div>
@@ -649,7 +748,7 @@ onMounted(() => {
                             <div class=" justify-content-center">
                             </div>
 
-                            <div class="grid grid-cols-12 justify-content-between">
+                            <div v-if="!state.setDefaults" class="grid grid-cols-12 justify-content-between">
                                 <div class="col-span-7 md:col-span-8 centered">
                                     <button id="submit" type="button" class="btn btn-primary submit centered"
                                             @click="SubmitEntry()">SUBMIT</button>
@@ -657,6 +756,17 @@ onMounted(() => {
 
                                 <div class="col-span-4 md:col-span-4">
                                     <button id="commentButton" class="comments btn btn-primary md:ml-2 " @click="state.editComment = true">Comment:</button>
+                                </div>
+                            </div>
+                            <div v-if="state.setDefaults" class="grid grid-cols-12 justify-content-between">
+                                <div class="col-span-7 md:col-span-8 centered">
+                                    <product-buttons id="saveDefaults" type="button" class="btn btn-primary submit centered"
+                                                     :active="Object.keys(state.defaults).length > 0"
+                                           :disabled="Object.keys(state.defaults).length === 0" @click="saveDefaults()">Save Defaults</product-buttons>
+                                </div>
+
+                                <div class="col-span-4 md:col-span-4">
+                                    <button id="addDefault" class="comments btn btn-primary md:ml-2 " @click="addDefault(state.entryModel)">Add</button>
                                 </div>
                             </div>
                         </div>

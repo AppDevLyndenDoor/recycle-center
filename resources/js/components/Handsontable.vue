@@ -21,6 +21,8 @@ const emit = defineEmits(['pendingEdits']);
 const instance = getCurrentInstance();
 const settings = ref({});
 const tableData = ref(props.tData);
+const products = [];
+const bins = [];
 
 const tableSortingSettings = {
     columnHeaders: [
@@ -98,45 +100,65 @@ const tableEntriesSettings = {
     },
     columnNames: [
         { data: 'user', editor: false },
-        { data: 'units', type: 'numeric',
+        {
+            data: 'units',
+            type: 'numeric',
             numericFormat: {
                 pattern: '0.0000',
             },
             allowInvalid: false,
         },
-        { data: 'uom',
+        {
+            data: 'uom',
             type: 'dropdown',
             source: ['each', 'yards'],
             strict: true,
 
             allowInvalid: false,
         },
-        { data: 'product' },
-        { data: 'length',type: 'numeric',
+        { data: 'product', type: 'dropdown', source: products },
+        {
+            data: 'length',
+            type: 'numeric',
             numericFormat: {
                 pattern: '0.00',
             },
-            allowInvalid: false,},
-        { data: 'width',type: 'numeric',
+            allowInvalid: false,
+        },
+        {
+            data: 'width',
+            type: 'numeric',
             numericFormat: {
                 pattern: '0.00',
             },
-            allowInvalid: false,},
-        { data: 'height',type: 'numeric',
+            allowInvalid: false,
+        },
+        {
+            data: 'height',
+            type: 'numeric',
             numericFormat: {
                 pattern: '0.00',
             },
-            allowInvalid: false,},
-        { data: 'bin' },
-        { data: 'date', 'renderer': 'customDateRendererGate',editor: 'date', dataType: 'date', dateFormat: 'MM/DD/YYYY' },
-        { data: 'picked_timestamp'  ,editor: false },
-        { data: 'company',
+            allowInvalid: false,
+        },
+        { data: 'bin', type: 'dropdown', source: bins },
+        {
+            data: 'date',
+            renderer: 'customDateRendererGate',
+            editor: 'date',
+            dataType: 'date',
+            dateFormat: 'MM/DD/YYYY',
+        },
+        { data: 'picked_timestamp', editor: false },
+        {
+            data: 'company',
             type: 'dropdown',
             source: ['Lynden Door', 'Victory Millwork', 'LD Trucking'],
             strict: true,
             allowInvalid: false,
         },
-        { data: 'destination',
+        {
+            data: 'destination',
             type: 'dropdown',
             source: ['Chip - C', 'Landfill - L', 'Sort - S', 'Process - P'],
             strict: true,
@@ -178,18 +200,43 @@ watch(
     },
 );
 
-const customDateRendererGate = function (instance, td, row, col, prop, value, cellProperties,) {
-    if(value) {
-        if(value.includes('-')){
+const customDateRendererGate = function (
+    instance,
+    td,
+    row,
+    col,
+    prop,
+    value,
+    cellProperties,
+) {
+    if (value) {
+        if (value.includes('-')) {
             const [year, month, day] = value.split('-');
             value = month + '/' + day + '/' + year;
         }
     }
-    Handsontable.renderers.TextRenderer(instance, td, row, col, prop, value, cellProperties,);
+    Handsontable.renderers.TextRenderer(
+        instance,
+        td,
+        row,
+        col,
+        prop,
+        value,
+        cellProperties,
+    );
     return td;
 };
 
-Handsontable.renderers.registerRenderer('customDateRendererGate', customDateRendererGate,);
+Handsontable.renderers.registerRenderer(
+    'customDateRendererGate',
+    customDateRendererGate,
+);
+function calcUnits(newWidth, newLength, newHeight) {
+    const width = parseFloat(newWidth) || 0;
+    const length = parseFloat(newLength) || 0;
+    const height = parseFloat(newHeight) || 0;
+    return Math.round(((width * length * height) / 1728 / 27) * 10000) / 10000;
+}
 
 function tableSettings() {
     let columnHeaders = [];
@@ -226,8 +273,11 @@ function tableSettings() {
                     const hot = instance.refs.hotTableComponent.hotInstance;
                     const selected = hot.getSelected()[0][0];
                     const rowData = hot.getSourceDataAtRow(selected);
-                    if(rowData['id'] == undefined || rowData['id'] == null) {
-                        toasty({ mode: 'warning', message: 'Cannot remove new row' });
+                    if (rowData['id'] == undefined || rowData['id'] == null) {
+                        toasty({
+                            mode: 'warning',
+                            message: 'Cannot remove new row',
+                        });
                         return;
                     }
                     for (let i = 0; i < tableData.value.length - 1; i++) {
@@ -240,7 +290,10 @@ function tableSettings() {
                     pendingEdits.value.push(rowData);
                     hot.alter('remove_row', selected);
                     emit('pendingEdits', true);
-                    toasty({ mode: 'success', message: 'Save Edits to permanently remove' });
+                    toasty({
+                        mode: 'success',
+                        message: 'Save Edits to permanently remove',
+                    });
                 }
             },
             items: {
@@ -317,23 +370,34 @@ function tableSettings() {
                 const ht = instance.refs.hotTableComponent.hotInstance;
                 for (let i = 0; i < changes.length; i++) {
                     const allData = ht.getSourceDataAtRow(changes[i][0]);
-                    const col = changes[i][1]
+                    const col = changes[i][1];
                     const row = changes[i][0];
-                    let message = validateChanges(changes[0][2], changes[0][3], col);
-                    if(allData['id'] == undefined) {
+                    let message = validateChanges(
+                        changes[0][2],
+                        changes[0][3],
+                        col,
+                    );
+                    if (allData['id'] == undefined) {
                         message = 'cannot edit new row';
                         ht.alter('remove_row', row);
-                        toasty({ mode: 'warning', message: message});
+                        toasty({ mode: 'warning', message: message });
                         return;
                     }
-                    if(message === -1) {
+                    if (message === -1) {
+                        return;
+                    } else if (message) {
+                        ht.setDataAtRowProp(row, col, changes[0][2]);
+                        toasty({ mode: 'warning', message: message });
                         return;
                     }
 
-                    else if (message) {
-                        ht.setDataAtRowProp(row, col, changes[0][2]);
-                        toasty({ mode: 'warning', message: message});
-                        return;
+                    if (allData['uom'] == 'yards' && (col === 'width' || col === 'length' || col === 'height')) {
+                        const units = calcUnits(
+                            allData['width'],
+                            allData['length'],
+                            allData['height'],
+                        );
+                        ht.setDataAtRowProp(row, 'units', units);
                     }
                     allData.changes = changes;
                     pendingEdits.value.push(allData);
@@ -344,27 +408,32 @@ function tableSettings() {
     };
 }
 function validateChanges(oldVal, newVal, columnName) {
-    if(oldVal == newVal) {
+    if (oldVal == newVal) {
         return -1;
     }
-    if(columnName == 'units' || columnName == 'length' || columnName == 'width' || columnName == 'height') {
+    if (
+        columnName == 'units' ||
+        columnName == 'length' ||
+        columnName == 'width' ||
+        columnName == 'height'
+    ) {
         const valNumber = Number(newVal);
-        if(!isFinite(valNumber) || newVal === ''){
+        if (!isFinite(valNumber) || newVal === '') {
             return columnName + ' must be a number';
         }
-        if(newVal >= 1000) {
+        if (newVal >= 1000) {
             return columnName + ' must be less than 1000';
         }
-        if(newVal < 0) {
+        if (newVal < 0) {
             return columnName + ' must be a positive number';
         }
     }
-    if(columnName != 'bin' && newVal === '') {
+    if (columnName != 'bin' && newVal === '') {
         return columnName + ' cannot be empty';
     }
-    if(columnName == 'date' && newVal !== '') {
+    if (columnName == 'date' && newVal !== '') {
         const date = new Date(newVal);
-        if(isNaN(date.getTime())) {
+        if (isNaN(date.getTime())) {
             return columnName + ' must be a valid date';
         }
     }
@@ -453,6 +522,15 @@ onMounted(() => {
     const ht = instance.refs.hotTableComponent.hotInstance;
     ht.updateSettings(settings.value);
     filterTableData();
+    const productString = JSON.parse(localStorage.getItem('database_products'));
+    for (let i = 0; i < productString.length; i++) {
+        products.push(productString[i].name);
+    }
+    const binString = JSON.parse(localStorage.getItem('database_bins'));
+
+    for (let i = 0; i < binString.length; i++) {
+        bins.push(binString[i].binNumber);
+    }
 });
 </script>
 
@@ -467,14 +545,13 @@ onMounted(() => {
 </template>
 
 <style>
-
 :root {
     --background: rgb(54, 61, 71);
     --color: rgb(224, 224, 224);
     --color2: rgb(123, 123, 123);
     --table-border-color: #444;
     --table-header-background: rgb(54, 61, 71);
-    --table-header-color: #FFF;
+    --table-header-color: #fff;
     --background-color-row-odd: rgb(54, 61, 71);
     --background-color-row-even: rgb(54, 61, 71);
     --background-color-row-first: rgb(54, 61, 71);
@@ -575,17 +652,17 @@ onMounted(() => {
     border-top: 1px solid var(--table-border-color);
 }
 
-.dark .data-sheet .ht_master tr>td {
+.dark .data-sheet .ht_master tr > td {
     border-bottom: 1px solid var(--table-border-color);
 }
 
 /* Right */
-.dark .data-sheet .ht_master tr>td {
+.dark .data-sheet .ht_master tr > td {
     border-right: 1px solid var(--table-border-color);
 }
 
-.dark .data-sheet .dark .data-sheet .handsontable .htNoFrame+td,
-.dark .data-sheet .handsontable .htNoFrame+th,
+.dark .data-sheet .dark .data-sheet .handsontable .htNoFrame + td,
+.dark .data-sheet .handsontable .htNoFrame + th,
 .dark .data-sheet .handsontable.htRowHeaders thead tr th:nth-child(2),
 .dark .data-sheet .handsontable td:first-of-type,
 .dark .data-sheet .handsontable th:first-child,
@@ -603,12 +680,12 @@ onMounted(() => {
 }
 
 /* Selected cell */
-.dark .data-sheet tr>td {
+.dark .data-sheet tr > td {
     background-color: var(--cell-color);
 }
 
 /* Selected cell */
-.dark .data-sheet tr>td.current {
+.dark .data-sheet tr > td.current {
     background-color: var(--cell-selected-color);
 }
 
@@ -618,7 +695,6 @@ onMounted(() => {
 .htFiltersConditionsMenu tr {
     background-color: var(--ctx-background);
 }
-
 
 .htContextMenu table tbody tr td,
 .htDropdownMenu table tbody tr td,
@@ -634,7 +710,6 @@ onMounted(() => {
 .htFiltersConditionsMenu table tbody tr td.zeroclipboard-is-hover {
     background-color: var(--ctx-background-hover);
 }
-
 
 .htContextMenu .handsontable table td.htCustomMenuRenderer,
 .htDropdownMenu .handsontable table td.htCustomMenuRenderer {

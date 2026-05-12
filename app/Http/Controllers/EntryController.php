@@ -250,4 +250,41 @@ class EntryController extends Controller
             return response()->json(['error' => 'Delete operation failed', 'details' => $e->getMessage()], 500);
         }
     }
+
+    public function getDefaults(Request $request){
+        try {
+            $data = $request->input();
+            $user = $data['user'];
+            $result = DB::table('user_defaults')->select('defaults')->where('user', '=', $user)->get()->toArray();
+            if (count($result) == 0) {
+                return [];
+            }
+            return [Json_decode($result[0]->defaults)];
+        }
+        catch(Exception $e){
+            return response()->json(['error' => 'Get operation failed', 'details' => $e->getMessage()], 500);
+        }
+    }
+
+    public function saveDefaults(Request $request){
+        try{
+            $data = $request->input();
+            $user = $data['user'];
+            $existing = DB::table('user_defaults')->select('defaults')->where('user', '=', $user)->get()->toArray();
+            if (count($existing) > 0) {
+               $existing = Json_decode($existing[0]->defaults, true);
+                $defaults = array_merge($existing, $data['defaults']);
+                $defaults = json_encode($defaults);
+            }
+            else{
+                $defaults = json_encode($data['defaults']);
+            }
+            DB::table('user_defaults')->where('user', '=', $user)->delete();
+            DB::table('user_defaults')->insert(['user' => $user, 'defaults' => $defaults]);
+            return true;
+        }
+        catch(Exception $e){
+            return response()->json(['error' => 'Save operation failed', 'details' => $e->getMessage()], 500);
+        }
+    }
 }
