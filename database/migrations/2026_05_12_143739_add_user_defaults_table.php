@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users_defaults', function (Blueprint $table) {
+        Schema::create('user_defaults', function (Blueprint $table) {
             $table->id()->primary();
             $table->string('user')->unique();
             $table->mediumText('defaults')->nullable();
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users_defaults');
+        Schema::dropIfExists('user_defaults');
     }
 };
