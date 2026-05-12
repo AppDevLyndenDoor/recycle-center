@@ -338,7 +338,9 @@ function saveDefaults(){
             if(product !== undefined) {
                 product.defaults = state.defaults[key];
             }
+
         });
+        state.defaults = {};
         toasty({ mode: 'success', message: 'Defaults Saved' });
     }, (error) => {
         if (error.message != undefined) {
