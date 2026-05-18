@@ -38,12 +38,12 @@ class EntryController extends Controller
                 DB::table('pickup_product')
                     ->where('id', '=', $data['id'])
                     ->update(['name' => $data['name'],
-                        'uom' => $data['uom'], 'company' => $data['company']]);
+                        'uom' => $data['uom'], 'company' => $data['company'], 'location' => $data['location'],]);
                 return 'updated';
             } else {
                 $newID = DB::table('pickup_product')
                     ->insertGetId(['name' => $data['name'],
-                        'uom' => $data['uom'], 'company' => $data['company']]);
+                        'uom' => $data['uom'], 'company' => $data['company'], 'location' => $data['location']]);
                 return $newID;
             }
         }

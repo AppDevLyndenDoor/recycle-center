@@ -52,6 +52,7 @@ const state = reactive({
         uom: 'each',
         id: -1,
         imageList: [],
+        location: '',
     },
     //selectedCompanies: [true,false,false, false], // Lynden Door, VM, LDT, All
     createSortingProduct: {
@@ -70,6 +71,7 @@ const state = reactive({
         'Victory Millwork',
         'LD Trucking',
     ],
+    locations: ['Chip - C', 'Landfill - L', 'Sort - S', 'Process - P'],
     deleteProductDialog: false,
     deleteImageDialog: false,
     newItem: false,
@@ -84,16 +86,23 @@ function productButton(product,index){
             uom: product.uom,
         },
         companyArray: product.company.split(','),
+        locationArray: product.location?.split(',')?? [],
         company: '',
         imageList: product.imageList,
         model: 'Product',
         id: product.id,
-        active: [false,false,false]
+        active: [false,false,false],
+        destinationActive: [false,false,false,false],
     };
     for (let i = 0; i < state.createItem.companyArray.length; i++) {
         const company = state.createItem.companyArray[i];
         const companyIndex = state.companies.indexOf(company);
         state.createItem.active[companyIndex] = true;
+    }
+    for (let i = 0; i < state.createItem.locationArray.length; i++) {
+        const location = state.createItem.locationArray[i];
+        const locationIndex = state.locations.indexOf(location);
+        state.createItem.destinationActive[locationIndex] = true;
     }
     state.editIndex = index;
     state.showEditDialog = true;
@@ -134,11 +143,18 @@ function saveEdit(product) {
     }
     if (product.edit.name == '') {
         toasty({ mode: 'warning', message: 'Name Field Cannot Be Empty' });
+        return;
     }
-    else if (product.edit.uom == '') {
+    if (product.edit.uom == '') {
         toasty({ mode: 'warning', message: 'UOM Field Cannot Be Empty' });
+        return;
+    }
+    if(product.locationArray.length === 0){
+        toasty({ mode: 'warning', message: 'Must select one or more Locations' });
+        return;
     }
         state.createProduct.company = product.companyArray.toString().trim();
+        state.createProduct.location = product.locationArray.toString().trim();
         state.createProduct.name = product.edit.name.trim();
         state.createProduct.uom = product.edit.uom.trim();
         state.createProduct.imageList = product.imageList;
@@ -451,6 +467,8 @@ function newProduct(){
             uom: '',
         },
         companyArray: [],
+        locationArray: [],
+        destinationActive: [false,false,false,false],
         imageList: [],
         model: 'Product',
         active: [false,false,false]
@@ -496,6 +514,18 @@ function clickedCompanyButton(company, model, index) {
     }
     else{
         state.createItem.company = company;
+    }
+}
+function clickedLocationButton(location, model, index) {
+    if (model === 'Product') {
+        const locationIndex = state.createItem.locationArray.indexOf(location);
+        if (locationIndex < 0) {
+            state.createItem.locationArray.push(location);
+            state.createItem.destinationActive[index] = true;
+        } else {
+            state.createItem.locationArray.splice(locationIndex, 1);
+            state.createItem.destinationActive[index] = false;
+        }
     }
 }
 function save(item){
@@ -630,6 +660,15 @@ onMounted( () => {
                 <div v-for="(company, index) in state.companies" :key="index">
                 <ProductButtons :id="'editItemCompanies-'+index"  @clicked="clickedCompanyButton(company,state.createItem.model,index)" :active="state.createItem.active[index]">{{company}}
                 </ProductButtons>
+
+                </div>
+
+            </div>
+            <div class="flex flex-wrap centered">
+                <div v-for="(location, index) in state.locations" :key="index">
+                    <ProductButtons :id="'editItemLocations-'+index"  @clicked="clickedLocationButton(location,state.createItem.model,index)" :active="state.createItem.destinationActive[index]">{{location}}
+                    </ProductButtons>
+
                 </div>
             </div>
             <div>
@@ -642,6 +681,7 @@ onMounted( () => {
                     <select :id="'editItemUom'" v-model="state.createItem.edit.uom" class="inputDetails mx-2 px-1">
                         <option value="each" class="dark:text-black">Each</option>
                         <option value="yards" class="dark:text-black">Yards</option>
+                        <option value="bin" class="dark:text-black">Bin</option>
                     </select>
                 </div>
             </div>

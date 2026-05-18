@@ -22,7 +22,10 @@ const instance = getCurrentInstance();
 const settings = ref({});
 const tableData = ref(props.tData);
 const products = [];
-const bins = [];
+let productObjects = {};
+let binObject = {};
+const bins = [''];
+const companies = ['Lynden Door', 'Victory Millwork', 'LD Trucking'];
 
 const tableSortingSettings = {
     columnHeaders: [
@@ -107,16 +110,19 @@ const tableEntriesSettings = {
                 pattern: '0.0000',
             },
             allowInvalid: false,
+            editor: true,
         },
         {
             data: 'uom',
-            type: 'dropdown',
-            source: ['each', 'yards'],
-            strict: true,
-
+            editor: false,
             allowInvalid: false,
         },
-        { data: 'product', type: 'dropdown', source: products },
+        {
+            data: 'product',
+            type: 'dropdown',
+            source: products,
+            allowInvalid: false,
+        },
         {
             data: 'length',
             type: 'numeric',
@@ -145,7 +151,7 @@ const tableEntriesSettings = {
         {
             data: 'date',
             renderer: 'customDateRendererGate',
-            editor: 'date',
+            editor: false,
             dataType: 'date',
             dateFormat: 'MM/DD/YYYY',
         },
@@ -153,7 +159,7 @@ const tableEntriesSettings = {
         {
             data: 'company',
             type: 'dropdown',
-            source: ['Lynden Door', 'Victory Millwork', 'LD Trucking'],
+            source: companies,
             strict: true,
             allowInvalid: false,
         },
@@ -168,6 +174,49 @@ const tableEntriesSettings = {
     ],
 };
 const pendingEdits = ref([]);
+function setDropdowns(ht) {
+    const rowCount = ht.countRows();
+
+    for (let row = 0; row < rowCount; row++) {
+        const productName = ht.getDataAtRowProp(row, 'product');
+        const company = ht.getDataAtRowProp(row, 'company');
+        if (!productName) continue;
+        const product = productObjects.find(
+            (product) => product.name === productName,
+        );
+        const bins = binObject.filter((bin) => bin.company === company);
+        const binNumbers = ['', ...bins.map((bin) => bin.binNumber)];
+
+        if (!product) continue;
+        const companyNames = product.company.split(',');
+        const productDestinations = product.location.split(',');
+        ht.setCellMeta(row, 10, 'source', companyNames);
+        ht.setCellMeta(row, 7, 'source', binNumbers);
+        ht.setCellMeta(row, 11, 'source', productDestinations);
+
+        if (product.uom == 'bin') {
+            ht.setCellMeta(row, 1, 'editor', false);
+            ht.setCellMeta(row, 4, 'editor', false);
+            ht.setCellMeta(row, 5, 'editor', false);
+            ht.setCellMeta(row, 6, 'editor', false);
+            ht.setCellMeta(row, 7, 'editor', 'dropdown');
+        } else if (product.uom == 'each') {
+            ht.setCellMeta(row, 1, 'editor', 'numeric');
+            ht.setCellMeta(row, 4, 'editor', false);
+            ht.setCellMeta(row, 5, 'editor', false);
+            ht.setCellMeta(row, 6, 'editor', false);
+            ht.setCellMeta(row, 7, 'editor', false);
+        } else {
+            ht.setCellMeta(row, 1, 'editor', false);
+            ht.setCellMeta(row, 4, 'editor', 'numeric');
+            ht.setCellMeta(row, 5, 'editor', 'numeric');
+            ht.setCellMeta(row, 6, 'editor', 'numeric');
+            ht.setCellMeta(row, 7, 'editor', false);
+        }
+    }
+
+    ht.render();
+}
 watch(
     () => props.tData,
     (newVal) => {
@@ -179,6 +228,7 @@ watch(
         settings.value = tableSettings();
         const ht = instance.refs.hotTableComponent.hotInstance;
         ht.updateSettings(settings.value);
+        setDropdowns(ht);
     },
 );
 watch(
@@ -237,6 +287,36 @@ function calcUnits(newWidth, newLength, newHeight) {
     const height = parseFloat(newHeight) || 0;
     return Math.round(((width * length * height) / 1728 / 27) * 10000) / 10000;
 }
+function updateDropdown(row, newProduct, ht) {
+
+    const product = productObjects.find(
+        (product) => product.name === newProduct,
+    );
+    const uom = product.uom;
+    let productCompanies;
+    if (product.company === 'All') {
+        productCompanies = companies;
+    } else {
+        productCompanies = product.company.split(',');
+    }
+    const productDestinations = product.location.split(',');
+
+    ht.setCellMeta(row, 10, 'source', productCompanies);
+    if (uom == 'bin') {
+        const selectedCompany = ht.getDataAtRowProp(row, 'company');
+        const bins = binObject.filter((bin) => bin.company === selectedCompany);
+        const binNumbers = ['', ...bins.map((bin) => bin.binNumber)];
+        ht.setCellMeta(row, 1, 'editor', false);
+        ht.setCellMeta(row, 7, 'source', binNumbers);
+        ht.setCellMeta(row, 7, 'editor', 'dropdown');
+        ht.setDataAtRowProp(row, 'uom', 'bin');
+    } else {
+        ht.setCellMeta(row, 1, 'editor', true);
+        ht.setCellMeta(row, 7, 'editor', false);
+        ht.setDataAtRowProp(row, 'uom', uom == 'each' ? 'each' : 'yards');
+    }
+    ht.setCellMeta(row, 11, 'source', productDestinations);
+}
 
 function tableSettings() {
     let columnHeaders = [];
@@ -263,7 +343,7 @@ function tableSettings() {
         columnSorting: true,
         sortIndicator: true,
         filters: true,
-        dropdownMenu: true,
+        dropdownMenu: false,
         manualColumnResize: true,
         colHeaders: columnHeaders,
         minSpareRows: 1,
@@ -391,7 +471,12 @@ function tableSettings() {
                         return;
                     }
 
-                    if (allData['uom'] == 'yards' && (col === 'width' || col === 'length' || col === 'height')) {
+                    if (
+                        allData['uom'] == 'yards' &&
+                        (col === 'width' ||
+                            col === 'length' ||
+                            col === 'height')
+                    ) {
                         const units = calcUnits(
                             allData['width'],
                             allData['length'],
@@ -399,6 +484,28 @@ function tableSettings() {
                         );
                         ht.setDataAtRowProp(row, 'units', units);
                     }
+                    if (col === 'product') {
+                        updateDropdown(row, changes[0][3], ht);
+                    }
+                    if (col === 'company') {
+                        const bins = binObject.filter(
+                            (bin) => bin.company === changes[0][3],
+                        );
+                        const binNumbers = [
+                            '',
+                            ...bins.map((bin) => bin.binNumber),
+                        ];
+                        ht.setCellMeta(row, 7, 'source', binNumbers);
+                    }
+                    /*if (col == 'bin') {
+                        const bins = binObject.find(
+                            (bin) => bin.binNumber === changes[0][3],
+                        );
+                        if (bins) {
+                            ht.setCellMeta(row, 1, 'editor', false);
+                            ht.setDataAtRowProp(row, 'units', bins.yards);
+                        }
+                    }*/
                     allData.changes = changes;
                     pendingEdits.value.push(allData);
                 }
@@ -467,21 +574,6 @@ function SaveEdits() {
     );
     localStorage.setItem('database', JSON.stringify(tableData.value));
     emit('pendingEdits', false);
-    /*axios({
-        method: 'POST',
-        url: url,
-        data: pendingEdits.value,
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem('token'),
-        },
-    }).then((response) => {
-            pendingEdits.value = [];
-            emit('pendingEdits', false);
-            //const hot = instance.refs.hotTableComponent.hotInstance;
-            //hot.reset()
-        }, (error) => {
-        toasty({ mode: 'error', response: error, request: error.request, message: error.message });
-    })*/
 }
 
 function filterTableData() {
@@ -522,14 +614,15 @@ onMounted(() => {
     const ht = instance.refs.hotTableComponent.hotInstance;
     ht.updateSettings(settings.value);
     filterTableData();
-    const productString = JSON.parse(localStorage.getItem('database_products'));
-    for (let i = 0; i < productString.length; i++) {
-        products.push(productString[i].name);
+    productObjects = JSON.parse(localStorage.getItem('database_products'));
+    for (let i = 0; i < productObjects.length; i++) {
+        products.push(productObjects[i].name);
     }
-    const binString = JSON.parse(localStorage.getItem('database_bins'));
 
-    for (let i = 0; i < binString.length; i++) {
-        bins.push(binString[i].binNumber);
+    binObject = JSON.parse(localStorage.getItem('database_bins'));
+
+    for (let i = 0; i < binObject.length; i++) {
+        bins.push(binObject[i].binNumber);
     }
 });
 </script>

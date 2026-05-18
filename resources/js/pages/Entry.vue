@@ -39,9 +39,10 @@ const state = reactive( {
         picked_timestamp: 0,
         company: 'Lynden Door',   //modified
         destination: 'Chip - C',
+
         comment: '',
     },
-
+    destinationActive: [true,true,true,true],
     binModels: {
         'Lynden Door': [],
         'Victory Millwork': [],
@@ -155,6 +156,12 @@ function productButton(product){
     state.mode = product.uom;
     state.entryModel.units = 0;
     state.entryModel.bin = '';
+    const locations = (product.location.split(','));
+    for (let i = 0; i < state.destinations.length; i++) {
+        const location = state.destinations[i];
+        const destinationIndex = locations.indexOf(location);
+        state.destinationActive[i] = (destinationIndex >= 0);
+    }
     if(product.defaults){
         state.entryModel.length = product.defaults[company]?.length || 0;
         state.entryModel.width = product.defaults[company]?.width || 0;
@@ -167,6 +174,8 @@ else{
         state.entryModel.width = 0;
         state.entryModel.height = 0;
         state.entryModel.units = 0;
+        const index = state.destinationActive.indexOf(true)
+        state.entryModel.destination = state.destinations[index]
     }
 
 }
@@ -675,7 +684,7 @@ onMounted(() => {
                             <div class="justify-content-center appendDestinationButtons">
                                 <div class="flex flex-wrap  centered">
                                     <div v-for="(destination, index) in state.destinations" :key="index">
-                                        <ProductButtons :id="'destinationButtons-'+index" :index="index" :active="destination === state.entryModel.destination"
+                                        <ProductButtons :id="'destinationButtons-'+index" :index="index" :active="destination === state.entryModel.destination" :disabled="!state.destinationActive[index]"
                                         @clicked="destinationClicked(destination)">{{destination}}</ProductButtons>
                                     </div>
                                 </div>
