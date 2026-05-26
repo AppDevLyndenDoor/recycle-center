@@ -149,7 +149,6 @@ function clickedCompanyButtons(model, index) {
 }
 
 function productButton(product){
-
     const company = state.entryModel.company;
     state.entryModel.product = product.name;
     state.entryModel.uom = product.uom;
@@ -225,6 +224,9 @@ function SubmitEntry(){
     const obj = {};
     Object.assign(obj, state.entryModel);
     obj.idempotency = getRandomInt(999999999);
+    if(state.entryModel.bin !== ''){
+        obj.uom = 'bin';
+    }
 
     const post = {
         headers: {
