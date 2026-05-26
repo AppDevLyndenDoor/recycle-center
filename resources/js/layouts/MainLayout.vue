@@ -447,6 +447,7 @@ onMounted(() => {
     setMaxDate();
     if (localStorage.getItem('OfflinePosts') !== '[]') {
         submitOfflinePosts(JSON.parse(localStorage.getItem('OfflinePosts')));
+        //localStorage.setItem('OfflinePosts', '[]');
     }
     //call ping every 5 minutes
     setInterval(function () {

@@ -26,6 +26,7 @@ let productObjects = {};
 let binObject = {};
 const bins = [''];
 const companies = ['Lynden Door', 'Victory Millwork', 'LD Trucking'];
+const errors = ref([]);
 
 const tableSortingSettings = {
     columnHeaders: [
@@ -246,6 +247,13 @@ watch(
 watch(
     () => props.save,
     () => {
+        if (errors.value.length > 0) {
+            toasty({
+                mode: 'warning',
+                message: 'Please fix all errors before saving',
+            });
+            return;
+        }
         SaveEdits();
     },
 );
@@ -299,8 +307,16 @@ function updateDropdown(row, newProduct, ht) {
         productCompanies = product.company.split(',');
     }
     const productDestinations = product.location.split(',');
+    const currentDestination = ht.getDataAtRowProp(row, 'destination');
+    if (productDestinations.indexOf(currentDestination) === -1) {
+        ht.setDataAtRowProp(row, 'destination', '');
+    }
 
     ht.setCellMeta(row, 10, 'source', productCompanies);
+    const currentCompany = ht.getDataAtRowProp(row, 'company');
+    if (productCompanies.indexOf(currentCompany) === -1) {
+        ht.setDataAtRowProp(row, 'company', '');
+    }
     if (uom == 'bin') {
         const selectedCompany = ht.getDataAtRowProp(row, 'company');
         const bins = binObject.filter((bin) => bin.company === selectedCompany);
@@ -309,10 +325,23 @@ function updateDropdown(row, newProduct, ht) {
         ht.setCellMeta(row, 7, 'source', binNumbers);
         ht.setCellMeta(row, 7, 'editor', 'dropdown');
         ht.setDataAtRowProp(row, 'uom', 'bin');
-    } else {
-        ht.setCellMeta(row, 1, 'editor', true);
+    } else if (uom == 'each') {
+        ht.setCellMeta(row, 1, 'editor', 'numeric');
+        ht.setCellMeta(row, 4, 'editor', false);
+        ht.setCellMeta(row, 5, 'editor', false);
+        ht.setCellMeta(row, 6, 'editor', false);
         ht.setCellMeta(row, 7, 'editor', false);
-        ht.setDataAtRowProp(row, 'uom', uom == 'each' ? 'each' : 'yards');
+        ht.setDataAtRowProp(row, 'uom', 'each');
+        ht.setDataAtRowProp(row, 'bin', '');
+    } else {
+        ht.setCellMeta(row, 1, 'editor', false);
+        ht.setCellMeta(row, 4, 'editor', 'numeric');
+        ht.setCellMeta(row, 5, 'editor', 'numeric');
+        ht.setCellMeta(row, 6, 'editor', 'numeric');
+        ht.setCellMeta(row, 7, 'editor', false);
+        ht.setDataAtRowProp(row, 'uom', 'yards');
+        ht.setDataAtRowProp(row, 'bin', '');
+
     }
     ht.setCellMeta(row, 11, 'source', productDestinations);
 }
@@ -451,10 +480,12 @@ function tableSettings() {
                     const allData = ht.getSourceDataAtRow(changes[i][0]);
                     const col = changes[i][1];
                     const row = changes[i][0];
+                    const uom = allData['uom'];
                     let message = validateChanges(
                         changes[0][2],
                         changes[0][3],
                         col,
+                        uom,
                     );
                     if (allData['id'] == undefined) {
                         message = 'cannot edit new row';
@@ -465,16 +496,35 @@ function tableSettings() {
                     if (message === -1) {
                         return;
                     } else if (message) {
+                        errors.value.push({ row, col });
                         ht.setDataAtRowProp(row, col, changes[0][2]);
                         toasty({ mode: 'warning', message: message });
                         return;
                     }
-
+                    if (uom == 'bin' && col == 'bin' && changes[0][3] === '') {
+                        errors.value.push({ row, col });
+                        toasty({
+                            mode: 'warning',
+                            message: 'Bin cannot be empty with UOM bin',
+                        });
+                        return;
+                    }
+                    if (errors.value.length > 0) {
+                        for (let i = 0; i < errors.value.length; i++) {
+                            if (
+                                errors.value[i].row == row &&
+                                errors.value[i].col == col
+                            ) {
+                                errors.value.splice(i, 1);
+                                break;
+                            }
+                        }
+                    }
                     if (
                         allData['uom'] == 'yards' &&
                         (col === 'width' ||
                             col === 'length' ||
-                            col === 'height')
+                            col === 'height' || col === 'uom')
                     ) {
                         const units = calcUnits(
                             allData['width'],
@@ -497,7 +547,7 @@ function tableSettings() {
                         ht.setCellMeta(row, 7, 'source', binNumbers);
                         ht.setDataAtRowProp(row, 'bin', '');
                     }
-                    if (col === 'bin') {
+                    if (col === 'bin' && changes[0][3] !== '') {
                         const bins = binObject.filter(
                             (bin) => bin.binNumber === changes[0][3],
                         );
