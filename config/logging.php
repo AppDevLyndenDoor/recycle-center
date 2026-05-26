@@ -145,17 +145,17 @@ return [
 
             // This optional option determines the minimum "level" a message
             // must be in order to be logged by the channel. Default is 'debug'
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'debug'),
 
             // This optional option determines the channel name sent with the
             // message in the 'facility' field. Default is equal to app.env
             // configuration value
-            'name' => 'my-custom-name',
+            'name' => env('GRAYLOG_INPUT_NAME'),
 
             // This optional option determines the system name sent with the
             // message in the 'source' field. When forgotten or set to null,
             // the current hostname is used.
-            'system_name' => null,
+            'system_name' => env('GRAYLOG_SYSTEM_NAME'),
 
             // This optional option determines if you want the UDP, TCP or HTTP
             // transport for the gelf log messages. Default is UDP
@@ -163,15 +163,11 @@ return [
 
             // This optional option determines the host that will receive the
             // gelf log messages. Default is 127.0.0.1
-            'host' => '127.0.0.1',
+            'host' => env('GRAYLOG_HOST'),
 
             // This optional option determines the port on which the gelf
             // receiver host is listening. Default is 12201
-            'port' => 12201,
-
-            // This optional option determines the chunk size used when
-            // transferring message via UDP transport. Default is 1420.
-            'chunk_size' => 1420,
+            'port' => env('GRAYLOG_PORT'),
 
             // This optional option determines the path used for the HTTP
             // transport. When forgotten or set to null, default path '/gelf'
@@ -199,17 +195,6 @@ return [
                 // Whether self-signed certificates are allowed. Default is
                 // false.
                 'allow_self_signed' => false,
-            ],
-
-            // If you want to send messages to the gelf server using http basic
-            // authentication, the following configuration is used. Only useful
-            // if transport is set to http.
-            'http_basic_auth' => [
-                // The http basic authentication username.
-                'username' => null,
-
-                // The http basic authentication password.
-                'password' => null,
             ],
 
             // This optional option determines the maximum length per message
