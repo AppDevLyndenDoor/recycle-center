@@ -362,7 +362,13 @@ function checkUserPermissions() {
                 user.perms.admin = true;
                 user.perms.operator = true;
                 getUserNames();
-            } else if (response.data === 'operator') {
+            }
+            else if (response.data === 'supervisor') {
+                user.perms.admin = false;
+                user.perms.supervisor = true;
+                user.perms.operator = true;
+            }
+            else if (response.data === 'operator') {
                 user.perms.admin = false;
                 user.perms.operator = true;
                 getUserNames();
@@ -576,15 +582,13 @@ onMounted(() => {
                             <h1 id="title" class="mt-2 ml-2 text-4xl">
                                 Recycle Center Tracker
                                 <span style="font-size: 12px">
-                                    v 2.{{ sessionSettings.version }}</span
-                                >
+                                    v 2.{{ sessionSettings.version }}</span>
                             </h1>
                         </div>
                         <!--                    <div class="flex-row centered w-full">-->
                         <div
                             class="col-span-2 col-start-8 my-2 place-content-between"
-                            v-show="user.perms.operator"
-                        >
+                            v-show="user.perms.operator">
                             <button
                                 id="syncButton"
                                 type="button"
@@ -596,8 +600,7 @@ onMounted(() => {
                         </div>
                         <div
                             class="centered col-span-1 col-start-11 mt-1"
-                            v-show="!user.perms.admin && user.perms.operator"
-                        >
+                            v-show="(!user.perms.admin && !user.perms.supervisor ) && user.perms.operator">
                             <button
                                 type="button"
                                 id="SelectUser"
@@ -609,16 +612,14 @@ onMounted(() => {
                         </div>
                         <div
                             class="centered col-span-1 col-start-11 mt-1"
-                            v-show="user.perms.admin"
-                        >
+                            v-show="user.perms.admin || user.perms.supervisor">
                             <p class="userName centered px-1">
                                 {{ user.userName }}
                             </p>
                         </div>
                         <div
                             class="centered col-span-1 col-start-11 mt-1"
-                            v-show="!user.perms.operator"
-                        >
+                            v-show="!user.perms.operator">
                             <p class="userName centered px-1">
                                 {{ user.userName }}
                             </p>

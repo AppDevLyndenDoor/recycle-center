@@ -10,6 +10,9 @@ class UserController extends Controller
         if ($user->hasRole('admin')) {
             return 'admin';
         }
+        else if ($user->hasRole('supervisor')) {
+            return 'supervisor';
+        }
         else if ($user->hasRole('operator')) {
             return 'operator';
         }

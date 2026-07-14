@@ -95,13 +95,13 @@ class EntryController extends Controller
     public function getPickupUnitRange(Request $request)
     {
         $fields = ! empty($request->fields) ? explode(',', $request->fields) : [];
-
-        $user = $fields[0] ?? null;
+        $user = $request->user();//$fields[0] ?? null;
+        $userName = $fields[0] ?? null;
         $start = $fields[1] ?? null;
         $end = $fields[2] ?? null;
         $start = Carbon::createFromDate($start)->shiftTimezone('America/Los_Angeles')->timestamp;
         $end = Carbon::createFromDate($end)->shiftTimezone('America/Los_Angeles')->add(1, 'day')->timestamp;
-        if ($user == 'all') {
+        if ($user->hasRole('admin') || $user->hasRole('supervisor')) {
             $result = DB::table('pickup_unit')
                 ->where('status', '=', 1)
                 ->where('picked_timestamp', '<=', $end)
@@ -118,7 +118,7 @@ class EntryController extends Controller
         } else {
             $result = DB::table('pickup_unit')
                 ->where('status', '=', 1)
-                ->where('user', '=', $user)
+                ->where('user', '=', $userName)
                 ->where('picked_timestamp', '<=', $end)
                 ->where('picked_timestamp', '>=', $start)
                 ->orderBy('picked_timestamp', 'asc')
