@@ -26,5 +26,7 @@ class permissionsSeeder extends Seeder
 
         $adminRole = Role::create(['name' => 'admin']);
         $adminRole->givePermissionTo(['delete row', 'access settings']);
+        $supervisorRole = Role::create(['name' => 'supervisor']);
+        $supervisorRole->givePermissionTo(['delete row']);
     }
 }

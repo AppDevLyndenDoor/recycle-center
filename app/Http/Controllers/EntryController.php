@@ -101,7 +101,7 @@ class EntryController extends Controller
         $end = $fields[2] ?? null;
         $start = Carbon::createFromDate($start)->shiftTimezone('America/Los_Angeles')->timestamp;
         $end = Carbon::createFromDate($end)->shiftTimezone('America/Los_Angeles')->add(1, 'day')->timestamp;
-        if ($user == 'admin') {
+        if ($user == 'all') {
             $result = DB::table('pickup_unit')
                 ->where('status', '=', 1)
                 ->where('picked_timestamp', '<=', $end)

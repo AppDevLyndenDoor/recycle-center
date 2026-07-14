@@ -348,7 +348,7 @@ function tableSettings() {
         minSpareRows: 1,
         contextMenu: {
             callback: function (key) {
-                if (key == 'RemoveRow' && user.perms.admin) {
+                if (key == 'RemoveRow' && (user.perms.admin || user.perms.supervisor)) {
                     const hot = instance.refs.hotTableComponent.hotInstance;
                     const selected = hot.getSelected()[0][0];
                     const rowData = hot.getSourceDataAtRow(selected);

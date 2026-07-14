@@ -7,6 +7,7 @@ export const useUserStore
     const pseudonym = ref('Select User');
     const perms = ref({
         admin: false,
+        supervisor: false,
         operator: false
     });
     const loggedIn = ref(false);

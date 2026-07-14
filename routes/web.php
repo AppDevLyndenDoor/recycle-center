@@ -39,7 +39,7 @@ Route::get('/pickupUserNames', [EntryController::class, 'getPickupUserNames'])->
 Route::Post('/saveUserNames', [EntryController::class, 'saveUserNames'])->middleware(['role:admin'])->name('saveUserNames');
 
 Route::post('/pickupUnit', [EntryController::class, 'submitPickupUnit'])->middleware(['auth', 'verified'])->name('submitPickupProduct');
-Route::get('/pickupUnitRange', [EntryController::class, 'getPickupUnitRange'])->middleware(['auth', 'verified'])->name('PickupUnitRange');
+Route::get('/pickupUnitRange', [EntryController::class, 'getPickupUnitRange'])->middleware(['auth', 'supervisor', 'verified'])->name('PickupUnitRange');
 Route::Post('/saveProduct', [EntryController::class, 'saveProduct'])->middleware(['role:admin'])->name('saveProduct');
 Route::get('/pickupProduct', [EntryController::class, 'getPickupProduct'])->middleware(['auth', 'verified'])->name('pickupProduct');
 Route::Post('/saveEntriesEdits', [EntryController::class, 'saveEntriesEdits'])->middleware(['auth', 'verified'])->name('saveEntriesEdits');

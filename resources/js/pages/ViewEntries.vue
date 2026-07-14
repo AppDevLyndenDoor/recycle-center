@@ -58,8 +58,8 @@ function getEntries(silence) {
         }
     } else {
         let tempUser = '';
-        if (user.perms.admin) {
-            tempUser = 'admin';
+        if (user.perms.admin || user.perms.supervisor) {
+            tempUser = 'all';
         } else {
             tempUser = user.pseudonym
         }
