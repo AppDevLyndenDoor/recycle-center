@@ -479,9 +479,10 @@ function tableSettings() {
             if (source === 'edit') {
                 const ht = instance.refs.hotTableComponent.hotInstance;
                 for (let i = 0; i < changes.length; i++) {
-                    const allData = ht.getSourceDataAtRow(changes[i][0]);
+                    const visualRow = changes[i][0];
+                    const row = this.toPhysicalRow(changes[i][0]);
+                    const allData = ht.getSourceDataAtRow(row);
                     const col = changes[i][1];
-                    const row = changes[i][0];
                     const uom = allData['uom'];
                     let message = validateChanges(
                         changes[0][2],
@@ -491,20 +492,20 @@ function tableSettings() {
                     );
                     if (allData['id'] == undefined) {
                         message = 'cannot edit new row';
-                        ht.alter('remove_row', row);
+                        ht.alter('remove_row', visualRow);
                         toasty({ mode: 'warning', message: message });
                         return;
                     }
                     if (message === -1) {
                         return;
                     } else if (message) {
-                        errors.value.push({ row, col });
-                        ht.setDataAtRowProp(row, col, changes[0][2]);
+                        errors.value.push({ visualRow, col });
+                        ht.setDataAtRowProp(visualRow, col, changes[0][2]);
                         toasty({ mode: 'warning', message: message });
                         return;
                     }
                     if (uom == 'bin' && col == 'bin' && changes[0][3] === '') {
-                        errors.value.push({ row, col });
+                        errors.value.push({ visualRow, col });
                         toasty({
                             mode: 'warning',
                             message: 'Bin cannot be empty with UOM bin',
@@ -534,7 +535,7 @@ function tableSettings() {
                             allData['length'],
                             allData['height'],
                         );
-                        ht.setDataAtRowProp(row, 'units', units);
+                        ht.setDataAtRowProp(visualRow, 'units', units);
                     }
                     if (col === 'product') {
                         updateDropdown(row, changes[0][3], ht);
