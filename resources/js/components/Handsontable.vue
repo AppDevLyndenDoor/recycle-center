@@ -288,7 +288,6 @@ function calcUnits(newWidth, newLength, newHeight) {
     return Math.round(((width * length * height) / 1728 / 27) * 10000) / 10000;
 }
 function updateDropdown(row, newProduct, ht) {
-
     const product = productObjects.find(
         (product) => product.name === newProduct,
     );
@@ -497,15 +496,13 @@ function tableSettings() {
                         ];
                         ht.setCellMeta(row, 7, 'source', binNumbers);
                     }
-                    /*if (col == 'bin') {
-                        const bins = binObject.find(
+                    if (col === 'bin') {
+                        const bins = binObject.filter(
                             (bin) => bin.binNumber === changes[0][3],
                         );
-                        if (bins) {
-                            ht.setCellMeta(row, 1, 'editor', false);
-                            ht.setDataAtRowProp(row, 'units', bins.yards);
-                        }
-                    }*/
+                        const yards = bins[0].yards;
+                        ht.setDataAtRowProp(row, 'units', yards);
+                    }
                     allData.changes = changes;
                     pendingEdits.value.push(allData);
                 }
