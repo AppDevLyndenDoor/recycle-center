@@ -194,13 +194,13 @@ function setDropdowns(ht) {
         ht.setCellMeta(row, 10, 'source', companyNames);
         ht.setCellMeta(row, 7, 'source', binNumbers);
         ht.setCellMeta(row, 11, 'source', productDestinations);
-
         if (product.uom == 'bin') {
             ht.setCellMeta(row, 1, 'editor', false);
             ht.setCellMeta(row, 4, 'editor', false);
             ht.setCellMeta(row, 5, 'editor', false);
             ht.setCellMeta(row, 6, 'editor', false);
             ht.setCellMeta(row, 7, 'editor', 'dropdown');
+            tableData.value[row]['uom'] = 'bin';
         } else if (product.uom == 'each') {
             ht.setCellMeta(row, 1, 'editor', 'numeric');
             ht.setCellMeta(row, 4, 'editor', false);
@@ -341,7 +341,6 @@ function updateDropdown(row, newProduct, ht) {
         ht.setCellMeta(row, 7, 'editor', false);
         ht.setDataAtRowProp(row, 'uom', 'yards');
         ht.setDataAtRowProp(row, 'bin', '');
-
     }
     ht.setCellMeta(row, 11, 'source', productDestinations);
 }
@@ -377,7 +376,10 @@ function tableSettings() {
         minSpareRows: 1,
         contextMenu: {
             callback: function (key) {
-                if (key == 'RemoveRow' && (user.perms.admin || user.perms.supervisor)) {
+                if (
+                    key == 'RemoveRow' &&
+                    (user.perms.admin || user.perms.supervisor)
+                ) {
                     const hot = instance.refs.hotTableComponent.hotInstance;
                     const selected = hot.getSelected()[0][0];
                     const rowData = hot.getSourceDataAtRow(selected);
@@ -524,7 +526,8 @@ function tableSettings() {
                         allData['uom'] == 'yards' &&
                         (col === 'width' ||
                             col === 'length' ||
-                            col === 'height' || col === 'uom')
+                            col === 'height' ||
+                            col === 'uom')
                     ) {
                         const units = calcUnits(
                             allData['width'],
