@@ -370,7 +370,7 @@ function tableSettings() {
         columnSorting: true,
         sortIndicator: true,
         filters: true,
-        dropdownMenu: false,
+        dropdownMenu: ['filter_by_condition', 'filter_operators', 'filter_by_condition2', 'filter_action_bar'],
         manualColumnResize: true,
         colHeaders: columnHeaders,
         minSpareRows: 1,
